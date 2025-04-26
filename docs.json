@@ -4,8 +4,8 @@
   "name": "ADCB API Docs",
   "colors": {
     "primary": "#ba141a",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "light": "#ba141a",
+    "dark": "#ba141a"
   },
   "favicon": "/adcb-favicon.ico",
   "navigation": {
