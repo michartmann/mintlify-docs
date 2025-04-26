@@ -59,7 +59,10 @@
       "groups": [
         {
           "group": "Bank Service Initiation",
-          "openapi": "https://petstore3.swagger.io/api/v3/openapi.json"
+          "openapi": {
+            "source": "api-reference/endpoints/uae-bank-initiation-openapi.yaml",
+            "directory": "api-reference"
+          }
         }
       ]
     }
