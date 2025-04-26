@@ -91,6 +91,10 @@
         {
           "group": "Events",
           "openapi": "api-reference/lfi/cbuae-ozone-connect-consent-events-actions-openapi.yaml"
+        },
+        {
+          "group": "Bank Data",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-data-sharing-openapi.yaml"
         }
       ]
     }
