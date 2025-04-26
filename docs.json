@@ -61,6 +61,10 @@
         {
           "group": "Bank Service Initiation",
           "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
+        },
+        {
+          "group": "Account Information",
+          "openapi": "api-reference/tpp/uae-account-information-openapi.yaml"
         }
       ]
     }
