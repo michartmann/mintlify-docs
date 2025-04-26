@@ -102,7 +102,15 @@
         },
         {
           "group": "Insurance Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-insurance-data-openapi.yaml"
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-insurance-data-sharing-openapi.yaml"
+        },
+        {
+          "group": "Product Data",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-product-data-openapi.yaml"
+        },
+        {
+          "group": "Service Initiation",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-service-initiation-openapi.yaml"
         }
       ]
     }
