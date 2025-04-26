@@ -87,6 +87,10 @@
         {
           "group": "Authentication",
           "openapi": "api-reference/lfi/cbuae-headless-heimdall-openapi.yaml"
+        },
+        {
+          "group": "Events",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-consent-events-actions-openapi.yaml"
         }
       ]
     }
