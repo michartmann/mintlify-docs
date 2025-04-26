@@ -51,13 +51,17 @@
               "api-reference/endpoint/delete",
               "api-reference/endpoint/webhook"
             ]
-          },
+          }
           {
-            "group": "Endpoints",
-            "openapi": {
-              "source": "https://awesome-api.ultersolutions.com/open-finance/payment/v1.2",
-              "directory": "api-reference"
-            }
+            "group": "Open Finance: Bank Service Initiation API",
+            "pages": [
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/delete",
+              "api-reference/endpoint/webhook"
+            ]
+            "openapi":"https://awesome-api.ultersolutions.com/open-finance/payment/v1.2"
+            ]
           }
         ]
       }
