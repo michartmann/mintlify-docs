@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "ADCB API Docs",
   "colors": {
     "primary": "#ba141a",
     "light": "#07C983",
@@ -136,8 +136,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/adcb-light.svg",
+    "dark": "/logo/adcb-dark.svg"
   },
   "navbar": {
     "links": [
