@@ -59,7 +59,7 @@
       "groups": [
         {
           "group": "Bank Service Initiation",
-          "openapi": "api-reference/endpoints/uae-bank-initiation-openapi.yaml"
+          "openapi": "api-reference/endpoint/openapi.json"
         }
       ]
     }
