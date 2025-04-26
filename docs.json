@@ -58,8 +58,8 @@
       "tab": "Open Finance API Reference",
       "groups": [
         {
-          "group": "Endpoints",
-"openapi": "https://petstore3.swagger.io/api/v3/openapi.json"
+          "group": "Bank Service Initiation",
+          "openapi": "https://awesome-api.ultersolutions.com/open-finance/payment/v1.2"
         }
       ]
     }
