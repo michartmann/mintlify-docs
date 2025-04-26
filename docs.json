@@ -54,7 +54,6 @@
           }
         ]
       }
-    
     ],
     "global": {
       "anchors": [
@@ -85,11 +84,6 @@
       {
         "label": "Support",
         "href": "mailto:hi@mintlify.com"
-      }
-    ,
-      {
-        "tab": "API Reference",
-        "openapi": "https://petstore3.swagger.io/api/v3/openapi.json"
       }
     ],
     "primary": {
