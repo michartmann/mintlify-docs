@@ -95,6 +95,10 @@
         {
           "group": "Bank Data",
           "openapi": "api-reference/lfi/cbuae-ozone-connect-data-sharing-openapi.yaml"
+        },
+        {
+          "group": "Health check",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-health-check-openapi.yaml"
         }
       ]
     }
