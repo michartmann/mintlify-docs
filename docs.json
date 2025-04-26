@@ -106,7 +106,7 @@
         },
         {
           "group": "Product Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-product-data-openapi.yaml"
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-products-data-openapi.yaml"
         },
         {
           "group": "Service Initiation",
