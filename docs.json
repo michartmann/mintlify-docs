@@ -58,8 +58,20 @@
       "tab": "Open Finance API Reference",
       "groups": [
         {
+          "group": "Bank Data",
+          "openapi": "api-reference/tpp/uae-account-openapi.yaml"
+        },
+        {
           "group": "Bank Service Initiation",
-          "openapi": "api-reference/uae-bank-initiation-openapi.yaml"
+          "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
+        },
+        {
+          "group": "Conformation of Payee",
+          "openapi": "api-reference/tpp/uae-payee-openapi.yaml"
+        },
+        {
+          "group": "Products Data",
+          "openapi": "api-reference/tpp/uae-products-openapi.yaml"
         }
       ]
     }
