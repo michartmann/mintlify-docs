@@ -83,34 +83,6 @@
         {
           "group": "Consent Manager",
           "openapi": "api-reference/lfi/cbuae-consent-manager-openapi.yaml"
-        },
-        {
-          "group": "Authentication",
-          "openapi": "api-reference/lfi/cbuae-headless-heimdall-openapi.yaml"
-        },
-        {
-          "group": "Events",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-consent-events-actions-openapi.yaml"
-        },
-        {
-          "group": "Bank Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-data-sharing-openapi.yaml"
-        },
-        {
-          "group": "Health check",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-health-check-openapi.yaml"
-        },
-        {
-          "group": "Insurance Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-insurance-data-openapi.yaml"
-        },
-        {
-          "group": "Product Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-product-data-openapi.yaml"
-        },
-        {
-          "group": "Service Initiation",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-service-initiation-openapi.yaml"
         }
       ]
     }
