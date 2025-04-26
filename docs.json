@@ -71,24 +71,6 @@
           "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
         }
       ]
-    },
-    {
-      "tab": "Open Finance API Reference (LFI)",
-      "groups": [
-
-        {
-          "group": "Bank Service Initiation",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-service-initiation-openapi.yaml"
-        },
-        {
-          "group": "Bank Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-data-sharing-openapi.yaml"
-        },
-        {
-          "group": "Confirmation of Payee",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-confirmation-of-payee-openapi.yaml"
-        }
-      ]
     }
     ],
     "global": {
