@@ -52,19 +52,9 @@
               "api-reference/endpoint/webhook"
             ]
           }
-          {
-            "group": "Open Finance: Bank Service Initiation API",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-            "openapi":"https://awesome-api.ultersolutions.com/open-finance/payment/v1.2"
-            ]
-          }
         ]
       }
+    
     ],
     "global": {
       "anchors": [
@@ -95,6 +85,11 @@
       {
         "label": "Support",
         "href": "mailto:hi@mintlify.com"
+      }
+    ,
+      {
+        "tab": "API Reference",
+        "openapi": "https://petstore3.swagger.io/api/v3/openapi.json"
       }
     ],
     "primary": {
