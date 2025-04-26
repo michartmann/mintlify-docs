@@ -136,8 +136,9 @@
     }
   },
   "logo": {
-    "light": "/logo/adcb-light.svg",
-    "dark": "/logo/adcb-dark.svg"
+    "light": "/logo/adcb-light.jpg",
+    "dark": "/logo/adcb-dark.png",
+    "href": "http://www.adcb.com"
   },
   "navbar": {
     "links": [
