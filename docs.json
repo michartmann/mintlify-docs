@@ -71,6 +71,24 @@
           "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
         }
       ]
+      },
+    {
+      "tab": "Open Finance API Reference (LFI)",
+      "groups": [
+
+        {
+          "group": "Bank Service Initiation",
+          "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
+        },
+        {
+          "group": "Bank Data",
+          "openapi": "api-reference/tpp/uae-account-information-openapi.yaml"
+        },
+        {
+          "group": "Confirmation of Payee",
+          "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
+        }
+      ]
     }
     ],
     "global": {
