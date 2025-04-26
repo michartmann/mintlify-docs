@@ -69,6 +69,10 @@
         {
           "group": "Confirmation of Payee",
           "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
+        },
+        {
+          "group": "Confirmation of Payee",
+          "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
         }
       ]
       },
