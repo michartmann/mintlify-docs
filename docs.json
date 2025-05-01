@@ -35,26 +35,15 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Customer Data Platform",
         "groups": [
           {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint Examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
+            "group": "CDP",
+            "openapi": "api-reference/cdp/cdp-swagger.json"
           }
         ]
       },
-    {
+      {
       "tab": "Open Finance API Reference (TPP)",
       "groups": [
 
