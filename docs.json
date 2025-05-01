@@ -61,18 +61,6 @@
         {
           "group": "CDP",
           "openapi": "api-reference/cdp/cdp-swagger.json"
-        },
-        {
-          "group": "Bank Data",
-          "openapi": "api-reference/tpp/uae-account-information-openapi.yaml"
-        },
-        {
-          "group": "Confirmation of Payee",
-          "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
-        },
-        {
-          "group": "Product Data",
-          "openapi": "api-reference/tpp/uae-product-openapi.yaml"
         }
       ]
       },
