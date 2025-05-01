@@ -59,8 +59,8 @@
       "groups": [
 
         {
-          "group": "Bank Service Initiation",
-          "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
+          "group": "CDP",
+          "openapi": "api-reference/cdp/cd-swagger.json"
         },
         {
           "group": "Bank Data",
