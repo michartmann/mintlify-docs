@@ -1,0 +1,3881 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API generated from PostgreSQL Views",
+    "version": "1.0.0",
+    "description": "Automatically generated API endpoints for views."
+  },
+  "servers": [
+    {
+      "url": "http://10.93.50.39:3000"
+    }
+  ],
+  "paths": {
+    "/accounts": {
+      "get": {
+        "summary": "Retrieve all records from accounts",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product_id",
+            "in": "query",
+            "description": "Filter by product_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_type",
+            "in": "query",
+            "description": "Filter by account_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_subtype",
+            "in": "query",
+            "description": "Filter by account_subtype.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "description": "Filter by description.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nickname",
+            "in": "query",
+            "description": "Filter by nickname.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status_update_datetime",
+            "in": "query",
+            "description": "Filter by status_update_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_number",
+            "in": "query",
+            "description": "Filter by account_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_iban",
+            "in": "query",
+            "description": "Filter by account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "opening_date",
+            "in": "query",
+            "description": "Filter by opening_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maturity_date",
+            "in": "query",
+            "description": "Filter by maturity_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_debit_indicator",
+            "in": "query",
+            "description": "Filter by credit_debit_indicator.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_updated",
+            "in": "query",
+            "description": "Filter by last_updated.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_overdraft_limit",
+            "in": "query",
+            "description": "Filter by max_overdraft_limit.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "notes",
+            "in": "query",
+            "description": "Filter by notes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_holder_name",
+            "in": "query",
+            "description": "Filter by account_holder_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_holder_short_name",
+            "in": "query",
+            "description": "Filter by account_holder_short_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_line_type",
+            "in": "query",
+            "description": "Filter by credit_line_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_line_included",
+            "in": "query",
+            "description": "Filter by credit_line_included.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "opening_available_balance",
+            "in": "query",
+            "description": "Filter by opening_available_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interim_booked_balance",
+            "in": "query",
+            "description": "Filter by interim_booked_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interim_available_balance",
+            "in": "query",
+            "description": "Filter by interim_available_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "balance_type",
+            "in": "query",
+            "description": "Filter by balance_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "product_id": {
+                        "type": "string"
+                      },
+                      "account_type": {
+                        "type": "string"
+                      },
+                      "account_subtype": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "nickname": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "status_update_datetime": {
+                        "type": "string"
+                      },
+                      "account_number": {
+                        "type": "string"
+                      },
+                      "account_iban": {
+                        "type": "string"
+                      },
+                      "opening_date": {
+                        "type": "string"
+                      },
+                      "maturity_date": {
+                        "type": "string"
+                      },
+                      "credit_debit_indicator": {
+                        "type": "string"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "last_updated": {
+                        "type": "string"
+                      },
+                      "max_overdraft_limit": {
+                        "type": "integer"
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "account_holder_name": {
+                        "type": "string"
+                      },
+                      "account_holder_short_name": {
+                        "type": "string"
+                      },
+                      "credit_line_type": {
+                        "type": "string"
+                      },
+                      "credit_line_included": {
+                        "type": "string"
+                      },
+                      "opening_available_balance": {
+                        "type": "integer"
+                      },
+                      "interim_booked_balance": {
+                        "type": "integer"
+                      },
+                      "interim_available_balance": {
+                        "type": "integer"
+                      },
+                      "balance_type": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/balance": {
+      "get": {
+        "summary": "Retrieve all records from balance",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_number",
+            "in": "query",
+            "description": "Filter by account_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_iban",
+            "in": "query",
+            "description": "Filter by account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_debit_indicator",
+            "in": "query",
+            "description": "Filter by credit_debit_indicator.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_updated",
+            "in": "query",
+            "description": "Filter by last_updated.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_overdraft_limit",
+            "in": "query",
+            "description": "Filter by max_overdraft_limit.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_line_type",
+            "in": "query",
+            "description": "Filter by credit_line_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_line_included",
+            "in": "query",
+            "description": "Filter by credit_line_included.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "opening_available_balance",
+            "in": "query",
+            "description": "Filter by opening_available_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interim_booked_balance",
+            "in": "query",
+            "description": "Filter by interim_booked_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interim_available_balance",
+            "in": "query",
+            "description": "Filter by interim_available_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "account_number": {
+                        "type": "string"
+                      },
+                      "account_iban": {
+                        "type": "string"
+                      },
+                      "credit_debit_indicator": {
+                        "type": "string"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "last_updated": {
+                        "type": "string"
+                      },
+                      "max_overdraft_limit": {
+                        "type": "integer"
+                      },
+                      "credit_line_type": {
+                        "type": "string"
+                      },
+                      "credit_line_included": {
+                        "type": "string"
+                      },
+                      "opening_available_balance": {
+                        "type": "integer"
+                      },
+                      "interim_booked_balance": {
+                        "type": "integer"
+                      },
+                      "interim_available_balance": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product": {
+      "get": {
+        "summary": "Retrieve all records from product",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "query",
+            "description": "Filter by product_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "islamic",
+            "in": "query",
+            "description": "Filter by islamic.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fees_amount",
+            "in": "query",
+            "description": "Filter by fees_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fees_name",
+            "in": "query",
+            "description": "Filter by fees_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fees_type",
+            "in": "query",
+            "description": "Filter by fees_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_rate",
+            "in": "query",
+            "description": "Filter by interest_rate.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_rate_type",
+            "in": "query",
+            "description": "Filter by interest_rate_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_payable",
+            "in": "query",
+            "description": "Filter by interest_payable.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_rate_calculation_frequency",
+            "in": "query",
+            "description": "Filter by interest_rate_calculation_frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_charge_frequency",
+            "in": "query",
+            "description": "Filter by interest_charge_frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_rate_repayment_type",
+            "in": "query",
+            "description": "Filter by interest_rate_repayment_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interest_rate_notes",
+            "in": "query",
+            "description": "Filter by interest_rate_notes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate",
+            "in": "query",
+            "description": "Filter by deposit_rate.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate_type",
+            "in": "query",
+            "description": "Filter by deposit_rate_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate_calculation_frequency",
+            "in": "query",
+            "description": "Filter by deposit_rate_calculation_frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate_application_frequency",
+            "in": "query",
+            "description": "Filter by deposit_rate_application_frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate_repayment_type",
+            "in": "query",
+            "description": "Filter by deposit_rate_repayment_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deposit_rate_notes",
+            "in": "query",
+            "description": "Filter by deposit_rate_notes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bundle_name",
+            "in": "query",
+            "description": "Filter by bundle_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "product_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "islamic": {
+                        "type": "string"
+                      },
+                      "fees_amount": {
+                        "type": "string"
+                      },
+                      "fees_name": {
+                        "type": "string"
+                      },
+                      "fees_type": {
+                        "type": "string"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "interest_rate": {
+                        "type": "string"
+                      },
+                      "interest_rate_type": {
+                        "type": "string"
+                      },
+                      "interest_payable": {
+                        "type": "string"
+                      },
+                      "interest_rate_calculation_frequency": {
+                        "type": "string"
+                      },
+                      "interest_charge_frequency": {
+                        "type": "string"
+                      },
+                      "interest_rate_repayment_type": {
+                        "type": "string"
+                      },
+                      "interest_rate_notes": {
+                        "type": "string"
+                      },
+                      "deposit_rate": {
+                        "type": "string"
+                      },
+                      "deposit_rate_type": {
+                        "type": "string"
+                      },
+                      "deposit_rate_calculation_frequency": {
+                        "type": "string"
+                      },
+                      "deposit_rate_application_frequency": {
+                        "type": "string"
+                      },
+                      "deposit_rate_repayment_type": {
+                        "type": "string"
+                      },
+                      "deposit_rate_notes": {
+                        "type": "string"
+                      },
+                      "bundle_name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/standing_orders": {
+      "get": {
+        "summary": "Retrieve all records from standing_orders",
+        "parameters": [
+          {
+            "name": "standing_order_id",
+            "in": "query",
+            "description": "Filter by standing_order_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "beneficiary_id",
+            "in": "query",
+            "description": "Filter by beneficiary_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "description": "Filter by frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "first_payment_datetime",
+            "in": "query",
+            "description": "Filter by first_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "next_payment_datetime",
+            "in": "query",
+            "description": "Filter by next_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_payment_datetime",
+            "in": "query",
+            "description": "Filter by last_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "final_payment_datetime",
+            "in": "query",
+            "description": "Filter by final_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "number_of_payments",
+            "in": "query",
+            "description": "Filter by number_of_payments.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "first_payment_amount",
+            "in": "query",
+            "description": "Filter by first_payment_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "next_payment_amount",
+            "in": "query",
+            "description": "Filter by next_payment_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_payment_amount",
+            "in": "query",
+            "description": "Filter by last_payment_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "final_payment_amount",
+            "in": "query",
+            "description": "Filter by final_payment_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "standing_order_status",
+            "in": "query",
+            "description": "Filter by standing_order_status.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "notes",
+            "in": "query",
+            "description": "Filter by notes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "description": "Filter by purpose.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "short_name",
+            "in": "query",
+            "description": "Filter by short_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_identification_type",
+            "in": "query",
+            "description": "Filter by creditor_agent_identification_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_identification",
+            "in": "query",
+            "description": "Filter by creditor_agent_identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account_number",
+            "in": "query",
+            "description": "Filter by creditor_account_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_iban",
+            "in": "query",
+            "description": "Filter by creditor_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "standing_order_id": {
+                        "type": "string"
+                      },
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "beneficiary_id": {
+                        "type": "string"
+                      },
+                      "frequency": {
+                        "type": "string"
+                      },
+                      "first_payment_datetime": {
+                        "type": "string"
+                      },
+                      "next_payment_datetime": {
+                        "type": "string"
+                      },
+                      "last_payment_datetime": {
+                        "type": "string"
+                      },
+                      "final_payment_datetime": {
+                        "type": "string"
+                      },
+                      "number_of_payments": {
+                        "type": "integer"
+                      },
+                      "first_payment_amount": {
+                        "type": "integer"
+                      },
+                      "next_payment_amount": {
+                        "type": "integer"
+                      },
+                      "last_payment_amount": {
+                        "type": "integer"
+                      },
+                      "final_payment_amount": {
+                        "type": "integer"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "standing_order_status": {
+                        "type": "string"
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "purpose": {
+                        "type": "string"
+                      },
+                      "short_name": {
+                        "type": "string"
+                      },
+                      "creditor_agent_identification_type": {
+                        "type": "string"
+                      },
+                      "creditor_agent_identification": {
+                        "type": "string"
+                      },
+                      "creditor_account_number": {
+                        "type": "string"
+                      },
+                      "creditor_iban": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cop_query": {
+      "get": {
+        "summary": "Retrieve all records from cop_query",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "given_name",
+            "in": "query",
+            "description": "Filter by given_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "family_name",
+            "in": "query",
+            "description": "Filter by family_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_iban",
+            "in": "query",
+            "description": "Filter by account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "given_name": {
+                        "type": "string"
+                      },
+                      "family_name": {
+                        "type": "string"
+                      },
+                      "account_iban": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/direct_debit": {
+      "get": {
+        "summary": "Retrieve all records from direct_debit",
+        "parameters": [
+          {
+            "name": "direct_debit_id",
+            "in": "query",
+            "description": "Filter by direct_debit_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direct_debit_status_code",
+            "in": "query",
+            "description": "Filter by direct_debit_status_code.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mandateidentification",
+            "in": "query",
+            "description": "Filter by mandateidentification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "previous_payment_datetime",
+            "in": "query",
+            "description": "Filter by previous_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "description": "Filter by frequency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "previous_payment_amount",
+            "in": "query",
+            "description": "Filter by previous_payment_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Filter by currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "direct_debit_id": {
+                        "type": "string"
+                      },
+                      "direct_debit_status_code": {
+                        "type": "string"
+                      },
+                      "mandateidentification": {
+                        "type": "string"
+                      },
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "previous_payment_datetime": {
+                        "type": "string"
+                      },
+                      "frequency": {
+                        "type": "string"
+                      },
+                      "previous_payment_amount": {
+                        "type": "integer"
+                      },
+                      "currency": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/surrogate_id": {
+      "get": {
+        "summary": "Retrieve all records from surrogate_id",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_type",
+            "in": "query",
+            "description": "Filter by account_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_iban",
+            "in": "query",
+            "description": "Filter by account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "account_type": {
+                        "type": "string"
+                      },
+                      "account_iban": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "summary": "Retrieve all records from transactions",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_id",
+            "in": "query",
+            "description": "Filter by transaction_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "booking_datetime",
+            "in": "query",
+            "description": "Filter by booking_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "completion_datetime",
+            "in": "query",
+            "description": "Filter by completion_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "value_datetime",
+            "in": "query",
+            "description": "Filter by value_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_amount",
+            "in": "query",
+            "description": "Filter by target_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_amount",
+            "in": "query",
+            "description": "Filter by source_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credit_debit_indicator",
+            "in": "query",
+            "description": "Filter by credit_debit_indicator.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payment_mode",
+            "in": "query",
+            "description": "Filter by payment_mode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_type",
+            "in": "query",
+            "description": "Filter by transaction_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sub_transaction_type",
+            "in": "query",
+            "description": "Filter by sub_transaction_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_currency",
+            "in": "query",
+            "description": "Filter by account_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "available_balance",
+            "in": "query",
+            "description": "Filter by available_balance.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_information",
+            "in": "query",
+            "description": "Filter by transaction_information.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_currency",
+            "in": "query",
+            "description": "Filter by source_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instructed_currency",
+            "in": "query",
+            "description": "Filter by instructed_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contract_identification",
+            "in": "query",
+            "description": "Filter by contract_identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instructed_amount",
+            "in": "query",
+            "description": "Filter by instructed_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_identification",
+            "in": "query",
+            "description": "Filter by creditor_agent_identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proprietary_bank_transaction_code",
+            "in": "query",
+            "description": "Filter by proprietary_bank_transaction_code.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_country",
+            "in": "query",
+            "description": "Filter by creditor_address_country.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_state",
+            "in": "query",
+            "description": "Filter by creditor_address_state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_city",
+            "in": "query",
+            "description": "Filter by creditor_address_city.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_postcode",
+            "in": "query",
+            "description": "Filter by creditor_address_postcode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_state",
+            "in": "query",
+            "description": "Filter by debtor_address_state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_city",
+            "in": "query",
+            "description": "Filter by debtor_address_city.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_postcode",
+            "in": "query",
+            "description": "Filter by debtor_address_postcode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_schemename",
+            "in": "query",
+            "description": "Filter by creditor_agent_schemename.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_agent_identification",
+            "in": "query",
+            "description": "Filter by debtor_agent_identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_channel_id",
+            "in": "query",
+            "description": "Filter by transaction_channel_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_reference",
+            "in": "query",
+            "description": "Filter by transaction_reference.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target_currency",
+            "in": "query",
+            "description": "Filter by target_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_no",
+            "in": "query",
+            "description": "Filter by account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "charges",
+            "in": "query",
+            "description": "Filter by charges.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_flag",
+            "in": "query",
+            "description": "Filter by transaction_flag.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_mutability",
+            "in": "query",
+            "description": "Filter by transaction_mutability.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vat_amount",
+            "in": "query",
+            "description": "Filter by vat_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unit_currency",
+            "in": "query",
+            "description": "Filter by unit_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quotation_date",
+            "in": "query",
+            "description": "Filter by quotation_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proprietary_bank_transaction_code_issuer",
+            "in": "query",
+            "description": "Filter by proprietary_bank_transaction_code_issuer.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "balance_type",
+            "in": "query",
+            "description": "Filter by balance_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "balance_credit_debit_indicator",
+            "in": "query",
+            "description": "Filter by balance_credit_debit_indicator.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_name",
+            "in": "query",
+            "description": "Filter by debtor_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_account_no",
+            "in": "query",
+            "description": "Filter by debtor_account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_account_iban",
+            "in": "query",
+            "description": "Filter by debtor_account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_name",
+            "in": "query",
+            "description": "Filter by creditor_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account_no",
+            "in": "query",
+            "description": "Filter by creditor_account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account_iban",
+            "in": "query",
+            "description": "Filter by creditor_account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_agent_schemename",
+            "in": "query",
+            "description": "Filter by debtor_agent_schemename.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_agent_address_id",
+            "in": "query",
+            "description": "Filter by debtor_agent_address_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_address_id",
+            "in": "query",
+            "description": "Filter by creditor_agent_address_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_short_address",
+            "in": "query",
+            "description": "Filter by debtor_short_address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_line_1",
+            "in": "query",
+            "description": "Filter by debtor_address_line_1.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_country",
+            "in": "query",
+            "description": "Filter by debtor_address_country.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_address_type",
+            "in": "query",
+            "description": "Filter by debtor_address_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_short_address",
+            "in": "query",
+            "description": "Filter by creditor_short_address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_line_1",
+            "in": "query",
+            "description": "Filter by creditor_address_line_1.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_address_type",
+            "in": "query",
+            "description": "Filter by creditor_address_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merchant_id",
+            "in": "query",
+            "description": "Filter by merchant_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merchant_mcc",
+            "in": "query",
+            "description": "Filter by merchant_mcc.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merchant_name",
+            "in": "query",
+            "description": "Filter by merchant_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "terminal_id",
+            "in": "query",
+            "description": "Filter by terminal_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exchange_rate",
+            "in": "query",
+            "description": "Filter by exchange_rate.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "card_instrument_name",
+            "in": "query",
+            "description": "Filter by card_instrument_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "card_instrument_type",
+            "in": "query",
+            "description": "Filter by card_instrument_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merchant_mid",
+            "in": "query",
+            "description": "Filter by merchant_mid.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account_id": {
+                        "type": "integer"
+                      },
+                      "transaction_id": {
+                        "type": "string"
+                      },
+                      "booking_datetime": {
+                        "type": "string"
+                      },
+                      "completion_datetime": {
+                        "type": "string"
+                      },
+                      "value_datetime": {
+                        "type": "string"
+                      },
+                      "target_amount": {
+                        "type": "string"
+                      },
+                      "source_amount": {
+                        "type": "string"
+                      },
+                      "credit_debit_indicator": {
+                        "type": "string"
+                      },
+                      "payment_mode": {
+                        "type": "string"
+                      },
+                      "transaction_type": {
+                        "type": "string"
+                      },
+                      "sub_transaction_type": {
+                        "type": "string"
+                      },
+                      "account_currency": {
+                        "type": "string"
+                      },
+                      "available_balance": {
+                        "type": "string"
+                      },
+                      "transaction_information": {
+                        "type": "string"
+                      },
+                      "source_currency": {
+                        "type": "string"
+                      },
+                      "instructed_currency": {
+                        "type": "string"
+                      },
+                      "contract_identification": {
+                        "type": "string"
+                      },
+                      "instructed_amount": {
+                        "type": "string"
+                      },
+                      "creditor_agent_identification": {
+                        "type": "string"
+                      },
+                      "proprietary_bank_transaction_code": {
+                        "type": "string"
+                      },
+                      "creditor_address_country": {
+                        "type": "string"
+                      },
+                      "creditor_address_state": {
+                        "type": "string"
+                      },
+                      "creditor_address_city": {
+                        "type": "string"
+                      },
+                      "creditor_address_postcode": {
+                        "type": "string"
+                      },
+                      "debtor_address_state": {
+                        "type": "string"
+                      },
+                      "debtor_address_city": {
+                        "type": "string"
+                      },
+                      "debtor_address_postcode": {
+                        "type": "string"
+                      },
+                      "creditor_agent_schemename": {
+                        "type": "string"
+                      },
+                      "debtor_agent_identification": {
+                        "type": "string"
+                      },
+                      "transaction_channel_id": {
+                        "type": "integer"
+                      },
+                      "transaction_reference": {
+                        "type": "string"
+                      },
+                      "target_currency": {
+                        "type": "string"
+                      },
+                      "account_no": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "charges": {
+                        "type": "string"
+                      },
+                      "transaction_flag": {
+                        "type": "string"
+                      },
+                      "transaction_mutability": {
+                        "type": "string"
+                      },
+                      "vat_amount": {
+                        "type": "string"
+                      },
+                      "unit_currency": {
+                        "type": "string"
+                      },
+                      "quotation_date": {
+                        "type": "string"
+                      },
+                      "proprietary_bank_transaction_code_issuer": {
+                        "type": "string"
+                      },
+                      "balance_type": {
+                        "type": "string"
+                      },
+                      "balance_credit_debit_indicator": {
+                        "type": "string"
+                      },
+                      "debtor_name": {
+                        "type": "string"
+                      },
+                      "debtor_account_no": {
+                        "type": "string"
+                      },
+                      "debtor_account_iban": {
+                        "type": "string"
+                      },
+                      "creditor_name": {
+                        "type": "string"
+                      },
+                      "creditor_account_no": {
+                        "type": "string"
+                      },
+                      "creditor_account_iban": {
+                        "type": "string"
+                      },
+                      "debtor_agent_schemename": {
+                        "type": "string"
+                      },
+                      "debtor_agent_address_id": {
+                        "type": "string"
+                      },
+                      "creditor_agent_address_id": {
+                        "type": "string"
+                      },
+                      "debtor_short_address": {
+                        "type": "string"
+                      },
+                      "debtor_address_line_1": {
+                        "type": "string"
+                      },
+                      "debtor_address_country": {
+                        "type": "string"
+                      },
+                      "debtor_address_type": {
+                        "type": "string"
+                      },
+                      "creditor_short_address": {
+                        "type": "string"
+                      },
+                      "creditor_address_line_1": {
+                        "type": "string"
+                      },
+                      "creditor_address_type": {
+                        "type": "string"
+                      },
+                      "merchant_id": {
+                        "type": "string"
+                      },
+                      "merchant_mcc": {
+                        "type": "string"
+                      },
+                      "merchant_name": {
+                        "type": "string"
+                      },
+                      "terminal_id": {
+                        "type": "string"
+                      },
+                      "exchange_rate": {
+                        "type": "string"
+                      },
+                      "card_instrument_name": {
+                        "type": "string"
+                      },
+                      "card_instrument_type": {
+                        "type": "string"
+                      },
+                      "merchant_mid": {
+                        "type": "string"
+                      },
+                      "customer_id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/beneficiaries": {
+      "get": {
+        "summary": "Retrieve all records from beneficiaries",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "beneficiary_id",
+            "in": "query",
+            "description": "Filter by beneficiary_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "description": "Filter by reference.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account",
+            "in": "query",
+            "description": "Filter by creditor_account.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_iban",
+            "in": "query",
+            "description": "Filter by creditor_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheme_name",
+            "in": "query",
+            "description": "Filter by scheme_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "identification",
+            "in": "query",
+            "description": "Filter by identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "beneficiary_status",
+            "in": "query",
+            "description": "Filter by beneficiary_status.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_line_1",
+            "in": "query",
+            "description": "Filter by address_line_1.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_line_2",
+            "in": "query",
+            "description": "Filter by address_line_2.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_unit_number",
+            "in": "query",
+            "description": "Filter by address_unit_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "building_number",
+            "in": "query",
+            "description": "Filter by building_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_city",
+            "in": "query",
+            "description": "Filter by address_city.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_district",
+            "in": "query",
+            "description": "Filter by address_district.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_state",
+            "in": "query",
+            "description": "Filter by address_state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_postcode",
+            "in": "query",
+            "description": "Filter by address_postcode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_country",
+            "in": "query",
+            "description": "Filter by address_country.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "beneficiary_institution_name",
+            "in": "query",
+            "description": "Filter by beneficiary_institution_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "short_name",
+            "in": "query",
+            "description": "Filter by short_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "beneficiary_id": {
+                        "type": "integer"
+                      },
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "reference": {
+                        "type": "string"
+                      },
+                      "creditor_account": {
+                        "type": "string"
+                      },
+                      "creditor_iban": {
+                        "type": "string"
+                      },
+                      "scheme_name": {
+                        "type": "string"
+                      },
+                      "identification": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "beneficiary_status": {
+                        "type": "string"
+                      },
+                      "address_line_1": {
+                        "type": "string"
+                      },
+                      "address_line_2": {
+                        "type": "string"
+                      },
+                      "address_unit_number": {
+                        "type": "string"
+                      },
+                      "building_number": {
+                        "type": "string"
+                      },
+                      "address_city": {
+                        "type": "string"
+                      },
+                      "address_district": {
+                        "type": "string"
+                      },
+                      "address_state": {
+                        "type": "string"
+                      },
+                      "address_postcode": {
+                        "type": "string"
+                      },
+                      "address_country": {
+                        "type": "string"
+                      },
+                      "beneficiary_institution_name": {
+                        "type": "string"
+                      },
+                      "short_name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scheduled_payments": {
+      "get": {
+        "summary": "Retrieve all records from scheduled_payments",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_no",
+            "in": "query",
+            "description": "Filter by account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheduled_payment_id",
+            "in": "query",
+            "description": "Filter by scheduled_payment_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheduled_payment",
+            "in": "query",
+            "description": "Filter by scheduled_payment.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheduled_payment_type",
+            "in": "query",
+            "description": "Filter by scheduled_payment_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheduled_payment_datetime",
+            "in": "query",
+            "description": "Filter by scheduled_payment_datetime.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_reference",
+            "in": "query",
+            "description": "Filter by creditor_reference.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_reference",
+            "in": "query",
+            "description": "Filter by debtor_reference.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instructed_amount",
+            "in": "query",
+            "description": "Filter by instructed_amount.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instructed_currency",
+            "in": "query",
+            "description": "Filter by instructed_currency.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_identification",
+            "in": "query",
+            "description": "Filter by creditor_agent_identification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_agent_schemename",
+            "in": "query",
+            "description": "Filter by creditor_agent_schemename.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account_no",
+            "in": "query",
+            "description": "Filter by creditor_account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_account_iban",
+            "in": "query",
+            "description": "Filter by creditor_account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_account_no",
+            "in": "query",
+            "description": "Filter by debtor_account_no.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debtor_account_iban",
+            "in": "query",
+            "description": "Filter by debtor_account_iban.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creditor_name",
+            "in": "query",
+            "description": "Filter by creditor_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "short_name",
+            "in": "query",
+            "description": "Filter by short_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nickname",
+            "in": "query",
+            "description": "Filter by nickname.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "account_no": {
+                        "type": "string"
+                      },
+                      "scheduled_payment_id": {
+                        "type": "integer"
+                      },
+                      "scheduled_payment": {
+                        "type": "string"
+                      },
+                      "scheduled_payment_type": {
+                        "type": "string"
+                      },
+                      "scheduled_payment_datetime": {
+                        "type": "string"
+                      },
+                      "creditor_reference": {
+                        "type": "string"
+                      },
+                      "debtor_reference": {
+                        "type": "string"
+                      },
+                      "instructed_amount": {
+                        "type": "integer"
+                      },
+                      "instructed_currency": {
+                        "type": "string"
+                      },
+                      "creditor_agent_identification": {
+                        "type": "string"
+                      },
+                      "creditor_agent_schemename": {
+                        "type": "string"
+                      },
+                      "creditor_account_no": {
+                        "type": "string"
+                      },
+                      "creditor_account_iban": {
+                        "type": "string"
+                      },
+                      "debtor_account_no": {
+                        "type": "string"
+                      },
+                      "debtor_account_iban": {
+                        "type": "string"
+                      },
+                      "creditor_name": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "short_name": {
+                        "type": "string"
+                      },
+                      "nickname": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer": {
+      "get": {
+        "summary": "Retrieve all records from customer",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "query",
+            "description": "Filter by customer_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "Filter by account_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salary_transfer",
+            "in": "query",
+            "description": "Filter by salary_transfer.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "poa",
+            "in": "query",
+            "description": "Filter by poa.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_role",
+            "in": "query",
+            "description": "Filter by account_role.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_name",
+            "in": "query",
+            "description": "Filter by full_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "given_name",
+            "in": "query",
+            "description": "Filter by given_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "family_name",
+            "in": "query",
+            "description": "Filter by family_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "middle_name",
+            "in": "query",
+            "description": "Filter by middle_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "also_known_as",
+            "in": "query",
+            "description": "Filter by also_known_as.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salutation",
+            "in": "query",
+            "description": "Filter by salutation.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_id",
+            "in": "query",
+            "description": "Filter by address_id.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "short_address",
+            "in": "query",
+            "description": "Filter by short_address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_line_1",
+            "in": "query",
+            "description": "Filter by address_line_1.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_city",
+            "in": "query",
+            "description": "Filter by address_city.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_state",
+            "in": "query",
+            "description": "Filter by address_state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_postcode",
+            "in": "query",
+            "description": "Filter by address_postcode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_country",
+            "in": "query",
+            "description": "Filter by address_country.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_type",
+            "in": "query",
+            "description": "Filter by address_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nationality",
+            "in": "query",
+            "description": "Filter by nationality.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_updated",
+            "in": "query",
+            "description": "Filter by last_updated.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preferred_language",
+            "in": "query",
+            "description": "Filter by preferred_language.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "birthdate",
+            "in": "query",
+            "description": "Filter by birthdate.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone_number",
+            "in": "query",
+            "description": "Filter by phone_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email_address",
+            "in": "query",
+            "description": "Filter by email_address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emirates_id_number",
+            "in": "query",
+            "description": "Filter by emirates_id_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emirates_id_expiry_date",
+            "in": "query",
+            "description": "Filter by emirates_id_expiry_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_income_wealth",
+            "in": "query",
+            "description": "Filter by source_income_wealth.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "profession",
+            "in": "query",
+            "description": "Filter by profession.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "income",
+            "in": "query",
+            "description": "Filter by income.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employer_name",
+            "in": "query",
+            "description": "Filter by employer_name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date_of_joining",
+            "in": "query",
+            "description": "Filter by date_of_joining.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assurance_level",
+            "in": "query",
+            "description": "Filter by assurance_level.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assurance_process_policy",
+            "in": "query",
+            "description": "Filter by assurance_process_policy.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assurance_process_procedure",
+            "in": "query",
+            "description": "Filter by assurance_process_procedure.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assurance_process_type",
+            "in": "query",
+            "description": "Filter by assurance_process_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assurance_process_verification",
+            "in": "query",
+            "description": "Filter by assurance_process_verification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verification_time",
+            "in": "query",
+            "description": "Filter by verification_time.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verification_process",
+            "in": "query",
+            "description": "Filter by verification_process.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "evidence_type",
+            "in": "query",
+            "description": "Filter by evidence_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "check_details_method",
+            "in": "query",
+            "description": "Filter by check_details_method.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "check_details_organization",
+            "in": "query",
+            "description": "Filter by check_details_organization.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "check_details_txn",
+            "in": "query",
+            "description": "Filter by check_details_txn.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "check_details_time",
+            "in": "query",
+            "description": "Filter by check_details_time.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verifier_organisation",
+            "in": "query",
+            "description": "Filter by verifier_organisation.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verifier_txn",
+            "in": "query",
+            "description": "Filter by verifier_txn.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_type",
+            "in": "query",
+            "description": "Filter by document_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_number",
+            "in": "query",
+            "description": "Filter by document_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_personal_number",
+            "in": "query",
+            "description": "Filter by document_personal_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_serial_number",
+            "in": "query",
+            "description": "Filter by document_serial_number.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_calendar_type",
+            "in": "query",
+            "description": "Filter by document_calendar_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_date",
+            "in": "query",
+            "description": "Filter by document_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_expiry_date",
+            "in": "query",
+            "description": "Filter by document_expiry_date.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "document_issuer",
+            "in": "query",
+            "description": "Filter by document_issuer.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_short_address",
+            "in": "query",
+            "description": "Filter by issuer_short_address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_address_line_1",
+            "in": "query",
+            "description": "Filter by issuer_address_line_1.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_address_city",
+            "in": "query",
+            "description": "Filter by issuer_address_city.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_address_state",
+            "in": "query",
+            "description": "Filter by issuer_address_state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_address_postcode",
+            "in": "query",
+            "description": "Filter by issuer_address_postcode.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_address_country",
+            "in": "query",
+            "description": "Filter by issuer_address_country.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuer_jurisdiction",
+            "in": "query",
+            "description": "Filter by issuer_jurisdiction.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "txn",
+            "in": "query",
+            "description": "Filter by txn.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "classification",
+            "in": "query",
+            "description": "Filter by classification.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment_description",
+            "in": "query",
+            "description": "Filter by attachment_description.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content_type",
+            "in": "query",
+            "description": "Filter by content_type.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "Filter by content.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip before starting to collect the result set.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "customer_id": {
+                        "type": "integer"
+                      },
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "salary_transfer": {
+                        "type": "string"
+                      },
+                      "poa": {
+                        "type": "string"
+                      },
+                      "account_role": {
+                        "type": "string"
+                      },
+                      "full_name": {
+                        "type": "string"
+                      },
+                      "given_name": {
+                        "type": "string"
+                      },
+                      "family_name": {
+                        "type": "string"
+                      },
+                      "middle_name": {
+                        "type": "string"
+                      },
+                      "also_known_as": {
+                        "type": "string"
+                      },
+                      "salutation": {
+                        "type": "string"
+                      },
+                      "address_id": {
+                        "type": "integer"
+                      },
+                      "short_address": {
+                        "type": "string"
+                      },
+                      "address_line_1": {
+                        "type": "string"
+                      },
+                      "address_city": {
+                        "type": "string"
+                      },
+                      "address_state": {
+                        "type": "string"
+                      },
+                      "address_postcode": {
+                        "type": "string"
+                      },
+                      "address_country": {
+                        "type": "string"
+                      },
+                      "address_type": {
+                        "type": "string"
+                      },
+                      "nationality": {
+                        "type": "string"
+                      },
+                      "last_updated": {
+                        "type": "string"
+                      },
+                      "preferred_language": {
+                        "type": "string"
+                      },
+                      "birthdate": {
+                        "type": "string"
+                      },
+                      "phone_number": {
+                        "type": "string"
+                      },
+                      "email_address": {
+                        "type": "string"
+                      },
+                      "emirates_id_number": {
+                        "type": "string"
+                      },
+                      "emirates_id_expiry_date": {
+                        "type": "string"
+                      },
+                      "source_income_wealth": {
+                        "type": "string"
+                      },
+                      "profession": {
+                        "type": "string"
+                      },
+                      "income": {
+                        "type": "string"
+                      },
+                      "employer_name": {
+                        "type": "string"
+                      },
+                      "date_of_joining": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "assurance_level": {
+                        "type": "string"
+                      },
+                      "assurance_process_policy": {
+                        "type": "string"
+                      },
+                      "assurance_process_procedure": {
+                        "type": "string"
+                      },
+                      "assurance_process_type": {
+                        "type": "string"
+                      },
+                      "assurance_process_verification": {
+                        "type": "string"
+                      },
+                      "verification_time": {
+                        "type": "string"
+                      },
+                      "verification_process": {
+                        "type": "string"
+                      },
+                      "evidence_type": {
+                        "type": "string"
+                      },
+                      "check_details_method": {
+                        "type": "string"
+                      },
+                      "check_details_organization": {
+                        "type": "string"
+                      },
+                      "check_details_txn": {
+                        "type": "string"
+                      },
+                      "check_details_time": {
+                        "type": "string"
+                      },
+                      "verifier_organisation": {
+                        "type": "string"
+                      },
+                      "verifier_txn": {
+                        "type": "string"
+                      },
+                      "document_type": {
+                        "type": "string"
+                      },
+                      "document_number": {
+                        "type": "string"
+                      },
+                      "document_personal_number": {
+                        "type": "string"
+                      },
+                      "document_serial_number": {
+                        "type": "string"
+                      },
+                      "document_calendar_type": {
+                        "type": "string"
+                      },
+                      "document_date": {
+                        "type": "string"
+                      },
+                      "document_expiry_date": {
+                        "type": "string"
+                      },
+                      "document_issuer": {
+                        "type": "string"
+                      },
+                      "issuer_short_address": {
+                        "type": "string"
+                      },
+                      "issuer_address_line_1": {
+                        "type": "string"
+                      },
+                      "issuer_address_city": {
+                        "type": "string"
+                      },
+                      "issuer_address_state": {
+                        "type": "string"
+                      },
+                      "issuer_address_postcode": {
+                        "type": "string"
+                      },
+                      "issuer_address_country": {
+                        "type": "string"
+                      },
+                      "issuer_jurisdiction": {
+                        "type": "string"
+                      },
+                      "txn": {
+                        "type": "string"
+                      },
+                      "classification": {
+                        "type": "string"
+                      },
+                      "attachment_description": {
+                        "type": "string"
+                      },
+                      "content_type": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@
   "theme": "mint",
   "name": "ADCB API Docs",
   "colors": {
-    "primary": "#ba141a",
+    "primary":,
     "light": "#ba141a",
     "dark": "#ba141a"
   },
@@ -51,6 +51,15 @@
               "api-reference/endpoint/delete",
               "api-reference/endpoint/webhook"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "Customer Data Platform",
+        "groups": [
+          {
+            "group": "CDP",
+            "openapi": "api-reference/cdp/cdp-swagger.json"
           }
         ]
       },
