@@ -55,7 +55,7 @@
         ]
       },
     {
-      "tab": "Open Finance API Reference (TPP)",
+      "tab": "CDP",
       "groups": [
 
         {
@@ -76,6 +76,28 @@
         }
       ]
       },
+      {
+        "tab": "Open Finance API Reference (TPP)",
+        "groups": [
+  
+          {
+            "group": "Bank Service Initiation",
+            "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
+          },
+          {
+            "group": "Bank Data",
+            "openapi": "api-reference/tpp/uae-account-information-openapi.yaml"
+          },
+          {
+            "group": "Confirmation of Payee",
+            "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
+          },
+          {
+            "group": "Product Data",
+            "openapi": "api-reference/tpp/uae-product-openapi.yaml"
+          }
+        ]
+        },
     {
       "tab": "Open Finance API Reference (LFI)",
       "groups": [
