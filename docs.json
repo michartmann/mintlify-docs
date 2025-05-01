@@ -56,12 +56,7 @@
       },
       {
         "tab": "Customer Data Platform",
-        "groups": [
-          {
-            "group": "CDP",
-            "openapi": "api-reference/cdp/cdp-swagger.json"
-          }
-        ]
+        "openapi": "api-reference/cdp/cdp-swagger.json"
       },
     {
       "tab": "Open Finance API Reference (TPP)",
