@@ -44,8 +44,8 @@
         ]
       },
       {
-      "tab": "Open Finance API Reference (TPP)",
-      "groups": [
+        "tab": "Open Finance API Reference (TPP)",
+        "groups": [
 
         {
           "group": "Bank Service Initiation",
@@ -65,9 +65,9 @@
         }
       ]
       },
-    {
-      "tab": "Open Finance API Reference (LFI)",
-      "groups": [
+      {
+        "tab": "Open Finance API Reference (LFI)",
+        "groups": [
 
         {
           "group": "Consent Manager",
@@ -102,7 +102,7 @@
           "openapi": "api-reference/lfi/cbuae-ozone-connect-service-initiation-openapi.yaml"
         }
       ]
-    }
+      }
     ],
     "global": {
       "anchors": [
