@@ -60,7 +60,7 @@
 
         {
           "group": "CDP",
-          "openapi": "api-reference/cdp/cd-swagger.json"
+          "openapi": "api-reference/cdp/cdp-swagger.json"
         },
         {
           "group": "Bank Data",
