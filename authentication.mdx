@@ -1,0 +1,503 @@
+---
+title: 'Authentication & Security'
+description: 'Secure API access with OAuth 2.0, mTLS, and request signing'
+---
+
+## Overview
+
+ADCB APIs implement multiple layers of security to protect sensitive financial data and ensure compliance with CBUAE Open Banking standards. All API requests must be authenticated and encrypted.
+
+## Security Architecture
+
+<Card>
+  Our security model implements defense-in-depth with multiple layers:
+  
+  1. **OAuth 2.0** - Identity and access management
+  2. **mTLS** - Mutual TLS for transport security
+  3. **JWS** - Request signing for message integrity
+  4. **IP Whitelisting** - Network-level access control
+  5. **Rate Limiting** - DDoS protection
+</Card>
+
+## OAuth 2.0 Authentication
+
+ADCB APIs use OAuth 2.0 for authentication and authorization. We support the following grant types:
+
+<Tabs>
+  <Tab title="Client Credentials">
+    For server-to-server communication without user context.
+    
+    ```bash
+    POST /oauth/token
+    Content-Type: application/x-www-form-urlencoded
+    
+    grant_type=client_credentials
+    &client_id=YOUR_CLIENT_ID
+    &client_secret=YOUR_CLIENT_SECRET
+    &scope=accounts:read payments:write
+    ```
+  </Tab>
+  <Tab title="Authorization Code">
+    For applications acting on behalf of users.
+    
+    **Step 1: Authorization Request**
+    ```
+    GET /oauth/authorize?
+      response_type=code
+      &client_id=YOUR_CLIENT_ID
+      &redirect_uri=https://yourapp.com/callback
+      &scope=accounts:read
+      &state=random_state_string
+    ```
+    
+    **Step 2: Token Exchange**
+    ```bash
+    POST /oauth/token
+    Content-Type: application/x-www-form-urlencoded
+    
+    grant_type=authorization_code
+    &code=AUTHORIZATION_CODE
+    &client_id=YOUR_CLIENT_ID
+    &client_secret=YOUR_CLIENT_SECRET
+    &redirect_uri=https://yourapp.com/callback
+    ```
+  </Tab>
+  <Tab title="Refresh Token">
+    To obtain new access tokens without re-authentication.
+    
+    ```bash
+    POST /oauth/token
+    Content-Type: application/x-www-form-urlencoded
+    
+    grant_type=refresh_token
+    &refresh_token=YOUR_REFRESH_TOKEN
+    &client_id=YOUR_CLIENT_ID
+    &client_secret=YOUR_CLIENT_SECRET
+    ```
+  </Tab>
+</Tabs>
+
+### Token Response
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "8xLOxBtZp8...",
+  "scope": "accounts:read payments:write",
+  "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Token Lifecycle
+
+<Info>
+  - **Access Token**: Valid for 1 hour (3600 seconds)
+  - **Refresh Token**: Valid for 90 days
+  - **ID Token**: Contains user identity claims (when applicable)
+</Info>
+
+## Mutual TLS (mTLS)
+
+All API connections require mutual TLS authentication using X.509 certificates.
+
+### Certificate Requirements
+
+<AccordionGroup>
+  <Accordion title="Certificate Specifications">
+    - **Key Size**: Minimum 2048-bit RSA or 256-bit ECC
+    - **Signature Algorithm**: SHA-256 or stronger
+    - **Validity Period**: Maximum 2 years
+    - **Subject DN**: Must include organization details
+    - **Extended Key Usage**: Client Authentication
+  </Accordion>
+  
+  <Accordion title="Certificate Chain">
+    Your certificate must be signed by an approved Certificate Authority:
+    - ADCB-approved CA for production
+    - Self-signed certificates allowed in sandbox only
+    - Full certificate chain must be provided
+  </Accordion>
+  
+  <Accordion title="Certificate Rotation">
+    - Certificates must be rotated before expiry
+    - Support multiple active certificates during rotation
+    - 30-day overlap period recommended
+    - Automated rotation via API available
+  </Accordion>
+</AccordionGroup>
+
+### mTLS Implementation
+
+<CodeGroup>
+
+```python Python
+import requests
+import ssl
+
+# Create SSL context with client certificate
+cert_path = 'path/to/client-cert.pem'
+key_path = 'path/to/client-key.pem'
+ca_bundle = 'path/to/ca-bundle.pem'
+
+response = requests.get(
+    'https://api.adcb.com/v1/accounts',
+    cert=(cert_path, key_path),
+    verify=ca_bundle,
+    headers={
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+)
+```
+
+```javascript Node.js
+const https = require('https');
+const fs = require('fs');
+
+const options = {
+  hostname: 'api.adcb.com',
+  path: '/v1/accounts',
+  method: 'GET',
+  cert: fs.readFileSync('client-cert.pem'),
+  key: fs.readFileSync('client-key.pem'),
+  ca: fs.readFileSync('ca-bundle.pem'),
+  headers: {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+  }
+};
+
+const req = https.request(options, (res) => {
+  // Handle response
+});
+```
+
+```java Java
+import javax.net.ssl.*;
+import java.security.KeyStore;
+
+// Load client certificate
+KeyStore keyStore = KeyStore.getInstance("PKCS12");
+keyStore.load(new FileInputStream("client-cert.p12"), 
+              "password".toCharArray());
+
+KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+kmf.init(keyStore, "password".toCharArray());
+
+// Load CA certificate
+KeyStore trustStore = KeyStore.getInstance("JKS");
+trustStore.load(new FileInputStream("truststore.jks"), 
+                "password".toCharArray());
+
+TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+tmf.init(trustStore);
+
+// Create SSL context
+SSLContext sslContext = SSLContext.getInstance("TLS");
+sslContext.init(kmf.getKeyManagers(), 
+                tmf.getTrustManagers(), null);
+
+// Use in HTTP client
+HttpsURLConnection.setDefaultSSLSocketFactory(
+    sslContext.getSocketFactory());
+```
+
+</CodeGroup>
+
+## Request Signing (JWS)
+
+For sensitive operations, requests must be signed using JSON Web Signature (JWS).
+
+### JWS Structure
+
+```json
+{
+  "header": {
+    "alg": "RS256",
+    "kid": "signing-key-id",
+    "typ": "JOSE",
+    "crit": ["http://openbanking.org.uk/iat"],
+    "http://openbanking.org.uk/iat": 1641024000
+  },
+  "payload": {
+    // Request body
+  },
+  "signature": "base64url_encoded_signature"
+}
+```
+
+### Signing Implementation
+
+<CodeGroup>
+
+```python Python
+import jwt
+import json
+from datetime import datetime
+
+def sign_request(payload, private_key):
+    headers = {
+        "alg": "RS256",
+        "kid": "your-key-id",
+        "typ": "JOSE",
+        "crit": ["http://openbanking.org.uk/iat"],
+        "http://openbanking.org.uk/iat": int(datetime.now().timestamp())
+    }
+    
+    token = jwt.encode(
+        payload,
+        private_key,
+        algorithm="RS256",
+        headers=headers
+    )
+    
+    return token
+```
+
+```javascript JavaScript
+const jose = require('jose');
+
+async function signRequest(payload, privateKey) {
+  const jwt = await new jose.SignJWT(payload)
+    .setProtectedHeader({
+      alg: 'RS256',
+      kid: 'your-key-id',
+      typ: 'JOSE',
+      crit: ['http://openbanking.org.uk/iat'],
+      'http://openbanking.org.uk/iat': Math.floor(Date.now() / 1000)
+    })
+    .sign(privateKey);
+  
+  return jwt;
+}
+```
+
+</CodeGroup>
+
+## API Scopes
+
+Scopes control access to specific API resources. Request only the scopes you need.
+
+### Available Scopes
+
+<Table>
+  <thead>
+    <tr>
+      <th>Scope</th>
+      <th>Description</th>
+      <th>Access Level</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`accounts:read`</td>
+      <td>Read account information</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`accounts:detail`</td>
+      <td>Read detailed account data</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`transactions:read`</td>
+      <td>Read transaction history</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`payments:write`</td>
+      <td>Initiate payments</td>
+      <td>Write</td>
+    </tr>
+    <tr>
+      <td>`payments:read`</td>
+      <td>Read payment status</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`consents:write`</td>
+      <td>Manage customer consents</td>
+      <td>Write</td>
+    </tr>
+    <tr>
+      <td>`consents:read`</td>
+      <td>Read consent status</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`beneficiaries:read`</td>
+      <td>Read beneficiary list</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td>`beneficiaries:write`</td>
+      <td>Manage beneficiaries</td>
+      <td>Write</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Security Headers
+
+All API requests must include these security headers:
+
+```http
+Authorization: Bearer {access_token}
+X-Request-ID: {unique_request_id}
+X-Idempotency-Key: {idempotency_key}  // For POST/PUT/PATCH
+X-JWS-Signature: {jws_signature}      // For sensitive operations
+X-Customer-IP: {end_user_ip}          // When applicable
+Accept: application/json
+Content-Type: application/json
+```
+
+## Rate Limiting
+
+API rate limits protect against abuse and ensure fair usage:
+
+<Tabs>
+  <Tab title="Default Limits">
+    - **Per Second**: 10 requests
+    - **Per Minute**: 100 requests
+    - **Per Hour**: 1,000 requests
+    - **Per Day**: 10,000 requests
+  </Tab>
+  <Tab title="Rate Limit Headers">
+    ```http
+    X-RateLimit-Limit: 100
+    X-RateLimit-Remaining: 95
+    X-RateLimit-Reset: 1641027600
+    Retry-After: 60
+    ```
+  </Tab>
+  <Tab title="Handling 429 Errors">
+    ```python
+    import time
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=1,
+        status_forcelist=[429, 500, 502, 503, 504]
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    ```
+  </Tab>
+</Tabs>
+
+## IP Whitelisting
+
+Production APIs require IP whitelisting for additional security.
+
+### Configuration Steps
+
+1. Log into Developer Dashboard
+2. Navigate to Security Settings
+3. Add your production IP addresses
+4. Specify environment (Production/Sandbox)
+5. Save and wait for propagation (5-10 minutes)
+
+<Warning>
+  IP whitelisting is mandatory for production. Ensure you whitelist all IPs including:
+  - Application servers
+  - Load balancers
+  - NAT gateways
+  - Disaster recovery sites
+</Warning>
+
+## Error Responses
+
+Security-related errors follow RFC 7807 problem details format:
+
+```json
+{
+  "type": "https://api.adcb.com/errors/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "The access token has expired",
+  "instance": "/v1/accounts",
+  "trace_id": "4d9c8b5a-f6e2-4c8a-9d3b-1e7f5a6c8d9e",
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Common Security Errors
+
+<AccordionGroup>
+  <Accordion title="401 Unauthorized">
+    - Invalid or expired access token
+    - Missing Authorization header
+    - Token lacks required scopes
+  </Accordion>
+  
+  <Accordion title="403 Forbidden">
+    - IP address not whitelisted
+    - Invalid mTLS certificate
+    - Certificate not authorized for resource
+  </Accordion>
+  
+  <Accordion title="400 Bad Request">
+    - Invalid JWS signature
+    - Malformed request body
+    - Missing required headers
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Credential Management" icon="key">
+    - Never hardcode credentials
+    - Use secure key management (HSM/KMS)
+    - Rotate credentials regularly
+    - Monitor for credential leaks
+  </Card>
+  
+  <Card title="Network Security" icon="network-wired">
+    - Use private networks where possible
+    - Implement network segmentation
+    - Enable DDoS protection
+    - Monitor suspicious traffic
+  </Card>
+  
+  <Card title="Application Security" icon="shield">
+    - Validate all inputs
+    - Implement proper error handling
+    - Use latest TLS versions
+    - Keep dependencies updated
+  </Card>
+  
+  <Card title="Compliance" icon="clipboard-check">
+    - Follow OWASP guidelines
+    - Implement PCI DSS requirements
+    - Ensure GDPR compliance
+    - Regular security audits
+  </Card>
+</CardGroup>
+
+## Security Checklist
+
+Before going to production, ensure:
+
+- [ ] mTLS certificates obtained and configured
+- [ ] OAuth 2.0 implementation tested
+- [ ] JWS signing implemented for sensitive operations
+- [ ] IP addresses whitelisted
+- [ ] Rate limiting handled in client code
+- [ ] Security headers implemented
+- [ ] Error handling for all security scenarios
+- [ ] Credentials stored securely
+- [ ] Audit logging enabled
+- [ ] Penetration testing completed
+
+## Support
+
+For security-related questions:
+
+- 📧 **Security Team**: security@adcb.com
+- 🔐 **Report Vulnerabilities**: security.disclosure@adcb.com
+- 📞 **24/7 Security Hotline**: +971 2 696 2999

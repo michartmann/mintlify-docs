@@ -1,107 +1,647 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: 'API Development Guide'
+description: 'Best practices and tools for developing with ADCB APIs'
 ---
 
+## Development Environment Setup
+
+This guide helps you set up a robust development environment for integrating with ADCB's Open Banking APIs.
+
 <Info>
-  **Prerequisite**: Please install Node.js (version 19 or higher) before proceeding. <br />
-  Please upgrade to ```docs.json``` before proceeding and delete the legacy ```mint.json``` file.
+  **Prerequisites**: 
+  - Programming language of choice (Python, Node.js, Java, etc.)
+  - API testing tool (Postman, Insomnia, or cURL)
+  - Valid ADCB developer account
+  - mTLS certificates for your environment
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system:
+## Environment Configuration
 
-**Step 1**: Install Mintlify:
+### Sandbox vs Production
+
+<Tabs>
+  <Tab title="Sandbox Environment">
+    **Base URL**: `https://sandbox-api.adcb.com`
+    
+    - Test with mock data
+    - No real transactions
+    - Relaxed rate limits
+    - Self-signed certificates allowed
+    - Test credentials provided
+    
+    ```bash
+    # .env.sandbox
+    ADCB_API_BASE_URL=https://sandbox-api.adcb.com
+    ADCB_CLIENT_ID=sandbox_client_id
+    ADCB_CLIENT_SECRET=sandbox_secret
+    ADCB_CERT_PATH=./certs/sandbox-cert.pem
+    ADCB_KEY_PATH=./certs/sandbox-key.pem
+    ```
+  </Tab>
+  <Tab title="Production Environment">
+    **Base URL**: `https://api.adcb.com`
+    
+    - Live customer data
+    - Real transactions
+    - Strict rate limits
+    - CA-signed certificates required
+    - Production credentials
+    
+    ```bash
+    # .env.production
+    ADCB_API_BASE_URL=https://api.adcb.com
+    ADCB_CLIENT_ID=prod_client_id
+    ADCB_CLIENT_SECRET=prod_secret
+    ADCB_CERT_PATH=./certs/prod-cert.pem
+    ADCB_KEY_PATH=./certs/prod-key.pem
+    ```
+  </Tab>
+</Tabs>
+
+## SDK Installation
 
 <CodeGroup>
 
-  ```bash npm
-  npm i -g mintlify
-  ```
+```bash Python
+# Install ADCB Python SDK
+pip install adcb-openbanking
 
-```bash yarn
-yarn global add mintlify
+# Or using requirements.txt
+echo "adcb-openbanking>=1.0.0" >> requirements.txt
+pip install -r requirements.txt
+```
+
+```bash Node.js
+# Install ADCB Node.js SDK
+npm install @adcb/openbanking-sdk
+
+# Or using yarn
+yarn add @adcb/openbanking-sdk
+```
+
+```bash Java
+<!-- Add to pom.xml -->
+<dependency>
+    <groupId>com.adcb</groupId>
+    <artifactId>openbanking-sdk</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+```bash Go
+# Install ADCB Go SDK
+go get github.com/adcb/openbanking-sdk-go
 ```
 
 </CodeGroup>
 
-**Step 2**: Navigate to the docs directory (where the `docs.json` file is located) and execute the following command:
+## Quick Start Examples
 
-```bash
-mintlify dev
-```
-
-A local preview of your documentation will be available at `http://localhost:3000`.
-
-### Custom Ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. To run Mintlify on port 3333, for instance, use this command:
-
-```bash
-mintlify dev --port 3333
-```
-
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify Versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local website doesn't align with the production version, please update the CLI:
+### Initialize Client
 
 <CodeGroup>
 
-```bash npm
-npm i -g mintlify@latest
+```python Python
+from adcb import OpenBankingClient
+import os
+
+client = OpenBankingClient(
+    client_id=os.environ['ADCB_CLIENT_ID'],
+    client_secret=os.environ['ADCB_CLIENT_SECRET'],
+    environment='sandbox',  # or 'production'
+    cert_path=os.environ['ADCB_CERT_PATH'],
+    key_path=os.environ['ADCB_KEY_PATH']
+)
+
+# Authenticate
+token = client.authenticate(scopes=['accounts:read', 'transactions:read'])
 ```
 
-```bash yarn
-yarn global upgrade mintlify
+```javascript Node.js
+const { OpenBankingClient } = require('@adcb/openbanking-sdk');
+
+const client = new OpenBankingClient({
+    clientId: process.env.ADCB_CLIENT_ID,
+    clientSecret: process.env.ADCB_CLIENT_SECRET,
+    environment: 'sandbox', // or 'production'
+    certPath: process.env.ADCB_CERT_PATH,
+    keyPath: process.env.ADCB_KEY_PATH
+});
+
+// Authenticate
+const token = await client.authenticate({
+    scopes: ['accounts:read', 'transactions:read']
+});
+```
+
+```java Java
+import com.adcb.OpenBankingClient;
+
+OpenBankingClient client = OpenBankingClient.builder()
+    .clientId(System.getenv("ADCB_CLIENT_ID"))
+    .clientSecret(System.getenv("ADCB_CLIENT_SECRET"))
+    .environment(Environment.SANDBOX)
+    .certPath(System.getenv("ADCB_CERT_PATH"))
+    .keyPath(System.getenv("ADCB_KEY_PATH"))
+    .build();
+
+// Authenticate
+Token token = client.authenticate(
+    Arrays.asList("accounts:read", "transactions:read")
+);
 ```
 
 </CodeGroup>
 
-## Validating Links
+### Common Operations
 
-The CLI can assist with validating reference links made in your documentation. To identify any broken links, use the following command:
+<Tabs>
+  <Tab title="List Accounts">
+    ```python
+    # Get all accounts
+    accounts = client.accounts.list()
+    
+    for account in accounts:
+        print(f"Account: {account.id}")
+        print(f"Balance: {account.balance.amount} {account.balance.currency}")
+        print(f"Type: {account.account_type}")
+    ```
+  </Tab>
+  <Tab title="Get Transactions">
+    ```python
+    # Get transactions for an account
+    transactions = client.transactions.list(
+        account_id="AE070331234567890123456",
+        from_date="2024-01-01",
+        to_date="2024-01-31"
+    )
+    
+    for txn in transactions:
+        print(f"Date: {txn.booking_date}")
+        print(f"Amount: {txn.amount.amount} {txn.amount.currency}")
+        print(f"Description: {txn.description}")
+    ```
+  </Tab>
+  <Tab title="Initiate Payment">
+    ```python
+    # Create a payment
+    payment = client.payments.create({
+        "from_account": "AE070331234567890123456",
+        "to_account": "AE070339876543210987654",
+        "amount": {
+            "value": 1000.00,
+            "currency": "AED"
+        },
+        "reference": "Invoice #12345",
+        "execution_date": "2024-01-20"
+    })
+    
+    print(f"Payment ID: {payment.id}")
+    print(f"Status: {payment.status}")
+    ```
+  </Tab>
+</Tabs>
 
-```bash
-mintlify broken-links
+## Error Handling
+
+Implement robust error handling for all API calls:
+
+<CodeGroup>
+
+```python Python
+from adcb.exceptions import (
+    AuthenticationError,
+    RateLimitError,
+    ValidationError,
+    ServerError
+)
+
+try:
+    accounts = client.accounts.list()
+except AuthenticationError as e:
+    # Token expired or invalid
+    print(f"Auth error: {e.message}")
+    # Refresh token and retry
+    client.refresh_token()
+except RateLimitError as e:
+    # Too many requests
+    print(f"Rate limit hit. Retry after: {e.retry_after}")
+    time.sleep(e.retry_after)
+except ValidationError as e:
+    # Invalid request parameters
+    print(f"Validation error: {e.errors}")
+except ServerError as e:
+    # ADCB server error
+    print(f"Server error: {e.status_code}")
+    # Implement exponential backoff
 ```
 
-## Deployment
+```javascript JavaScript
+try {
+    const accounts = await client.accounts.list();
+} catch (error) {
+    if (error.name === 'AuthenticationError') {
+        // Token expired or invalid
+        console.error('Auth error:', error.message);
+        await client.refreshToken();
+    } else if (error.name === 'RateLimitError') {
+        // Too many requests
+        console.error(`Rate limit hit. Retry after: ${error.retryAfter}`);
+        await sleep(error.retryAfter * 1000);
+    } else if (error.name === 'ValidationError') {
+        // Invalid request parameters
+        console.error('Validation error:', error.errors);
+    } else if (error.name === 'ServerError') {
+        // ADCB server error
+        console.error('Server error:', error.statusCode);
+        // Implement exponential backoff
+    }
+}
+```
 
-<Tip>
-  Unlimited editors available under the [Pro
-  Plan](https://mintlify.com/pricing) and above.
-</Tip>
+</CodeGroup>
 
-If the deployment is successful, you should see the following:
+## Testing Strategies
 
-<Frame>
-  <img src="/images/checks-passed.png" style={{ borderRadius: '0.5rem' }} />
-</Frame>
+### Unit Testing
 
-## Code Formatting
+<CodeGroup>
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+```python Python
+import unittest
+from unittest.mock import patch, Mock
+from adcb import OpenBankingClient
 
-## Troubleshooting
+class TestAccountOperations(unittest.TestCase):
+    def setUp(self):
+        self.client = OpenBankingClient(
+            client_id="test_id",
+            client_secret="test_secret",
+            environment="sandbox"
+        )
+    
+    @patch('adcb.accounts.list')
+    def test_list_accounts(self, mock_list):
+        # Mock response
+        mock_list.return_value = [
+            {"id": "ACC001", "balance": {"amount": 1000, "currency": "AED"}}
+        ]
+        
+        accounts = self.client.accounts.list()
+        
+        self.assertEqual(len(accounts), 1)
+        self.assertEqual(accounts[0]["id"], "ACC001")
+```
+
+```javascript Jest
+const { OpenBankingClient } = require('@adcb/openbanking-sdk');
+
+describe('Account Operations', () => {
+    let client;
+    
+    beforeEach(() => {
+        client = new OpenBankingClient({
+            clientId: 'test_id',
+            clientSecret: 'test_secret',
+            environment: 'sandbox'
+        });
+    });
+    
+    test('should list accounts', async () => {
+        // Mock the API call
+        jest.spyOn(client.accounts, 'list').mockResolvedValue([
+            { id: 'ACC001', balance: { amount: 1000, currency: 'AED' }}
+        ]);
+        
+        const accounts = await client.accounts.list();
+        
+        expect(accounts).toHaveLength(1);
+        expect(accounts[0].id).toBe('ACC001');
+    });
+});
+```
+
+</CodeGroup>
+
+### Integration Testing
+
+```yaml
+# .github/workflows/api-tests.yml
+name: API Integration Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up environment
+      run: |
+        echo "ADCB_API_BASE_URL=${{ secrets.SANDBOX_URL }}" >> $GITHUB_ENV
+        echo "ADCB_CLIENT_ID=${{ secrets.SANDBOX_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "ADCB_CLIENT_SECRET=${{ secrets.SANDBOX_CLIENT_SECRET }}" >> $GITHUB_ENV
+    
+    - name: Run integration tests
+      run: |
+        npm test:integration
+```
+
+## Logging and Monitoring
+
+### Structured Logging
+
+<CodeGroup>
+
+```python Python
+import logging
+import json
+from datetime import datetime
+
+class ADCBLogger:
+    def __init__(self):
+        self.logger = logging.getLogger('adcb_api')
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
+    
+    def log_api_call(self, method, endpoint, status, duration):
+        self.logger.info(json.dumps({
+            'timestamp': datetime.utcnow().isoformat(),
+            'method': method,
+            'endpoint': endpoint,
+            'status': status,
+            'duration_ms': duration,
+            'environment': os.environ.get('ENVIRONMENT', 'development')
+        }))
+
+logger = ADCBLogger()
+```
+
+```javascript Node.js
+const winston = require('winston');
+
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'adcb-api.log' })
+    ]
+});
+
+function logApiCall(method, endpoint, status, duration) {
+    logger.info({
+        method,
+        endpoint,
+        status,
+        duration_ms: duration,
+        environment: process.env.ENVIRONMENT || 'development'
+    });
+}
+```
+
+</CodeGroup>
+
+### Monitoring Metrics
+
+Key metrics to track:
+
+<Table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+      <th>Alert Threshold</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>API Response Time</td>
+      <td>Average latency of API calls</td>
+      <td>> 2 seconds</td>
+    </tr>
+    <tr>
+      <td>Error Rate</td>
+      <td>Percentage of failed requests</td>
+      <td>> 1%</td>
+    </tr>
+    <tr>
+      <td>Rate Limit Usage</td>
+      <td>Percentage of rate limit consumed</td>
+      <td>> 80%</td>
+    </tr>
+    <tr>
+      <td>Token Refresh Rate</td>
+      <td>Frequency of token refreshes</td>
+      <td>> 10/hour</td>
+    </tr>
+    <tr>
+      <td>Certificate Expiry</td>
+      <td>Days until certificate expires</td>
+      <td>< 30 days</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Performance Optimization
+
+### Connection Pooling
+
+<CodeGroup>
+
+```python Python
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+# Create session with connection pooling
+session = requests.Session()
+
+# Configure retries
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[429, 500, 502, 503, 504],
+)
+
+adapter = HTTPAdapter(
+    max_retries=retry_strategy,
+    pool_connections=10,
+    pool_maxsize=20
+)
+
+session.mount("https://", adapter)
+
+# Use session for all API calls
+response = session.get(
+    "https://api.adcb.com/v1/accounts",
+    headers={"Authorization": f"Bearer {token}"}
+)
+```
+
+```javascript Node.js
+const https = require('https');
+const axios = require('axios');
+
+// Create axios instance with keep-alive
+const client = axios.create({
+    baseURL: 'https://api.adcb.com',
+    timeout: 10000,
+    httpsAgent: new https.Agent({
+        keepAlive: true,
+        maxSockets: 10,
+        maxFreeSockets: 5,
+        timeout: 60000,
+        keepAliveTimeout: 30000
+    })
+});
+
+// Add retry logic
+axios.interceptors.response.use(null, async (error) => {
+    if (error.config && error.response && error.response.status === 429) {
+        const retryAfter = error.response.headers['retry-after'] || 1;
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        return axios.request(error.config);
+    }
+    return Promise.reject(error);
+});
+```
+
+</CodeGroup>
+
+### Caching Strategies
+
+```python
+from functools import lru_cache
+from datetime import datetime, timedelta
+import redis
+
+class CacheManager:
+    def __init__(self):
+        self.redis_client = redis.Redis(
+            host='localhost',
+            port=6379,
+            decode_responses=True
+        )
+    
+    def cache_response(self, key, data, ttl=300):
+        """Cache API response with TTL"""
+        self.redis_client.setex(
+            key,
+            ttl,
+            json.dumps(data)
+        )
+    
+    def get_cached(self, key):
+        """Retrieve cached response"""
+        data = self.redis_client.get(key)
+        return json.loads(data) if data else None
+    
+    @lru_cache(maxsize=128)
+    def get_account_details(self, account_id):
+        """LRU cache for frequently accessed accounts"""
+        return self.client.accounts.get(account_id)
+```
+
+## Debugging Tips
 
 <AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of mintlify: `npm remove -g mintlify`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall mintlify: `npm install -g mintlify`
+  <Accordion title="Enable Debug Logging">
+    ```python
+    import logging
+    import http.client as http_client
+    
+    # Enable HTTP debug logging
+    http_client.HTTPConnection.debuglevel = 1
+    
+    # Configure logging
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+    ```
   </Accordion>
-
-  <Accordion title="Issue: Encountering an unknown error">
   
-    Solution: Go to the root of your device and delete the \~/.mintlify folder. Afterwards, run `mintlify dev` again.
+  <Accordion title="Capture Request/Response">
+    ```python
+    import json
+    
+    def log_request_response(response):
+        print(f"Request URL: {response.request.url}")
+        print(f"Request Headers: {response.request.headers}")
+        print(f"Request Body: {response.request.body}")
+        print(f"Response Status: {response.status_code}")
+        print(f"Response Headers: {response.headers}")
+        print(f"Response Body: {json.dumps(response.json(), indent=2)}")
+    ```
+  </Accordion>
+  
+  <Accordion title="Mock Server for Testing">
+    ```javascript
+    const express = require('express');
+    const app = express();
+    
+    // Mock accounts endpoint
+    app.get('/v1/accounts', (req, res) => {
+        res.json({
+            data: {
+                accounts: [
+                    {
+                        id: 'TEST001',
+                        balance: { amount: 1000, currency: 'AED' }
+                    }
+                ]
+            }
+        });
+    });
+    
+    app.listen(3000, () => {
+        console.log('Mock server running on port 3000');
+    });
+    ```
   </Accordion>
 </AccordionGroup>
 
-Curious about what changed in the CLI version? [Check out the CLI changelog.](https://www.npmjs.com/package/mintlify?activeTab=versions)
+## Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Environment variables configured
+- [ ] mTLS certificates installed and valid
+- [ ] Error handling implemented
+- [ ] Logging configured
+- [ ] Monitoring setup
+- [ ] Rate limiting handled
+- [ ] Connection pooling enabled
+- [ ] Retry logic implemented
+- [ ] Security best practices followed
+- [ ] Load testing completed
+- [ ] Disaster recovery plan in place
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="book" href="/api-reference/introduction">
+    Complete API documentation
+  </Card>
+  <Card title="Postman Collection" icon="rocket" href="https://www.postman.com/adcb-api">
+    Pre-configured API requests
+  </Card>
+  <Card title="GitHub Examples" icon="github" href="https://github.com/adcb/api-examples">
+    Sample code and tutorials
+  </Card>
+  <Card title="Developer Forum" icon="comments" href="https://community.adcb.dev">
+    Community support
+  </Card>
+</CardGroup>

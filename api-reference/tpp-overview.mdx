@@ -1,0 +1,437 @@
+---
+title: 'Open Finance APIs for TPPs'
+description: 'Third-Party Provider APIs for Open Banking services'
+---
+
+## Overview
+
+ADCB's Open Finance APIs for Third-Party Providers (TPPs) enable licensed institutions to access banking services in compliance with CBUAE Open Banking regulations. These APIs support Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs) in delivering innovative financial services.
+
+## API Categories
+
+<CardGroup cols={2}>
+  <Card title="Account Information" icon="wallet">
+    Access account details, balances, and transaction history
+  </Card>
+  <Card title="Payment Initiation" icon="money-bill-transfer">
+    Initiate domestic and international payments
+  </Card>
+  <Card title="Confirmation of Payee" icon="user-check">
+    Verify beneficiary details before payment
+  </Card>
+  <Card title="Product Information" icon="box">
+    Access product catalogs and terms
+  </Card>
+</CardGroup>
+
+## Account Information APIs
+
+### Available Endpoints
+
+Access comprehensive account data with customer consent:
+
+<Table>
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Description</th>
+      <th>Consent Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`GET /accounts`</td>
+      <td>List all consented accounts</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}`</td>
+      <td>Get specific account details</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}/balances`</td>
+      <td>Get account balances</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}/transactions`</td>
+      <td>Get transaction history</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}/direct-debits`</td>
+      <td>Get direct debit mandates</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}/standing-orders`</td>
+      <td>Get standing orders</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>`GET /accounts/{id}/beneficiaries`</td>
+      <td>Get saved beneficiaries</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</Table>
+
+### Example: Retrieving Account Information
+
+<CodeGroup>
+
+```python Python
+# Step 1: Create consent
+consent = tpp_client.create_consent({
+    "permissions": [
+        "ReadAccountsBasic",
+        "ReadAccountsDetail",
+        "ReadBalances",
+        "ReadTransactionsBasic",
+        "ReadTransactionsDetail"
+    ],
+    "expirationDateTime": "2024-12-31T23:59:59Z",
+    "transactionFromDateTime": "2024-01-01T00:00:00Z",
+    "transactionToDateTime": "2024-12-31T23:59:59Z"
+})
+
+# Step 2: Get authorization from customer
+auth_url = tpp_client.get_authorization_url(consent.id)
+# Redirect customer to auth_url
+
+# Step 3: Exchange authorization code for access token
+token = tpp_client.exchange_code(authorization_code)
+
+# Step 4: Access account data
+accounts = tpp_client.get_accounts(token)
+for account in accounts:
+    balance = tpp_client.get_balance(token, account.id)
+    transactions = tpp_client.get_transactions(
+        token, 
+        account.id,
+        from_date="2024-01-01",
+        to_date="2024-01-31"
+    )
+```
+
+```javascript Node.js
+// Step 1: Create consent
+const consent = await tppClient.createConsent({
+    permissions: [
+        'ReadAccountsBasic',
+        'ReadAccountsDetail',
+        'ReadBalances',
+        'ReadTransactionsBasic',
+        'ReadTransactionsDetail'
+    ],
+    expirationDateTime: '2024-12-31T23:59:59Z',
+    transactionFromDateTime: '2024-01-01T00:00:00Z',
+    transactionToDateTime: '2024-12-31T23:59:59Z'
+});
+
+// Step 2: Get authorization from customer
+const authUrl = tppClient.getAuthorizationUrl(consent.id);
+// Redirect customer to authUrl
+
+// Step 3: Exchange authorization code for access token
+const token = await tppClient.exchangeCode(authorizationCode);
+
+// Step 4: Access account data
+const accounts = await tppClient.getAccounts(token);
+for (const account of accounts) {
+    const balance = await tppClient.getBalance(token, account.id);
+    const transactions = await tppClient.getTransactions(
+        token,
+        account.id,
+        { fromDate: '2024-01-01', toDate: '2024-01-31' }
+    );
+}
+```
+
+</CodeGroup>
+
+## Payment Initiation APIs
+
+### Payment Types Supported
+
+<Tabs>
+  <Tab title="Domestic Payments">
+    **Within UAE transfers**
+    - Instant payments (< 30 seconds)
+    - Same-day transfers
+    - Future-dated payments
+    - Recurring payments
+    
+    ```json
+    {
+      "instructionIdentification": "PAY123456",
+      "endToEndIdentification": "E2E123456",
+      "instructedAmount": {
+        "amount": "1000.00",
+        "currency": "AED"
+      },
+      "creditorAccount": {
+        "schemeName": "IBAN",
+        "identification": "AE070331234567890123456"
+      },
+      "creditorName": "Ahmed Al Rashid",
+      "remittanceInformation": {
+        "unstructured": "Invoice payment #INV2024-001"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="International Payments">
+    **Cross-border transfers**
+    - SWIFT payments
+    - Multi-currency support
+    - FX rate locking
+    - Compliance checks
+    
+    ```json
+    {
+      "instructionIdentification": "INTL123456",
+      "instructedAmount": {
+        "amount": "5000.00",
+        "currency": "USD"
+      },
+      "exchangeRateInformation": {
+        "unitCurrency": "AED",
+        "rate": 3.67,
+        "rateType": "Agreed"
+      },
+      "creditorAccount": {
+        "schemeName": "IBAN",
+        "identification": "GB33BUKB20201555555555"
+      },
+      "creditorAgent": {
+        "schemeName": "BICFI",
+        "identification": "BUKBGB22"
+      },
+      "chargeBearer": "SHAR"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Payment Flow
+
+<Steps>
+  <Step title="Create Payment Consent">
+    Obtain customer consent for payment initiation
+  </Step>
+  <Step title="Customer Authorization">
+    Customer authorizes payment through ADCB authentication
+  </Step>
+  <Step title="Submit Payment">
+    Submit payment instruction with consent token
+  </Step>
+  <Step title="Track Status">
+    Monitor payment status through webhooks or polling
+  </Step>
+</Steps>
+
+## Confirmation of Payee (CoP)
+
+Verify beneficiary details before payment to prevent fraud:
+
+```python
+# Verify beneficiary
+cop_result = tpp_client.verify_payee({
+    "account": {
+        "schemeName": "IBAN",
+        "identification": "AE070339876543210987654"
+    },
+    "name": "Mohammed Ali Hassan"
+})
+
+if cop_result.match == "FULL":
+    # Name matches exactly - safe to proceed
+    submit_payment()
+elif cop_result.match == "PARTIAL":
+    # Partial match - request confirmation
+    show_warning(f"Name on account: {cop_result.actualName}")
+elif cop_result.match == "NO_MATCH":
+    # No match - high fraud risk
+    block_payment()
+```
+
+## Product Information APIs
+
+Access ADCB's product catalog without customer authentication:
+
+### Available Products
+
+<CardGroup cols={3}>
+  <Card title="Personal Accounts" icon="user">
+    - Current accounts
+    - Savings accounts
+    - Fixed deposits
+  </Card>
+  <Card title="Credit Products" icon="credit-card">
+    - Credit cards
+    - Personal loans
+    - Auto loans
+  </Card>
+  <Card title="Business Banking" icon="briefcase">
+    - Business accounts
+    - Trade finance
+    - Corporate cards
+  </Card>
+</CardGroup>
+
+### Example Request
+
+```bash
+curl -X GET https://api.adcb.com/open-banking/v1/products \
+  -H "Accept: application/json" \
+  -H "X-Request-ID: unique-request-id"
+```
+
+## Consent Management
+
+### Consent Lifecycle
+
+<Info>
+  All data access requires explicit customer consent with defined scope and duration
+</Info>
+
+```python
+# Create consent request
+consent = tpp_client.create_consent({
+    "permissions": ["ReadAccountsDetail", "ReadBalances"],
+    "expirationDateTime": "2024-06-30T23:59:59Z",
+    "transactionFromDateTime": "2023-01-01T00:00:00Z",
+    "transactionToDateTime": "2024-06-30T23:59:59Z"
+})
+
+# Check consent status
+status = tpp_client.get_consent_status(consent.id)
+print(f"Consent status: {status.status}")  # Active, Expired, Revoked
+
+# Revoke consent
+tpp_client.revoke_consent(consent.id)
+```
+
+## Regulatory Compliance
+
+### CBUAE Requirements
+
+<Warning>
+  TPPs must comply with all CBUAE Open Banking regulations:
+  - Valid TPP license required
+  - Customer consent mandatory
+  - Data retention limits apply
+  - Regular compliance audits
+</Warning>
+
+### Security Standards
+
+- **PSD2/Open Banking compliant**: Following international standards
+- **mTLS mandatory**: All connections require mutual TLS
+- **Message signing**: JWS signatures for payment instructions
+- **Qualified certificates**: eIDAS/CBUAE approved certificates only
+
+## Testing in Sandbox
+
+### Test Accounts
+
+Use these test IBANs in sandbox environment:
+
+<Table>
+  <thead>
+    <tr>
+      <th>Account Type</th>
+      <th>IBAN</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Current Account</td>
+      <td>AE07033TEST000000000001</td>
+      <td>50,000 AED</td>
+    </tr>
+    <tr>
+      <td>Savings Account</td>
+      <td>AE07033TEST000000000002</td>
+      <td>100,000 AED</td>
+    </tr>
+    <tr>
+      <td>Business Account</td>
+      <td>AE07033TEST000000000003</td>
+      <td>250,000 AED</td>
+    </tr>
+  </tbody>
+</Table>
+
+### Test Scenarios
+
+```python
+# Test different consent scenarios
+test_scenarios = [
+    {
+        "name": "Valid consent",
+        "consent_id": "CONSENT_VALID",
+        "expected": "Active"
+    },
+    {
+        "name": "Expired consent",
+        "consent_id": "CONSENT_EXPIRED",
+        "expected": "Expired"
+    },
+    {
+        "name": "Revoked consent",
+        "consent_id": "CONSENT_REVOKED",
+        "expected": "Revoked"
+    }
+]
+
+for scenario in test_scenarios:
+    result = tpp_client.test_consent(scenario["consent_id"])
+    assert result.status == scenario["expected"]
+```
+
+## Error Handling
+
+### Common Error Codes
+
+<AccordionGroup>
+  <Accordion title="400 - Bad Request">
+    ```json
+    {
+      "code": "FIELD_INVALID",
+      "message": "Invalid IBAN format",
+      "field": "creditorAccount.identification"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="403 - Forbidden">
+    ```json
+    {
+      "code": "CONSENT_INVALID",
+      "message": "Consent has expired or been revoked",
+      "consentId": "CONS123456"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="429 - Rate Limited">
+    ```json
+    {
+      "code": "RATE_LIMIT_EXCEEDED",
+      "message": "Too many requests",
+      "retryAfter": 60
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Support Resources
+
+- 📧 **TPP Support**: tpp-support@adcb.com
+- 📚 **Technical Docs**: [tpp.adcb.dev](https://tpp.adcb.dev)
+- 🔐 **Certificate Management**: [certs.adcb.dev](https://certs.adcb.dev)
+- 💬 **TPP Forum**: [community.adcb.dev/tpp](https://community.adcb.dev/tpp)

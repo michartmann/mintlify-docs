@@ -1,0 +1,280 @@
+---
+title: 'Customer Data Platform (CDP) APIs'
+description: 'Unified customer insights and analytics platform'
+---
+
+## Overview
+
+ADCB's Customer Data Platform (CDP) APIs provide a comprehensive solution for accessing and managing customer data across all touchpoints. These APIs enable you to build personalized banking experiences, perform advanced analytics, and create data-driven financial products.
+
+## Key Capabilities
+
+<CardGroup cols={2}>
+  <Card title="360° Customer View" icon="user-circle">
+    Unified profile aggregating data from all channels and products
+  </Card>
+  <Card title="Real-time Analytics" icon="chart-line">
+    Instant insights into customer behavior and preferences
+  </Card>
+  <Card title="Segmentation Engine" icon="filter">
+    Dynamic customer segmentation for targeted offerings
+  </Card>
+  <Card title="Predictive Insights" icon="brain">
+    ML-powered predictions for customer needs and behaviors
+  </Card>
+</CardGroup>
+
+## API Categories
+
+### Customer Profile APIs
+
+Access comprehensive customer information including:
+- Personal details and demographics
+- Product holdings and relationships
+- Transaction patterns and history
+- Channel preferences and interactions
+- Risk profiles and credit scores
+
+### Analytics APIs
+
+Leverage advanced analytics capabilities:
+- Spending pattern analysis
+- Cash flow predictions
+- Product affinity scores
+- Churn risk indicators
+- Life event detection
+
+### Engagement APIs
+
+Optimize customer interactions:
+- Next best action recommendations
+- Personalized product offers
+- Communication preferences
+- Campaign eligibility
+- Customer journey tracking
+
+## Use Cases
+
+<Tabs>
+  <Tab title="Personalization">
+    **Personalized Banking Experience**
+    
+    Use CDP APIs to:
+    - Customize app interfaces based on user preferences
+    - Recommend relevant products and services
+    - Provide personalized financial insights
+    - Tailor communication content and timing
+    
+    ```python
+    # Get personalized recommendations
+    recommendations = cdp_client.get_recommendations(
+        customer_id="CUST123456",
+        context="mobile_app",
+        limit=5
+    )
+    ```
+  </Tab>
+  <Tab title="Risk Management">
+    **Enhanced Risk Assessment**
+    
+    Leverage CDP for:
+    - Real-time fraud detection
+    - Credit risk evaluation
+    - Transaction monitoring
+    - Behavioral anomaly detection
+    
+    ```python
+    # Assess transaction risk
+    risk_score = cdp_client.evaluate_risk(
+        customer_id="CUST123456",
+        transaction_type="international_transfer",
+        amount=10000
+    )
+    ```
+  </Tab>
+  <Tab title="Marketing">
+    **Targeted Marketing Campaigns**
+    
+    Enable precision marketing:
+    - Customer segmentation
+    - Campaign eligibility checks
+    - Response prediction
+    - ROI optimization
+    
+    ```python
+    # Check campaign eligibility
+    eligibility = cdp_client.check_campaign_eligibility(
+        customer_id="CUST123456",
+        campaign_id="CAMP2024Q1"
+    )
+    ```
+  </Tab>
+</Tabs>
+
+## Data Model
+
+### Customer Profile Schema
+
+```json
+{
+  "customerId": "CUST123456",
+  "personalInfo": {
+    "firstName": "Ahmed",
+    "lastName": "Al Rashid",
+    "dateOfBirth": "1985-03-15",
+    "nationality": "UAE",
+    "emiratesId": "784-1985-1234567-1"
+  },
+  "demographics": {
+    "age": 39,
+    "gender": "M",
+    "maritalStatus": "Married",
+    "dependents": 2,
+    "education": "Bachelor's Degree",
+    "occupation": "Business Owner",
+    "incomeRange": "100K-250K AED"
+  },
+  "relationships": {
+    "primaryBank": true,
+    "relationshipLength": "8 years",
+    "totalProducts": 5,
+    "totalValue": 2500000
+  },
+  "segments": [
+    "High Value",
+    "Digital Savvy",
+    "Investment Focused"
+  ],
+  "scores": {
+    "clv": 850000,
+    "creditScore": 780,
+    "digitalEngagement": 92,
+    "churnRisk": 12
+  }
+}
+```
+
+## Integration Guide
+
+### Step 1: Authentication
+
+CDP APIs require enhanced authentication:
+
+```bash
+curl -X POST https://api.adcb.com/cdp/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=YOUR_CDP_CLIENT_ID" \
+  -d "client_secret=YOUR_CDP_CLIENT_SECRET" \
+  -d "scope=cdp:read analytics:read"
+```
+
+### Step 2: Query Customer Data
+
+```python
+import requests
+
+headers = {
+    "Authorization": f"Bearer {access_token}",
+    "X-Consent-ID": "CONS123456"
+}
+
+# Get customer profile
+response = requests.get(
+    "https://api.adcb.com/cdp/v1/customers/CUST123456",
+    headers=headers
+)
+
+customer_data = response.json()
+```
+
+### Step 3: Subscribe to Events
+
+```python
+# Subscribe to customer events
+subscription = cdp_client.subscribe_events({
+    "customer_id": "CUST123456",
+    "events": [
+        "profile_update",
+        "transaction_completed",
+        "product_activated"
+    ],
+    "webhook_url": "https://yourapp.com/webhooks/cdp"
+})
+```
+
+## Privacy and Compliance
+
+<Warning>
+  All CDP API access requires explicit customer consent. Ensure you:
+  - Obtain proper consent before accessing customer data
+  - Implement data minimization principles
+  - Comply with GDPR and UAE data protection laws
+  - Maintain audit logs of all data access
+</Warning>
+
+### Consent Management
+
+```python
+# Check consent status
+consent = cdp_client.get_consent_status(
+    customer_id="CUST123456",
+    purpose="marketing_analytics"
+)
+
+if consent.status == "active":
+    # Proceed with data access
+    data = cdp_client.get_customer_insights(customer_id)
+else:
+    # Request consent through appropriate channel
+    pass
+```
+
+## Rate Limits
+
+CDP APIs have specific rate limits to ensure platform stability:
+
+- **Profile APIs**: 100 requests/minute
+- **Analytics APIs**: 50 requests/minute
+- **Bulk Operations**: 10 requests/hour
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Data Caching">
+    Cache frequently accessed data to reduce API calls:
+    - Customer profiles: 15-minute TTL
+    - Analytics results: 1-hour TTL
+    - Segments: 24-hour TTL
+  </Accordion>
+  
+  <Accordion title="Batch Processing">
+    Use batch endpoints for bulk operations:
+    ```python
+    # Batch customer query
+    customers = cdp_client.batch_get_customers(
+        customer_ids=["CUST1", "CUST2", "CUST3"],
+        fields=["profile", "scores", "segments"]
+    )
+    ```
+  </Accordion>
+  
+  <Accordion title="Event Streaming">
+    Implement webhooks for real-time updates instead of polling:
+    ```python
+    @app.route('/webhooks/cdp', methods=['POST'])
+    def handle_cdp_event():
+        event = request.json
+        if event['type'] == 'profile_updated':
+            # Invalidate cache and fetch new data
+            cache.delete(f"customer:{event['customer_id']}")
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+For CDP-specific support:
+- 📧 **CDP Team**: cdp-support@adcb.com
+- 📚 **CDP Documentation**: [cdp.adcb.dev](https://cdp.adcb.dev)
+- 🔧 **Technical Issues**: Use ticket system in Developer Portal

@@ -11,25 +11,33 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Getting Started",
             "pages": [
               "introduction",
               "quickstart",
+              "authentication",
               "development"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "API Guides",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "guides/error-handling",
+              "guides/rate-limiting",
+              "guides/webhooks",
+              "guides/sandbox-testing"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/sdks",
+              "resources/postman",
+              "resources/changelog",
+              "resources/support"
             ]
           }
         ]
@@ -57,9 +65,14 @@
     {
       "tab": "CDP",
       "groups": [
-
         {
-          "group": "CDP",
+          "group": "Overview",
+          "pages": [
+            "api-reference/cdp-overview"
+          ]
+        },
+        {
+          "group": "CDP APIs",
           "openapi": "api-reference/cdp/cdp-swagger.json"
         }
       ]
@@ -67,7 +80,12 @@
       {
         "tab": "Open Finance API Reference (TPP)",
         "groups": [
-  
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/tpp-overview"
+            ]
+          },
           {
             "group": "Bank Service Initiation",
             "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
@@ -89,7 +107,12 @@
     {
       "tab": "Open Finance API Reference (LFI)",
       "groups": [
-
+        {
+          "group": "Overview",
+          "pages": [
+            "api-reference/lfi-overview"
+          ]
+        },
         {
           "group": "Consent Manager",
           "openapi": "api-reference/lfi/cbuae-consent-manager-openapi.yaml"
@@ -128,19 +151,19 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "API Status",
+          "href": "https://status.adcb.dev",
+          "icon": "signal"
         },
         {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "anchor": "Developer Forum",
+          "href": "https://community.adcb.dev",
+          "icon": "comments"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Support",
+          "href": "mailto:api-support@adcb.com",
+          "icon": "headset"
         }
       ]
     }
@@ -153,21 +176,25 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "API Support",
+        "href": "mailto:api-support@adcb.com"
+      },
+      {
+        "label": "Status",
+        "href": "https://status.adcb.dev"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Developer Portal",
+      "href": "https://developers.adcb.com"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/adcb",
+      "github": "https://github.com/adcb",
+      "linkedin": "https://linkedin.com/company/adcb"
     }
   }
 }

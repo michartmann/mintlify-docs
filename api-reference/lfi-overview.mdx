@@ -1,0 +1,507 @@
+---
+title: 'Open Finance APIs for LFIs'
+description: 'Licensed Financial Institution APIs with enhanced capabilities'
+---
+
+## Overview
+
+ADCB's Open Finance APIs for Licensed Financial Institutions (LFIs) provide advanced integration capabilities beyond standard TPP access. These APIs are designed for banks, insurance companies, and other licensed financial institutions requiring deeper integration with ADCB's systems.
+
+## Enhanced Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Consent Manager" icon="shield-check">
+    Advanced consent orchestration and management
+  </Card>
+  <Card title="Headless Authentication" icon="key">
+    White-label authentication services
+  </Card>
+  <Card title="Event Streaming" icon="broadcast">
+    Real-time event notifications and webhooks
+  </Card>
+  <Card title="Data Sharing" icon="share-nodes">
+    Bi-directional data exchange capabilities
+  </Card>
+  <Card title="Insurance Integration" icon="shield">
+    Insurance-specific data and services
+  </Card>
+  <Card title="Service Initiation" icon="play">
+    Complex service orchestration
+  </Card>
+</CardGroup>
+
+## Consent Manager API
+
+### Advanced Consent Features
+
+The LFI Consent Manager provides granular control over customer consents:
+
+<Tabs>
+  <Tab title="Consent Creation">
+    ```python
+    # Create detailed consent with multiple permissions
+    consent = lfi_client.consent_manager.create({
+        "consentType": "PERSISTENT",
+        "permissions": {
+            "accounts": {
+                "read": ["basic", "detail", "balance"],
+                "write": ["nickname", "preferences"]
+            },
+            "transactions": {
+                "read": ["basic", "detail", "enriched"],
+                "dateRange": {
+                    "from": "2023-01-01",
+                    "to": "2024-12-31"
+                }
+            },
+            "payments": {
+                "initiate": ["domestic", "international"],
+                "limits": {
+                    "daily": 50000,
+                    "perTransaction": 10000
+                }
+            }
+        },
+        "validity": {
+            "from": "2024-01-01T00:00:00Z",
+            "to": "2024-12-31T23:59:59Z",
+            "maxUsage": 1000
+        },
+        "purpose": "Account aggregation and payment services",
+        "dataRetention": 90
+    })
+    ```
+  </Tab>
+  <Tab title="Consent Dashboard">
+    ```python
+    # Get consent analytics
+    analytics = lfi_client.consent_manager.get_analytics({
+        "period": "last_30_days",
+        "groupBy": "permission_type"
+    })
+    
+    print(f"Active consents: {analytics.active_count}")
+    print(f"Revocation rate: {analytics.revocation_rate}%")
+    print(f"Average lifetime: {analytics.avg_lifetime_days} days")
+    ```
+  </Tab>
+  <Tab title="Bulk Operations">
+    ```python
+    # Bulk consent operations
+    results = lfi_client.consent_manager.bulk_update({
+        "filter": {
+            "status": "ACTIVE",
+            "expiringWithin": "30_days"
+        },
+        "action": "EXTEND",
+        "parameters": {
+            "additionalDays": 90
+        }
+    })
+    
+    print(f"Updated {results.success_count} consents")
+    ```
+  </Tab>
+</Tabs>
+
+## Headless Authentication (Heimdall)
+
+### White-Label Authentication Flow
+
+Integrate ADCB's authentication seamlessly into your application:
+
+```javascript
+// Initialize headless auth
+const auth = new ADCBHeadlessAuth({
+    clientId: 'LFI_CLIENT_ID',
+    environment: 'production',
+    theme: {
+        primaryColor: '#003366',
+        logo: 'https://yourlfi.com/logo.png'
+    }
+});
+
+// Trigger authentication
+const session = await auth.authenticate({
+    username: 'customer@email.com',
+    method: 'biometric',
+    context: {
+        deviceId: 'device-uuid',
+        location: 'Dubai, UAE',
+        ipAddress: '192.168.1.1'
+    }
+});
+
+// Handle MFA if required
+if (session.requiresMFA) {
+    const mfaResult = await auth.completeMFA({
+        sessionId: session.id,
+        method: 'SMS',
+        code: '123456'
+    });
+}
+```
+
+### Authentication Methods
+
+<Table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Description</th>
+      <th>Security Level</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Biometric</td>
+      <td>Face ID, Touch ID, fingerprint</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td>Push Notification</td>
+      <td>Mobile app push approval</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td>SMS OTP</td>
+      <td>One-time password via SMS</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td>Hardware Token</td>
+      <td>Physical security key</td>
+      <td>Very High</td>
+    </tr>
+    <tr>
+      <td>Voice Recognition</td>
+      <td>Voice biometric authentication</td>
+      <td>High</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Event Streaming API
+
+### Real-Time Event Subscriptions
+
+<CodeGroup>
+
+```python Python
+# Subscribe to events
+subscription = lfi_client.events.subscribe({
+    "events": [
+        "account.balance.changed",
+        "transaction.completed",
+        "payment.initiated",
+        "consent.revoked",
+        "customer.profile.updated"
+    ],
+    "filters": {
+        "accounts": ["AE070331234567890123456"],
+        "minAmount": 1000
+    },
+    "delivery": {
+        "method": "webhook",
+        "url": "https://yourlfi.com/webhooks/adcb",
+        "secret": "webhook_secret_key"
+    }
+})
+
+# Handle incoming events
+@app.route('/webhooks/adcb', methods=['POST'])
+def handle_event():
+    event = verify_webhook_signature(request)
+    
+    if event['type'] == 'transaction.completed':
+        process_transaction(event['data'])
+    elif event['type'] == 'consent.revoked':
+        handle_consent_revocation(event['data'])
+```
+
+```javascript WebSocket
+// Real-time WebSocket connection
+const ws = new WebSocket('wss://api.adcb.com/lfi/events');
+
+ws.on('open', () => {
+    ws.send(JSON.stringify({
+        action: 'subscribe',
+        token: accessToken,
+        events: ['account.balance.changed', 'transaction.completed']
+    }));
+});
+
+ws.on('message', (data) => {
+    const event = JSON.parse(data);
+    console.log(`Event received: ${event.type}`, event.data);
+    
+    // Process event in real-time
+    processEvent(event);
+});
+```
+
+</CodeGroup>
+
+### Event Types
+
+<AccordionGroup>
+  <Accordion title="Account Events">
+    - `account.opened` - New account created
+    - `account.closed` - Account closed
+    - `account.balance.changed` - Balance update
+    - `account.status.changed` - Status change (frozen, active, etc.)
+    - `account.limit.exceeded` - Limit breach notification
+  </Accordion>
+  
+  <Accordion title="Transaction Events">
+    - `transaction.completed` - Transaction processed
+    - `transaction.failed` - Transaction failed
+    - `transaction.reversed` - Transaction reversal
+    - `transaction.disputed` - Dispute raised
+    - `transaction.suspicious` - Fraud alert
+  </Accordion>
+  
+  <Accordion title="Customer Events">
+    - `customer.onboarded` - New customer
+    - `customer.profile.updated` - Profile change
+    - `customer.kyc.expired` - KYC renewal needed
+    - `customer.risk.changed` - Risk rating update
+  </Accordion>
+</AccordionGroup>
+
+## Bank Data Sharing API
+
+### Bi-Directional Data Exchange
+
+Share and receive data with ADCB for enhanced services:
+
+```python
+# Share customer data with ADCB
+sharing_agreement = lfi_client.data_sharing.create_agreement({
+    "type": "BIDIRECTIONAL",
+    "dataCategories": [
+        "credit_history",
+        "income_verification",
+        "asset_information"
+    ],
+    "purpose": "Joint lending assessment",
+    "duration": "6_months",
+    "reciprocalSharing": True
+})
+
+# Upload data
+lfi_client.data_sharing.upload({
+    "agreementId": sharing_agreement.id,
+    "customerId": "CUST789012",
+    "data": {
+        "creditScore": 750,
+        "monthlyIncome": 25000,
+        "employmentStatus": "EMPLOYED",
+        "employmentDuration": "5_years"
+    }
+})
+
+# Retrieve ADCB data
+adcb_data = lfi_client.data_sharing.retrieve({
+    "agreementId": sharing_agreement.id,
+    "customerId": "CUST789012",
+    "dataTypes": ["account_history", "payment_behavior"]
+})
+```
+
+## Insurance Data Sharing
+
+### Insurance-Specific Integration
+
+<Tabs>
+  <Tab title="Policy Management">
+    ```python
+    # Create insurance policy record
+    policy = lfi_client.insurance.create_policy({
+        "policyNumber": "POL2024001",
+        "type": "LIFE",
+        "insured": {
+            "customerId": "CUST123456",
+            "emiratesId": "784-1990-1234567-1"
+        },
+        "coverage": {
+            "amount": 1000000,
+            "currency": "AED",
+            "startDate": "2024-01-01",
+            "endDate": "2044-01-01"
+        },
+        "premium": {
+            "amount": 5000,
+            "frequency": "MONTHLY",
+            "debitAccount": "AE070331234567890123456"
+        }
+    })
+    ```
+  </Tab>
+  <Tab title="Claims Processing">
+    ```python
+    # Submit insurance claim
+    claim = lfi_client.insurance.submit_claim({
+        "policyNumber": "POL2024001",
+        "claimType": "MEDICAL",
+        "amount": 15000,
+        "documents": [
+            {"type": "MEDICAL_REPORT", "url": "https://..."},
+            {"type": "INVOICE", "url": "https://..."}
+        ],
+        "bankAccount": "AE070331234567890123456"
+    })
+    
+    # Track claim status
+    status = lfi_client.insurance.get_claim_status(claim.id)
+    ```
+  </Tab>
+  <Tab title="Risk Assessment">
+    ```python
+    # Get risk assessment for insurance
+    risk = lfi_client.insurance.assess_risk({
+        "customerId": "CUST123456",
+        "productType": "HEALTH",
+        "dataPoints": [
+            "medical_history",
+            "lifestyle_factors",
+            "financial_stability"
+        ]
+    })
+    
+    print(f"Risk score: {risk.score}")
+    print(f"Premium adjustment: {risk.premium_modifier}%")
+    ```
+  </Tab>
+</Tabs>
+
+## Service Initiation API
+
+### Complex Service Orchestration
+
+Initiate and manage complex multi-step services:
+
+```python
+# Initiate loan application with multiple services
+service = lfi_client.services.initiate({
+    "serviceType": "JOINT_LOAN_APPLICATION",
+    "participants": [
+        {"customerId": "CUST123456", "role": "PRIMARY"},
+        {"customerId": "CUST789012", "role": "CO_APPLICANT"}
+    ],
+    "workflow": {
+        "steps": [
+            {
+                "id": "credit_check",
+                "service": "CREDIT_BUREAU_CHECK",
+                "parallel": True
+            },
+            {
+                "id": "income_verification",
+                "service": "SALARY_VERIFICATION",
+                "parallel": True
+            },
+            {
+                "id": "property_valuation",
+                "service": "PROPERTY_ASSESSMENT",
+                "dependsOn": ["credit_check", "income_verification"]
+            },
+            {
+                "id": "final_approval",
+                "service": "UNDERWRITING",
+                "dependsOn": ["property_valuation"]
+            }
+        ]
+    },
+    "callback": "https://yourlfi.com/services/callback"
+})
+
+# Monitor service progress
+progress = lfi_client.services.get_progress(service.id)
+for step in progress.steps:
+    print(f"{step.id}: {step.status} - {step.completion}%")
+```
+
+## Health Check API
+
+### System Monitoring
+
+```python
+# Check API health
+health = lfi_client.health.check()
+
+print(f"Status: {health.status}")
+print(f"Response time: {health.latency_ms}ms")
+print("Service status:")
+for service in health.services:
+    print(f"  {service.name}: {service.status}")
+
+# Get detailed metrics
+metrics = lfi_client.health.get_metrics({
+    "period": "last_hour",
+    "services": ["consent_manager", "data_sharing"]
+})
+```
+
+## LFI-Specific Features
+
+### Enhanced Rate Limits
+
+LFIs enjoy higher rate limits:
+
+- **Standard APIs**: 1000 requests/minute
+- **Bulk Operations**: 100 requests/minute
+- **Data Sharing**: 500 requests/minute
+- **Event Streaming**: Unlimited (WebSocket)
+
+### Dedicated Support
+
+<CardGroup cols={2}>
+  <Card title="Technical Account Manager" icon="user-tie">
+    Dedicated TAM for integration support
+  </Card>
+  <Card title="Priority Support" icon="headset">
+    24/7 priority technical support
+  </Card>
+  <Card title="Custom SLAs" icon="file-contract">
+    Negotiable SLAs based on volume
+  </Card>
+  <Card title="Training & Workshops" icon="chalkboard-teacher">
+    Regular training on new features
+  </Card>
+</CardGroup>
+
+## Compliance Requirements
+
+<Warning>
+  LFIs must maintain strict compliance:
+  - Valid CBUAE LFI license
+  - Annual security audits
+  - Data localization requirements
+  - Incident reporting within 24 hours
+  - Business continuity planning
+</Warning>
+
+## Integration Checklist
+
+Before going live:
+
+- [ ] LFI license verified by ADCB
+- [ ] Legal agreements signed
+- [ ] Technical integration completed
+- [ ] Security assessment passed
+- [ ] Disaster recovery tested
+- [ ] Staff training completed
+- [ ] Compliance review approved
+- [ ] Production certificates installed
+- [ ] Monitoring configured
+- [ ] Support channels established
+
+## Support
+
+LFI-specific support channels:
+
+- 📧 **LFI Support**: lfi-support@adcb.com
+- 📞 **Priority Hotline**: +971 2 696 3000
+- 👤 **TAM Contact**: Via developer portal
+- 🔧 **Technical Escalation**: lfi-escalation@adcb.com
