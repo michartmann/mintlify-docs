@@ -1,0 +1,367 @@
+---
+title: 'API Pricing & Usage Tiers'
+description: 'Transparent pricing for ADCB API services with flexible usage tiers'
+---
+
+# API Pricing & Usage Tiers
+
+ADCB offers flexible pricing tiers designed to support your business growth from development to enterprise scale.
+
+## Pricing Tiers
+
+<CardGroup cols={3}>
+  <Card title="Sandbox" icon="flask">
+    **Free Forever**
+    - Unlimited API calls in sandbox
+    - Full API access for testing
+    - 24/7 community support
+    - Standard documentation
+    
+    **Perfect for:**
+    - Development and testing
+    - Proof of concept projects
+    - Learning and experimentation
+  </Card>
+  
+  <Card title="Production Starter" icon="rocket">
+    **$0.02 per API call**
+    - Up to 100,000 calls/month
+    - Production environment access
+    - Email support (48h SLA)
+    - Basic monitoring dashboard
+    
+    **Perfect for:**
+    - Small applications
+    - Startups and SMBs
+    - Limited transaction volumes
+  </Card>
+  
+  <Card title="Business" icon="building">
+    **$0.015 per API call**
+    - Up to 1,000,000 calls/month
+    - Priority email support (24h SLA)
+    - Advanced monitoring & analytics
+    - Custom webhook configurations
+    
+    **Perfect for:**
+    - Growing businesses
+    - Medium transaction volumes
+    - Multi-application deployments
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Enterprise" icon="shield">
+    **Custom Pricing**
+    - Unlimited API calls
+    - Dedicated account manager
+    - Phone support (4h SLA)
+    - Custom integrations & consulting
+    - Advanced security features
+    - Priority feature requests
+    
+    **Perfect for:**
+    - Large enterprises
+    - High-volume applications
+    - Mission-critical systems
+    - Custom requirements
+  </Card>
+  
+  <Card title="Licensed Financial Institution" icon="university">
+    **Regulatory Pricing**
+    - CBUAE compliant pricing
+    - Dedicated infrastructure
+    - Enhanced security controls
+    - Regulatory reporting support
+    - Compliance consulting
+    
+    **Perfect for:**
+    - Banks and financial institutions
+    - Licensed money exchangers
+    - Payment service providers
+    - Insurance companies
+  </Card>
+</CardGroup>
+
+## Usage-Based Billing
+
+### API Call Pricing Structure
+
+<Tabs>
+  <Tab title="Standard APIs">
+    | Tier | Monthly Calls | Price per Call | Monthly Cost |
+    |------|--------------|----------------|--------------|
+    | Starter | 0 - 100K | $0.020 | Up to $2,000 |
+    | Business | 100K - 1M | $0.015 | $1,500 - $15,000 |
+    | Enterprise | 1M+ | Custom | Contact Sales |
+  </Tab>
+  
+  <Tab title="Premium APIs">
+    | API Category | Price per Call | Description |
+    |-------------|----------------|-------------|
+    | Account Information | $0.01 | Balance, transactions, details |
+    | Payment Initiation | $0.05 | Domestic and international payments |
+    | Confirmation of Payee | $0.03 | Beneficiary verification |
+    | Customer Data Platform | $0.02 | Enhanced analytics and insights |
+    | Webhook Delivery | $0.001 | Real-time event notifications |
+  </Tab>
+  
+  <Tab title="Bulk Operations">
+    | Operation | Volume | Price | Savings |
+    |-----------|---------|-------|---------|
+    | Bulk Account Retrieval | 1000+ accounts | 50% discount | High |
+    | Batch Payment Processing | 500+ payments | 30% discount | Medium |
+    | Historical Data Export | Full account history | Fixed $100/export | High |
+    | Bulk Customer Onboarding | 100+ customers | 25% discount | Medium |
+  </Tab>
+</Tabs>
+
+## Cost Optimization Strategies
+
+### 1. **Efficient API Usage Patterns**
+
+```python
+# ❌ Inefficient: Multiple individual calls
+for account in accounts:
+    balance = get_account_balance(account.id)  # $0.01 × 50 accounts = $0.50
+    transactions = get_transactions(account.id)  # $0.01 × 50 accounts = $0.50
+
+# ✅ Efficient: Bulk operations
+all_balances = get_bulk_account_balances(account_ids)  # $0.15 total
+all_transactions = get_bulk_transactions(account_ids)  # $0.15 total
+# Total savings: 70% reduction in API costs
+```
+
+### 2. **Smart Caching Strategy**
+
+```python
+# Implement intelligent caching to reduce API calls
+class CostOptimizedClient:
+    def __init__(self):
+        self.cache = {}
+        self.cache_ttl = {
+            'account_balance': 300,  # 5 minutes
+            'customer_profile': 3600,  # 1 hour
+            'transaction_history': 1800  # 30 minutes
+        }
+    
+    def get_account_balance(self, account_id):
+        cache_key = f"balance_{account_id}"
+        
+        if self._is_cached_valid(cache_key):
+            return self.cache[cache_key]['data']  # $0.00 - cached response
+        
+        balance = self.api_client.get_balance(account_id)  # $0.01 - API call
+        self._cache_response(cache_key, balance, 'account_balance')
+        
+        return balance
+```
+
+### 3. **Volume Discounts & Commitments**
+
+<AccordionGroup>
+  <Accordion title="Annual Commitment Discounts">
+    **12-Month Commitment Benefits:**
+    - 15% discount on all API calls
+    - Predictable monthly billing
+    - Priority support included
+    - Free sandbox environment upgrades
+    
+    **24-Month Commitment Benefits:**
+    - 25% discount on all API calls
+    - Dedicated customer success manager
+    - Free professional services consultation
+    - Early access to beta features
+  </Accordion>
+  
+  <Accordion title="Volume Tier Benefits">
+    **Tier 1 (100K+ calls/month):**
+    - 10% volume discount
+    - Extended rate limit quotas
+    - Priority API support queue
+    
+    **Tier 2 (500K+ calls/month):**
+    - 20% volume discount
+    - Dedicated infrastructure allocation
+    - Custom webhook configurations
+    
+    **Tier 3 (1M+ calls/month):**
+    - 30% volume discount
+    - White-label API documentation
+    - Direct engineering support channel
+  </Accordion>
+</AccordionGroup>
+
+## Billing & Payment Options
+
+### Payment Methods
+- **Credit Card**: Visa, MasterCard, American Express
+- **Bank Transfer**: Direct debit from ADCB accounts
+- **Invoice Payment**: Net 30 terms for enterprise customers
+- **Cryptocurrency**: Bitcoin and Ethereum accepted (Enterprise tier)
+
+### Billing Cycles
+- **Pay-as-you-go**: Real-time billing for each API call
+- **Monthly Billing**: Consolidated monthly invoices
+- **Quarterly Billing**: 3-month advance payment (5% discount)
+- **Annual Billing**: 12-month advance payment (15% discount)
+
+## Cost Monitoring & Alerts
+
+### Real-Time Usage Dashboard
+
+```javascript
+// API usage monitoring example
+const usageMonitor = {
+  getCurrentUsage: async () => {
+    const response = await fetch('/api/usage/current', {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+    
+    return {
+      callsToday: response.callsToday,
+      costToday: response.costToday,
+      monthlyProjection: response.monthlyProjection,
+      tierStatus: response.currentTier
+    };
+  },
+  
+  setUsageAlerts: (thresholds) => {
+    // Set alerts at 50%, 75%, 90% of monthly budget
+    fetch('/api/usage/alerts', {
+      method: 'POST',
+      body: JSON.stringify({
+        thresholds: [
+          { percentage: 50, action: 'email' },
+          { percentage: 75, action: 'email_sms' },
+          { percentage: 90, action: 'rate_limit_warning' }
+        ]
+      })
+    });
+  }
+};
+```
+
+### Cost Control Features
+
+<CardGroup cols={2}>
+  <Card title="Budget Limits" icon="gauge">
+    - Set daily/monthly spending limits
+    - Automatic API throttling at limits
+    - Grace period configurations
+    - Team budget allocations
+  </Card>
+  
+  <Card title="Usage Analytics" icon="chart-line">
+    - Detailed cost breakdown by API
+    - Usage trend analysis
+    - Efficiency recommendations
+    - ROI calculations
+  </Card>
+  
+  <Card title="Alert System" icon="bell">
+    - Email/SMS threshold alerts
+    - Slack/Teams integrations
+    - Custom webhook notifications
+    - Executive summary reports
+  </Card>
+  
+  <Card title="Team Management" icon="users">
+    - Per-team usage tracking
+    - Department cost allocation
+    - Developer-level quotas
+    - Project-based billing
+  </Card>
+</CardGroup>
+
+## Enterprise Pricing Models
+
+### 1. **Revenue Share Model**
+```
+For fintech partners processing payments:
+- 0.1% of transaction volume
+- Minimum $10,000/month commitment
+- Includes all API calls and support
+- Quarterly business reviews included
+```
+
+### 2. **SaaS Integration Pricing**
+```
+For SaaS platforms offering banking features:
+- $5/active user/month
+- Includes unlimited API calls per user
+- White-label documentation
+- Co-marketing opportunities
+```
+
+### 3. **Regulatory Compliance Package**
+```
+For financial institutions:
+- Fixed $50,000/year compliance fee
+- Includes regulatory reporting
+- Audit support and documentation
+- Dedicated compliance officer
+```
+
+## Getting Started
+
+<Steps>
+  <Step title="Choose Your Tier">
+    Start with sandbox for development, upgrade to production when ready
+  </Step>
+  <Step title="Set Up Billing">
+    Add payment method and configure usage alerts in developer portal
+  </Step>
+  <Step title="Monitor Usage">
+    Use our dashboard to track costs and optimize API usage patterns
+  </Step>
+  <Step title="Scale Efficiently">
+    Implement caching and bulk operations to minimize costs as you grow
+  </Step>
+</Steps>
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="Are there any setup fees or hidden costs?">
+    No setup fees, no hidden costs. You only pay for the API calls you make. Sandbox usage is completely free forever.
+  </Accordion>
+  
+  <Accordion title="Can I change tiers at any time?">
+    Yes, you can upgrade or downgrade your tier at any time. Changes take effect at the next billing cycle.
+  </Accordion>
+  
+  <Accordion title="What happens if I exceed my tier limits?">
+    You'll automatically move to the next tier's pricing. We'll send alerts before this happens and provide a grace period.
+  </Accordion>
+  
+  <Accordion title="Do you offer refunds for unused calls?">
+    We operate on a pay-per-use model, so you only pay for calls made. For annual commitments, unused portions are not refundable.
+  </Accordion>
+  
+  <Accordion title="Are webhooks included in API call pricing?">
+    Webhook deliveries are charged separately at $0.001 per delivery. Failed deliveries (retries) are not charged.
+  </Accordion>
+</AccordionGroup>
+
+## Contact Sales
+
+Ready to discuss custom pricing for your specific needs?
+
+<CardGroup cols={2}>
+  <Card title="Schedule a Call" icon="calendar">
+    Book a consultation with our solutions team to discuss volume pricing and custom requirements.
+    
+    [**Schedule Now →**](https://calendly.com/adcb-solutions)
+  </Card>
+  
+  <Card title="Request Quote" icon="calculator">
+    Get a custom quote based on your expected API usage and integration requirements.
+    
+    [**Request Quote →**](mailto:sales@adcb.com?subject=API%20Pricing%20Quote)
+  </Card>
+</CardGroup>
+
+<Info>
+All prices are in USD and exclude applicable taxes. Pricing is subject to change with 30 days notice for existing customers.
+</Info>

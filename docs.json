@@ -29,7 +29,8 @@
               "guides/rate-limiting",
               "guides/webhooks",
               "guides/sandbox-testing",
-              "guides/best-practices"
+              "guides/best-practices",
+              "guides/code-examples"
             ]
           },
           {
@@ -38,7 +39,14 @@
               "resources/sdks",
               "resources/postman",
               "resources/changelog",
+              "resources/pricing",
               "resources/support"
+            ]
+          },
+          {
+            "group": "Learning Paths",
+            "pages": [
+              "tutorials/integration-paths"
             ]
           },
           {

@@ -1,0 +1,549 @@
+---
+title: 'Code Examples Library'
+description: 'Ready-to-use code examples for common ADCB API integration patterns'
+---
+
+# Code Examples Library
+
+Production-ready code examples for common ADCB API integration scenarios.
+
+## Quick Integration Examples
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # Complete account balance check
+    import requests
+    from datetime import datetime
+    
+    class ADCBClient:
+        def __init__(self, client_id, client_secret, cert_path, key_path):
+            self.client_id = client_id
+            self.client_secret = client_secret
+            self.cert = (cert_path, key_path)
+            self.base_url = "https://api.adcb.com/v1"
+            self.token = self._get_token()
+        
+        def _get_token(self):
+            response = requests.post(
+                "https://auth.adcb.com/oauth/token",
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "scope": "accounts:read"
+                },
+                cert=self.cert
+            )
+            return response.json()["access_token"]
+        
+        def get_account_balance(self, account_id):
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "X-Request-ID": f"req_{int(datetime.now().timestamp())}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.get(
+                f"{self.base_url}/accounts/{account_id}/balances",
+                headers=headers,
+                cert=self.cert
+            )
+            
+            return response.json()
+    
+    # Usage
+    client = ADCBClient("your_client_id", "your_secret", "cert.pem", "key.pem")
+    balance = client.get_account_balance("ACC123456789")
+    print(f"Available balance: {balance['data']['available']['amount']} AED")
+    ```
+  </Tab>
+  
+  <Tab title="Node.js">
+    ```javascript
+    const https = require('https');
+    const fs = require('fs');
+    const axios = require('axios');
+    
+    class ADCBClient {
+        constructor(clientId, clientSecret, certPath, keyPath) {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.httpsAgent = new https.Agent({
+                cert: fs.readFileSync(certPath),
+                key: fs.readFileSync(keyPath),
+            });
+            this.baseURL = 'https://api.adcb.com/v1';
+            this.token = null;
+        }
+        
+        async getToken() {
+            try {
+                const response = await axios.post(
+                    'https://auth.adcb.com/oauth/token',
+                    {
+                        grant_type: 'client_credentials',
+                        client_id: this.clientId,
+                        client_secret: this.clientSecret,
+                        scope: 'accounts:read'
+                    },
+                    { httpsAgent: this.httpsAgent }
+                );
+                
+                this.token = response.data.access_token;
+                return this.token;
+            } catch (error) {
+                throw new Error(`Token acquisition failed: ${error.message}`);
+            }
+        }
+        
+        async getAccountBalance(accountId) {
+            if (!this.token) await this.getToken();
+            
+            const headers = {
+                'Authorization': `Bearer ${this.token}`,
+                'X-Request-ID': `req_${Date.now()}`,
+                'Content-Type': 'application/json'
+            };
+            
+            try {
+                const response = await axios.get(
+                    `${this.baseURL}/accounts/${accountId}/balances`,
+                    { 
+                        headers,
+                        httpsAgent: this.httpsAgent 
+                    }
+                );
+                
+                return response.data;
+            } catch (error) {
+                throw new Error(`Balance retrieval failed: ${error.message}`);
+            }
+        }
+    }
+    
+    // Usage
+    const client = new ADCBClient('your_client_id', 'your_secret', 'cert.pem', 'key.pem');
+    client.getAccountBalance('ACC123456789')
+        .then(balance => {
+            console.log(`Available balance: ${balance.data.available.amount} AED`);
+        })
+        .catch(console.error);
+    ```
+  </Tab>
+  
+  <Tab title="Java">
+    ```java
+    import java.net.http.*;
+    import java.net.URI;
+    import java.security.*;
+    import javax.net.ssl.*;
+    import java.io.*;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    
+    public class ADCBClient {
+        private final String clientId;
+        private final String clientSecret;
+        private final HttpClient httpClient;
+        private final ObjectMapper mapper;
+        private String accessToken;
+        
+        public ADCBClient(String clientId, String clientSecret, 
+                         String certPath, String keyPath) throws Exception {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.mapper = new ObjectMapper();
+            
+            // Setup mTLS
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(new FileInputStream(certPath), "password".toCharArray());
+            
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            kmf.init(keyStore, "password".toCharArray());
+            
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), null, null);
+            
+            this.httpClient = HttpClient.newBuilder()
+                .sslContext(sslContext)
+                .build();
+        }
+        
+        public String getAccessToken() throws Exception {
+            if (accessToken != null) return accessToken;
+            
+            String formData = String.format(
+                "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=accounts:read",
+                clientId, clientSecret
+            );
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://auth.adcb.com/oauth/token"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(formData))
+                .build();
+            
+            HttpResponse<String> response = httpClient.send(request, 
+                HttpResponse.BodyHandlers.ofString());
+            
+            TokenResponse tokenResponse = mapper.readValue(response.body(), 
+                TokenResponse.class);
+            this.accessToken = tokenResponse.getAccessToken();
+            
+            return accessToken;
+        }
+        
+        public AccountBalance getAccountBalance(String accountId) throws Exception {
+            String token = getAccessToken();
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.adcb.com/v1/accounts/" + accountId + "/balances"))
+                .header("Authorization", "Bearer " + token)
+                .header("X-Request-ID", "req_" + System.currentTimeMillis())
+                .header("Content-Type", "application/json")
+                .GET()
+                .build();
+            
+            HttpResponse<String> response = httpClient.send(request,
+                HttpResponse.BodyHandlers.ofString());
+            
+            return mapper.readValue(response.body(), AccountBalance.class);
+        }
+    }
+    
+    // Usage
+    ADCBClient client = new ADCBClient("your_client_id", "your_secret", 
+                                      "cert.p12", "key.p12");
+    AccountBalance balance = client.getAccountBalance("ACC123456789");
+    System.out.println("Available balance: " + balance.getData().getAvailable().getAmount() + " AED");
+    ```
+  </Tab>
+</Tabs>
+
+## Common Integration Patterns
+
+### 1. Payment Initiation Flow
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    def initiate_payment(self, from_account, to_account, amount, reference):
+        """Complete payment initiation with consent flow"""
+        
+        # Step 1: Create payment consent
+        consent_data = {
+            "data": {
+                "initiation": {
+                    "instructionIdentification": f"PAYMENT_{int(time.time())}",
+                    "endToEndIdentification": reference,
+                    "instructedAmount": {
+                        "amount": str(amount),
+                        "currency": "AED"
+                    },
+                    "debtorAccount": {
+                        "schemeName": "IBAN",
+                        "identification": from_account,
+                        "name": "Primary Account"
+                    },
+                    "creditorAccount": {
+                        "schemeName": "IBAN", 
+                        "identification": to_account,
+                        "name": "Beneficiary Account"
+                    },
+                    "remittanceInformation": {
+                        "unstructured": reference
+                    }
+                }
+            }
+        }
+        
+        # Create consent
+        consent_response = self._post("/payment-consents", consent_data)
+        consent_id = consent_response["data"]["consentId"]
+        
+        # Step 2: Redirect customer for authorization
+        auth_url = f"https://auth.adcb.com/authorize?consent_id={consent_id}"
+        
+        # Step 3: After customer authorization, initiate payment
+        payment_data = {
+            "data": {
+                "consentId": consent_id,
+                "initiation": consent_data["data"]["initiation"]
+            }
+        }
+        
+        payment_response = self._post("/payments", payment_data)
+        return payment_response
+    ```
+  </Tab>
+</Tabs>
+
+### 2. Webhook Handler Implementation
+
+<Tabs>
+  <Tab title="Python Flask">
+    ```python
+    from flask import Flask, request, jsonify
+    import hmac
+    import hashlib
+    
+    app = Flask(__name__)
+    WEBHOOK_SECRET = "your_webhook_secret"
+    
+    def verify_webhook_signature(payload, signature):
+        """Verify webhook signature using HMAC-SHA256"""
+        expected = hmac.new(
+            WEBHOOK_SECRET.encode(),
+            payload,
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(f"sha256={expected}", signature)
+    
+    @app.route("/webhooks/adcb", methods=["POST"])
+    def handle_webhook():
+        # Verify signature
+        signature = request.headers.get("X-ADCB-Signature")
+        if not verify_webhook_signature(request.get_data(), signature):
+            return "Invalid signature", 401
+        
+        event = request.json
+        event_type = event.get("type")
+        
+        # Handle different event types
+        if event_type == "payment.completed":
+            handle_payment_completed(event["data"])
+        elif event_type == "consent.expired":
+            handle_consent_expired(event["data"])
+        elif event_type == "account.balance.low":
+            handle_low_balance_alert(event["data"])
+        
+        return jsonify({"status": "processed"}), 200
+    
+    def handle_payment_completed(data):
+        payment_id = data["paymentId"]
+        amount = data["amount"]
+        print(f"Payment {payment_id} completed for {amount} AED")
+        # Update your database, send notifications, etc.
+    ```
+  </Tab>
+</Tabs>
+
+### 3. Error Handling & Retry Logic
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    import time
+    import random
+    from functools import wraps
+    
+    def retry_with_backoff(max_retries=3, base_delay=1, max_delay=60):
+        """Decorator for exponential backoff retry logic"""
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                for attempt in range(max_retries + 1):
+                    try:
+                        return func(*args, **kwargs)
+                    except requests.exceptions.RequestException as e:
+                        if attempt == max_retries:
+                            raise
+                        
+                        # Handle specific error types
+                        if e.response.status_code in [429, 503, 502, 504]:
+                            delay = min(base_delay * (2 ** attempt) + random.uniform(0, 1), max_delay)
+                            print(f"Retry attempt {attempt + 1} after {delay:.2f}s")
+                            time.sleep(delay)
+                        else:
+                            raise  # Don't retry for 4xx errors (except 429)
+                            
+                return None
+            return wrapper
+        return decorator
+    
+    class ADCBClientWithRetry(ADCBClient):
+        @retry_with_backoff(max_retries=3)
+        def _make_request(self, method, endpoint, **kwargs):
+            """Make HTTP request with retry logic"""
+            try:
+                response = requests.request(
+                    method, 
+                    f"{self.base_url}{endpoint}",
+                    **kwargs
+                )
+                
+                # Handle API-specific errors
+                if response.status_code == 401:
+                    self.token = None  # Force token refresh
+                    raise requests.exceptions.RequestException("Unauthorized - token expired")
+                
+                response.raise_for_status()
+                return response.json()
+                
+            except requests.exceptions.Timeout:
+                print("Request timeout - will retry")
+                raise
+            except requests.exceptions.ConnectionError:
+                print("Connection error - will retry")
+                raise
+    ```
+  </Tab>
+</Tabs>
+
+## Real-World Use Cases
+
+### Banking Dashboard Integration
+
+```python
+# Complete banking dashboard data aggregation
+def get_dashboard_data(customer_id):
+    """Fetch comprehensive customer dashboard data"""
+    
+    dashboard = {
+        "customer": get_customer_profile(customer_id),
+        "accounts": [],
+        "recent_transactions": [],
+        "pending_payments": [],
+        "alerts": []
+    }
+    
+    # Get all accounts
+    accounts = client.get_accounts(customer_id)
+    for account in accounts["data"]:
+        account_id = account["accountId"]
+        
+        # Get balances
+        balances = client.get_account_balance(account_id)
+        account["balance"] = balances["data"]
+        
+        # Get recent transactions
+        transactions = client.get_transactions(
+            account_id, 
+            from_date=(datetime.now() - timedelta(days=30)).isoformat()
+        )
+        account["recent_transactions"] = transactions["data"][:5]
+        
+        dashboard["accounts"].append(account)
+    
+    return dashboard
+```
+
+### Payment Processing Workflow
+
+```python
+# End-to-end payment processing
+class PaymentProcessor:
+    def process_payment(self, payment_request):
+        """Complete payment processing workflow"""
+        
+        try:
+            # Validate request
+            self.validate_payment_request(payment_request)
+            
+            # Check account balance
+            balance = self.check_sufficient_funds(payment_request)
+            
+            # Create payment consent
+            consent = self.create_payment_consent(payment_request)
+            
+            # Initiate payment
+            payment = self.initiate_payment(consent["consentId"])
+            
+            # Monitor payment status
+            status = self.monitor_payment_status(payment["paymentId"])
+            
+            return {
+                "success": True,
+                "payment_id": payment["paymentId"],
+                "status": status,
+                "reference": payment_request["reference"]
+            }
+            
+        except InsufficientFundsError as e:
+            return {"success": False, "error": "Insufficient funds"}
+        except InvalidAccountError as e:
+            return {"success": False, "error": "Invalid account details"}
+        except PaymentTimeoutError as e:
+            return {"success": False, "error": "Payment processing timeout"}
+```
+
+## Testing Scenarios
+
+### Unit Test Examples
+
+```python
+import unittest
+from unittest.mock import patch, Mock
+
+class TestADCBClient(unittest.TestCase):
+    def setUp(self):
+        self.client = ADCBClient("test_id", "test_secret", "cert.pem", "key.pem")
+    
+    @patch('requests.post')
+    def test_token_acquisition(self, mock_post):
+        # Mock successful token response
+        mock_response = Mock()
+        mock_response.json.return_value = {"access_token": "test_token_123"}
+        mock_post.return_value = mock_response
+        
+        token = self.client._get_token()
+        
+        self.assertEqual(token, "test_token_123")
+        mock_post.assert_called_once()
+    
+    @patch('requests.get')
+    def test_account_balance_retrieval(self, mock_get):
+        # Setup
+        self.client.token = "test_token"
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            "data": {
+                "available": {"amount": "1000.00", "currency": "AED"}
+            }
+        }
+        mock_get.return_value = mock_response
+        
+        balance = self.client.get_account_balance("ACC123")
+        
+        self.assertEqual(balance["data"]["available"]["amount"], "1000.00")
+```
+
+<Tip>
+All code examples include proper error handling, logging, and security best practices. Adapt the certificate paths and credentials for your specific environment.
+</Tip>
+
+## Quick Copy-Paste Snippets
+
+### Environment Configuration
+```bash
+# .env file template
+ADCB_CLIENT_ID=your_client_id_here
+ADCB_CLIENT_SECRET=your_client_secret_here
+ADCB_CERT_PATH=/path/to/your/certificate.pem
+ADCB_KEY_PATH=/path/to/your/private_key.pem
+ADCB_BASE_URL=https://sandbox-api.adcb.com/v1
+ADCB_AUTH_URL=https://sandbox-auth.adcb.com/oauth/token
+```
+
+### Docker Configuration
+```dockerfile
+# Dockerfile for ADCB integration
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy certificates securely
+COPY --chmod=600 certs/ /app/certs/
+
+COPY . .
+EXPOSE 8000
+
+CMD ["python", "app.py"]
+```
+
+<Warning>
+Never commit certificates or secrets to version control. Use environment variables and secure secret management systems in production.
+</Warning>
