@@ -1,0 +1,248 @@
+---
+title: 'Interactive API Playground'
+description: 'Test ADCB APIs directly in your browser with live data'
+---
+
+# Interactive API Playground
+
+Test ADCB APIs instantly without writing any code. Our interactive playground provides a safe sandbox environment with realistic test data.
+
+<Warning>
+🔒 **Sandbox Environment**: All requests use test data. No real transactions will be processed.
+</Warning>
+
+## 🚀 Quick Test - Health Check
+
+<Card title="Try Your First API Call" icon="play">
+Test API connectivity with our health check endpoint - no authentication required!
+
+```bash
+GET https://sandbox-api.adcb.com/v1/health
+```
+
+<ParamField path="test_mode" type="boolean" default="true">
+  Enable test mode for sandbox environment
+</ParamField>
+
+**Expected Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-03-15T10:30:00Z",
+  "version": "v2.1.0",
+  "environment": "sandbox"
+}
+```
+
+[**▶️ Run Test**](https://sandbox-api.adcb.com/v1/health?test_mode=true)
+</Card>
+
+## 🔐 Authenticated Endpoints
+
+### Get Account Balance
+
+<CodeGroup>
+```bash Request
+curl -X GET "https://sandbox-api.adcb.com/v1/accounts/ACC123456789/balance" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "X-Request-ID: unique-request-id"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://sandbox-api.adcb.com/v1/accounts/ACC123456789/balance",
+    headers={
+        "Authorization": "Bearer YOUR_ACCESS_TOKEN",
+        "X-Request-ID": "unique-request-id"
+    }
+)
+
+print(response.json())
+```
+
+```javascript Node.js
+const axios = require('axios');
+
+const response = await axios.get(
+  'https://sandbox-api.adcb.com/v1/accounts/ACC123456789/balance',
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+      'X-Request-ID': 'unique-request-id'
+    }
+  }
+);
+
+console.log(response.data);
+```
+</CodeGroup>
+
+### Test Accounts Available
+
+| Account ID | Type | Balance (AED) | Status |
+|------------|------|---------------|--------|
+| ACC123456789 | Savings | 50,000.00 | Active |
+| ACC987654321 | Current | 125,000.00 | Active |
+| ACC456789123 | Credit Card | -5,000.00 | Active |
+| ACC789123456 | Investment | 500,000.00 | Active |
+
+## 🎮 Interactive Testing Console
+
+<iframe
+  src="https://sandbox-api.adcb.com/console"
+  width="100%"
+  height="600px"
+  frameBorder="0"
+  title="ADCB API Testing Console"
+/>
+
+## 📝 Request Builder
+
+Build and test API requests with our visual request builder:
+
+<Tabs>
+  <Tab title="1. Select Endpoint">
+    Choose from available API endpoints:
+    - Account Information
+    - Payment Initiation
+    - Transaction History
+    - Customer Profile
+  </Tab>
+  
+  <Tab title="2. Configure Parameters">
+    Set required and optional parameters:
+    - Path parameters
+    - Query parameters
+    - Request headers
+    - Request body
+  </Tab>
+  
+  <Tab title="3. Execute Request">
+    Run the request and view:
+    - Response status
+    - Response headers
+    - Response body
+    - Response time
+  </Tab>
+  
+  <Tab title="4. Generate Code">
+    Export your request as:
+    - cURL command
+    - Python code
+    - JavaScript code
+    - Java code
+    - Go code
+  </Tab>
+</Tabs>
+
+## 🧪 Test Scenarios
+
+### Common Test Cases
+
+<AccordionGroup>
+  <Accordion title="Successful Payment Flow">
+    ```javascript
+    // Step 1: Create payment consent
+    const consent = await createPaymentConsent({
+      amount: 100.00,
+      currency: "AED",
+      fromAccount: "ACC123456789",
+      toAccount: "ACC987654321"
+    });
+    
+    // Step 2: Authorize consent (automatic in sandbox)
+    const authorization = await authorizeConsent(consent.consentId);
+    
+    // Step 3: Execute payment
+    const payment = await executePayment({
+      consentId: consent.consentId,
+      authorization: authorization.token
+    });
+    
+    console.log("Payment completed:", payment.paymentId);
+    ```
+  </Accordion>
+  
+  <Accordion title="Error Handling Test">
+    Test various error scenarios:
+    - Invalid authentication (401)
+    - Insufficient funds (400)
+    - Rate limit exceeded (429)
+    - Server error simulation (500)
+    
+    Use `X-Test-Scenario` header to trigger specific errors:
+    ```bash
+    curl -H "X-Test-Scenario: insufficient_funds"
+    ```
+  </Accordion>
+  
+  <Accordion title="Webhook Testing">
+    ```javascript
+    // Register webhook endpoint
+    const webhook = await registerWebhook({
+      url: "https://your-app.com/webhooks",
+      events: ["payment.completed", "account.updated"],
+      secret: "your-webhook-secret"
+    });
+    
+    // Trigger test webhook
+    await triggerTestWebhook({
+      webhookId: webhook.id,
+      event: "payment.completed",
+      data: { paymentId: "PAY123", amount: 100.00 }
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## 🎯 Quick Actions
+
+<CardGroup cols={2}>
+  <Card title="Generate Access Token" icon="key">
+    Get a sandbox access token valid for 1 hour
+    
+    [**Generate Token →**](#)
+  </Card>
+  
+  <Card title="Reset Test Data" icon="refresh">
+    Reset all sandbox data to initial state
+    
+    [**Reset Data →**](#)
+  </Card>
+  
+  <Card title="Download Postman Collection" icon="download">
+    Get pre-configured Postman collection
+    
+    [**Download →**](/resources/postman)
+  </Card>
+  
+  <Card title="View API Logs" icon="list">
+    See your last 100 API requests
+    
+    [**View Logs →**](#)
+  </Card>
+</CardGroup>
+
+## 📊 Response Metrics
+
+Track your API testing performance:
+
+| Metric | Your Value | Target |
+|--------|------------|--------|
+| Average Response Time | 245ms | <300ms |
+| Success Rate | 98.5% | >95% |
+| Requests Today | 1,247 | Unlimited |
+| Errors (Last Hour) | 2 | - |
+
+## 🔗 Useful Links
+
+- [Authentication Guide](/authentication) - Set up OAuth 2.0
+- [Error Codes Reference](/guides/error-handling) - Understand error responses
+- [Rate Limits](/guides/rate-limiting) - API usage limits
+- [Webhook Setup](/guides/webhooks) - Configure event notifications
+
+<Info>
+**Pro Tip**: Use the browser's developer tools (F12) to inspect actual API requests and responses made by this playground.
+</Info>

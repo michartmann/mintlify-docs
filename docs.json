@@ -19,7 +19,8 @@
               "introduction",
               "quickstart",
               "authentication",
-              "development"
+              "development",
+              "api-playground"
             ]
           },
           {
