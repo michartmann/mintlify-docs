@@ -1,0 +1,510 @@
+---
+title: 'Developer Support'
+description: 'Get help with ADCB API integration and development'
+---
+
+## Support Overview
+
+ADCB provides comprehensive support for developers integrating with our Open Banking APIs. Our multi-tiered support system ensures you get the help you need, when you need it.
+
+<CardGroup cols={2}>
+  <Card title="24/7 Technical Support" icon="headset">
+    Round-the-clock assistance for critical production issues
+  </Card>
+  <Card title="Developer Community" icon="users">
+    Connect with other developers and ADCB experts
+  </Card>
+  <Card title="Comprehensive Documentation" icon="book">
+    Detailed guides, tutorials, and API references
+  </Card>
+  <Card title="Dedicated Account Management" icon="user-tie">
+    Personal support for enterprise integrations
+  </Card>
+</CardGroup>
+
+## Support Channels
+
+### 📧 Email Support
+
+**General API Support**
+- **Email**: api-support@adcb.com
+- **Response Time**: 
+  - Standard: 24 hours
+  - Premium: 4 hours
+  - Enterprise: 2 hours
+- **Languages**: English, Arabic
+
+**Specialized Support**
+- **Security Issues**: security@adcb.com
+- **Webhook Support**: webhook-support@adcb.com
+- **CDP Support**: cdp-support@adcb.com
+- **Compliance Questions**: compliance@adcb.com
+
+### 📞 Phone Support
+
+**Technical Hotline**
+- **Number**: +971 2 696 2222
+- **Hours**: 24/7 for production issues
+- **Languages**: English, Arabic
+
+**Business Hours Support**
+- **Hours**: Sunday - Thursday, 9:00 AM - 6:00 PM GST
+- **Saturday**: 9:00 AM - 1:00 PM GST
+- **Friday**: Closed
+
+### 💬 Live Chat
+
+**Developer Portal Chat**
+- Available in the [Developer Portal](https://developers.adcb.com)
+- **Hours**: Sunday - Thursday, 9:00 AM - 6:00 PM GST
+- **Average Response**: < 5 minutes
+
+### 🌐 Developer Community
+
+**Forum & Discussions**
+- **URL**: [community.adcb.dev](https://community.adcb.dev)
+- **Features**:
+  - Technical discussions
+  - Code sharing
+  - Best practices
+  - Product announcements
+  - Community-driven support
+
+**Slack Workspace**
+- **Invite**: Available in Developer Portal
+- **Channels**:
+  - `#general` - General discussions
+  - `#api-help` - Technical support
+  - `#announcements` - Official updates
+  - `#tpp` - TPP-specific discussions
+  - `#lfi` - LFI-specific discussions
+
+## Support Tiers
+
+<Tabs>
+  <Tab title="Standard Support">
+    **Included with all API access**
+    
+    **Features:**
+    - Email support (24-hour response)
+    - Community forum access
+    - Documentation and guides
+    - Basic troubleshooting
+    - Standard SLA coverage
+    
+    **Response Times:**
+    - **High Priority**: 24 hours
+    - **Medium Priority**: 48 hours  
+    - **Low Priority**: 72 hours
+    
+    **Availability:** Business hours
+  </Tab>
+  
+  <Tab title="Premium Support">
+    **Available for high-volume integrations**
+    
+    **Features:**
+    - Priority email support (4-hour response)
+    - Phone support access
+    - Live chat support
+    - Advanced troubleshooting
+    - Enhanced SLA coverage
+    - Monthly health checks
+    
+    **Response Times:**
+    - **Critical**: 1 hour
+    - **High Priority**: 4 hours
+    - **Medium Priority**: 12 hours
+    - **Low Priority**: 24 hours
+    
+    **Availability:** Extended hours (12 hours/day)
+  </Tab>
+  
+  <Tab title="Enterprise Support">
+    **Dedicated support for large institutions**
+    
+    **Features:**
+    - Dedicated Technical Account Manager (TAM)
+    - 24/7 phone and email support
+    - Priority escalation path
+    - Custom SLA agreements
+    - Regular business reviews
+    - Advanced monitoring and alerting
+    - On-site support (if required)
+    
+    **Response Times:**
+    - **Critical**: 15 minutes
+    - **High Priority**: 2 hours
+    - **Medium Priority**: 4 hours
+    - **Low Priority**: 8 hours
+    
+    **Availability:** 24/7
+  </Tab>
+</Tabs>
+
+## Issue Priorities
+
+<Table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Definition</th>
+      <th>Examples</th>
+      <th>Standard SLA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Critical**</td>
+      <td>Production system down, security breach</td>
+      <td>API completely unavailable, data breach</td>
+      <td>1 hour</td>
+    </tr>
+    <tr>
+      <td>**High**</td>
+      <td>Significant functionality impaired</td>
+      <td>Payment failures, authentication issues</td>
+      <td>4 hours</td>
+    </tr>
+    <tr>
+      <td>**Medium**</td>
+      <td>Partial functionality affected</td>
+      <td>Specific endpoint errors, performance issues</td>
+      <td>24 hours</td>
+    </tr>
+    <tr>
+      <td>**Low**</td>
+      <td>General questions, minor issues</td>
+      <td>Documentation clarifications, feature requests</td>
+      <td>72 hours</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Getting Help
+
+### Before Contacting Support
+
+<Steps>
+  <Step title="Check API Status">
+    Visit [status.adcb.dev](https://status.adcb.dev) to check for known issues
+  </Step>
+  <Step title="Search Documentation">
+    Review our comprehensive documentation and troubleshooting guides
+  </Step>
+  <Step title="Check Community Forum">
+    See if your question has already been answered in our community forum
+  </Step>
+  <Step title="Review Error Messages">
+    Gather detailed error messages and trace IDs from API responses
+  </Step>
+</Steps>
+
+### Information to Provide
+
+When contacting support, please include:
+
+<AccordionGroup>
+  <Accordion title="Technical Details">
+    - **API Endpoint**: Which specific endpoint(s) are affected
+    - **HTTP Method**: GET, POST, PUT, DELETE, etc.
+    - **Request Headers**: Include all relevant headers (mask sensitive data)
+    - **Request Body**: Sample request payload (mask sensitive data)
+    - **Response**: Full error response including status code
+    - **Trace ID**: From X-Trace-ID header in the response
+    - **Timestamp**: When the issue occurred (include timezone)
+  </Accordion>
+  
+  <Accordion title="Environment Information">
+    - **Environment**: Sandbox or Production
+    - **Client ID**: Your application's client ID
+    - **SDK Version**: If using official SDKs
+    - **Programming Language**: And version
+    - **Server Location**: Geographic location of your servers
+  </Accordion>
+  
+  <Accordion title="Business Context">
+    - **Impact**: How many users/transactions are affected
+    - **Urgency**: Business impact and required resolution timeframe
+    - **Frequency**: Is this a one-time or recurring issue
+    - **Recent Changes**: Any recent changes to your integration
+  </Accordion>
+</AccordionGroup>
+
+### Sample Support Request
+
+```
+Subject: [CRITICAL] Payment API returning 500 errors - Production
+
+Environment: Production
+Affected Endpoint: POST /v1/payments
+Client ID: prod_client_12345
+
+Issue Description:
+Payment initiation requests are returning 500 Internal Server Error 
+since 14:30 GST today. Approximately 50 payment requests have failed.
+
+Technical Details:
+- HTTP Status: 500
+- Error Response: {"error": {"type": "internal_error", "detail": "Unexpected server error"}}
+- Trace IDs: 4d9c8b5a-f6e2-4c8a-9d3b-1e7f5a6c8d9e, 7f8e9d0c-1234-5678-9abc-def012345678
+- First Occurrence: 2024-01-15 14:30:15 GST
+- Frequency: 100% failure rate since 14:30
+
+Business Impact:
+- 50 customers unable to make payments
+- Critical business functionality affected
+- Urgent resolution required
+
+Recent Changes:
+No changes to our integration in the past 2 weeks.
+
+Request immediate investigation and resolution.
+```
+
+## Self-Service Resources
+
+<CardGroup cols={2}>
+  <Card title="Knowledge Base" icon="lightbulb">
+    **[kb.adcb.dev](https://kb.adcb.dev)**
+    
+    - Common troubleshooting scenarios
+    - Step-by-step integration guides
+    - Best practices and tips
+    - FAQ with searchable content
+  </Card>
+  
+  <Card title="Video Tutorials" icon="play">
+    **[tutorials.adcb.dev](https://tutorials.adcb.dev)**
+    
+    - API integration walkthroughs
+    - Authentication setup guides
+    - Payment flow demonstrations
+    - SDK usage examples
+  </Card>
+  
+  <Card title="Code Examples" icon="code">
+    **[GitHub Repository](https://github.com/adcb/api-examples)**
+    
+    - Complete sample applications
+    - Language-specific examples
+    - Integration patterns
+    - Testing frameworks
+  </Card>
+  
+  <Card title="Postman Collection" icon="download">
+    **[postman.adcb.dev](https://postman.adcb.dev)**
+    
+    - Pre-configured API requests
+    - Test data and scenarios
+    - Environment templates
+    - Automated test suites
+  </Card>
+</CardGroup>
+
+## Service Level Agreements (SLAs)
+
+### API Availability
+
+<Table>
+  <thead>
+    <tr>
+      <th>Service Tier</th>
+      <th>Uptime SLA</th>
+      <th>Monthly Downtime</th>
+      <th>Response Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Standard</td>
+      <td>99.9%</td>
+      <td>43.2 minutes</td>
+      <td>< 2 seconds</td>
+    </tr>
+    <tr>
+      <td>Premium</td>
+      <td>99.95%</td>
+      <td>21.6 minutes</td>
+      <td>< 1 second</td>
+    </tr>
+    <tr>
+      <td>Enterprise</td>
+      <td>99.99%</td>
+      <td>4.3 minutes</td>
+      <td>< 500ms</td>
+    </tr>
+  </tbody>
+</Table>
+
+### Support Response SLAs
+
+Response times are measured from initial contact to first meaningful response:
+
+<Table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Standard</th>
+      <th>Premium</th>
+      <th>Enterprise</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Critical</td>
+      <td>4 hours</td>
+      <td>1 hour</td>
+      <td>15 minutes</td>
+    </tr>
+    <tr>
+      <td>High</td>
+      <td>24 hours</td>
+      <td>4 hours</td>
+      <td>2 hours</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>48 hours</td>
+      <td>12 hours</td>
+      <td>4 hours</td>
+    </tr>
+    <tr>
+      <td>Low</td>
+      <td>72 hours</td>
+      <td>24 hours</td>
+      <td>8 hours</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Escalation Process
+
+If you're not satisfied with the initial response:
+
+<Steps>
+  <Step title="Request Escalation">
+    Reply to your support ticket requesting escalation to a senior engineer
+  </Step>
+  <Step title="Manager Review">
+    Your case will be reviewed by the Support Manager within 2 hours
+  </Step>
+  <Step title="Technical Lead Involvement">
+    If needed, the Technical Lead will be brought into the investigation
+  </Step>
+  <Step title="Executive Escalation">
+    For critical business impact, escalate to api-escalation@adcb.com
+  </Step>
+</Steps>
+
+## Feedback and Improvement
+
+We continuously improve our support based on your feedback:
+
+### Support Satisfaction Survey
+After each interaction, you'll receive a brief survey to rate:
+- Response time
+- Technical expertise
+- Communication clarity
+- Resolution effectiveness
+
+### Monthly Support Review
+- Support metrics and trends
+- Common issues and resolutions
+- Process improvements
+- New self-service resources
+
+### Support Advisory Board
+Enterprise customers can participate in quarterly advisory sessions to:
+- Provide feedback on support processes
+- Suggest new support features
+- Review upcoming changes
+- Share best practices
+
+## Training and Enablement
+
+<CardGroup cols={2}>
+  <Card title="Webinar Series" icon="chalkboard-teacher">
+    Monthly technical webinars covering:
+    - New API features
+    - Integration best practices
+    - Common troubleshooting
+    - Q&A sessions
+  </Card>
+  
+  <Card title="Technical Workshops" icon="tools">
+    Hands-on workshops available:
+    - API integration fundamentals
+    - Security implementation
+    - Performance optimization
+    - Testing strategies
+  </Card>
+  
+  <Card title="Certification Program" icon="certificate">
+    ADCB API Developer Certification:
+    - Online training modules
+    - Practical assignments
+    - Certification exam
+    - Digital badge recognition
+  </Card>
+  
+  <Card title="Office Hours" icon="clock">
+    Weekly drop-in sessions:
+    - **When**: Wednesdays 2:00 PM GST
+    - **Where**: Developer Portal
+    - **Format**: Open Q&A
+    - **Duration**: 1 hour
+  </Card>
+</CardGroup>
+
+## Contact Information
+
+<Table>
+  <thead>
+    <tr>
+      <th>Support Type</th>
+      <th>Contact Method</th>
+      <th>Availability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**General API Support**</td>
+      <td>api-support@adcb.com</td>
+      <td>24/7</td>
+    </tr>
+    <tr>
+      <td>**Critical Production Issues**</td>
+      <td>+971 2 696 2222</td>
+      <td>24/7</td>
+    </tr>
+    <tr>
+      <td>**Security Incidents**</td>
+      <td>security@adcb.com</td>
+      <td>24/7</td>
+    </tr>
+    <tr>
+      <td>**Business Inquiries**</td>
+      <td>partnerships@adcb.com</td>
+      <td>Business Hours</td>
+    </tr>
+    <tr>
+      <td>**Developer Community**</td>
+      <td>community.adcb.dev</td>
+      <td>24/7</td>
+    </tr>
+  </tbody>
+</Table>
+
+## International Support
+
+For developers outside the UAE:
+
+- **GCC Region**: Same support hours and SLAs
+- **Europe**: Additional support hours 9 AM - 6 PM CET
+- **Asia Pacific**: Additional support hours 9 AM - 6 PM SGT
+- **Americas**: Limited support - email only with extended response times
+
+<Info>
+  We're continuously expanding our global support capabilities. Check the Developer Portal for the latest international support offerings.
+</Info>

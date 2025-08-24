@@ -1,33 +1,367 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Complete reference for ADCB Open Banking APIs'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to ADCB API Reference
 
-## Welcome
+This comprehensive API reference provides detailed documentation for all ADCB Open Banking endpoints. Our APIs enable third-party providers (TPPs) and licensed financial institutions (LFIs) to build innovative financial services while maintaining the highest security standards.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get your first API call working in minutes
+  </Card>
+  <Card
+    title="Authentication"
+    icon="shield"
+    href="/authentication"
+  >
+    Learn about OAuth 2.0 and security requirements
+  </Card>
+  <Card
+    title="Development Guide"
+    icon="code"
+    href="/development"
+  >
+    Best practices and SDK integration
+  </Card>
+  <Card
+    title="Webhooks"
+    icon="webhook"
+    href="/guides/webhooks"
+  >
+    Real-time event notifications
+  </Card>
+</CardGroup>
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+## API Categories
 
-## Authentication
+### Customer Data Platform (CDP)
+Access unified customer profiles, analytics, and insights for personalized banking experiences.
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+**Key Features:**
+- 360° customer view aggregation
+- Real-time behavioral analytics
+- ML-powered predictions
+- Advanced customer segmentation
+
+[Explore CDP APIs →](/api-reference/cdp-overview)
+
+### Third-Party Provider (TPP) APIs
+CBUAE-compliant Open Banking APIs for Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs).
+
+**Key Features:**
+- Account information access
+- Payment initiation services
+- Confirmation of Payee verification
+- Product information catalog
+
+[Explore TPP APIs →](/api-reference/tpp-overview)
+
+### Licensed Financial Institution (LFI) APIs
+Enhanced APIs for banks and licensed financial institutions with advanced integration capabilities.
+
+**Key Features:**
+- Advanced consent management
+- Headless authentication services
+- Real-time event streaming
+- Bi-directional data sharing
+- Insurance data integration
+
+[Explore LFI APIs →](/api-reference/lfi-overview)
+
+## API Standards
+
+ADCB APIs follow international Open Banking standards and best practices:
+
+<Tabs>
+  <Tab title="Security Standards">
+    - **OAuth 2.0** for authentication and authorization
+    - **mTLS** (mutual TLS) for transport security
+    - **JWS** (JSON Web Signature) for message integrity
+    - **FAPI** (Financial-grade API) compliance
+    - **PCI DSS** Level 1 certified infrastructure
+  </Tab>
+  <Tab title="Technical Standards">
+    - **REST** architectural style
+    - **JSON** request/response format
+    - **OpenAPI 3.0** specifications
+    - **ISO 20022** message formats
+    - **UTF-8** character encoding
+  </Tab>
+  <Tab title="Banking Standards">
+    - **CBUAE** Open Banking compliance
+    - **IBAN** account identification
+    - **BIC/SWIFT** for international transfers
+    - **ISO 4217** currency codes
+    - **PSD2** regulatory alignment
+  </Tab>
+</Tabs>
+
+## Base URLs
+
+<Table>
+  <thead>
+    <tr>
+      <th>Environment</th>
+      <th>Base URL</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Sandbox**</td>
+      <td>`https://sandbox-api.adcb.com`</td>
+      <td>Development and testing</td>
+    </tr>
+    <tr>
+      <td>**Production**</td>
+      <td>`https://api.adcb.com`</td>
+      <td>Live customer data</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Common Headers
+
+All API requests must include these standard headers:
+
+```http
+Authorization: Bearer {access_token}
+Accept: application/json
+Content-Type: application/json
+X-Request-ID: {unique_request_id}
+X-Customer-IP: {end_user_ip_address}
+User-Agent: {your_application_name}
+```
+
+### Optional Headers
+
+```http
+X-Idempotency-Key: {idempotency_key}    # For POST/PUT/PATCH requests
+X-JWS-Signature: {jws_signature}        # For sensitive operations
+X-Customer-User-Agent: {customer_ua}    # Customer's browser/app info
+Accept-Language: en-US,ar-AE            # Preferred language
+```
+
+## Response Format
+
+All API responses follow a consistent structure:
+
+### Success Response
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "data": {
+    // Response payload
+  },
+  "links": {
+    "self": "https://api.adcb.com/v1/accounts",
+    "next": "https://api.adcb.com/v1/accounts?page=2",
+    "prev": null
+  },
+  "meta": {
+    "totalCount": 156,
+    "pageCount": 8,
+    "currentPage": 1,
+    "perPage": 20
   }
-]
+}
 ```
+
+### Error Response
+
+```json
+{
+  "error": {
+    "type": "https://api.adcb.com/errors/validation_failed",
+    "title": "Validation Failed",
+    "status": 400,
+    "detail": "The request body contains invalid fields",
+    "instance": "/v1/payments",
+    "trace_id": "4d9c8b5a-f6e2-4c8a-9d3b-1e7f5a6c8d9e",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "errors": [
+      {
+        "field": "amount.value",
+        "code": "INVALID_FORMAT",
+        "message": "Amount must be a positive number"
+      }
+    ]
+  }
+}
+```
+
+## Rate Limits
+
+API rate limits vary by endpoint category and customer tier:
+
+<Table>
+  <thead>
+    <tr>
+      <th>API Category</th>
+      <th>Standard Tier</th>
+      <th>Premium Tier</th>
+      <th>LFI Tier</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Account Information</td>
+      <td>100/min</td>
+      <td>500/min</td>
+      <td>1000/min</td>
+    </tr>
+    <tr>
+      <td>Payment Initiation</td>
+      <td>50/min</td>
+      <td>200/min</td>
+      <td>500/min</td>
+    </tr>
+    <tr>
+      <td>Customer Data Platform</td>
+      <td>200/min</td>
+      <td>1000/min</td>
+      <td>2000/min</td>
+    </tr>
+    <tr>
+      <td>Webhook Management</td>
+      <td>10/min</td>
+      <td>50/min</td>
+      <td>100/min</td>
+    </tr>
+  </tbody>
+</Table>
+
+Rate limit information is included in response headers:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1641027600
+X-RateLimit-Window: 60
+```
+
+## Error Handling
+
+ADCB APIs use standard HTTP status codes and provide detailed error information:
+
+<AccordionGroup>
+  <Accordion title="4xx Client Errors">
+    - **400 Bad Request** - Invalid request format or parameters
+    - **401 Unauthorized** - Invalid or expired access token
+    - **403 Forbidden** - Insufficient permissions or IP not whitelisted
+    - **404 Not Found** - Resource not found
+    - **409 Conflict** - Request conflicts with current resource state
+    - **422 Unprocessable Entity** - Valid format but semantic errors
+    - **429 Too Many Requests** - Rate limit exceeded
+  </Accordion>
+  
+  <Accordion title="5xx Server Errors">
+    - **500 Internal Server Error** - Unexpected server error
+    - **502 Bad Gateway** - Upstream service error
+    - **503 Service Unavailable** - Temporary service outage
+    - **504 Gateway Timeout** - Upstream service timeout
+  </Accordion>
+</AccordionGroup>
+
+## Pagination
+
+Large result sets are paginated using cursor-based pagination:
+
+```http
+GET /v1/transactions?limit=20&cursor=eyJpZCI6MTIzNDU2fQ==
+```
+
+**Parameters:**
+- `limit` - Number of items per page (max 100, default 20)
+- `cursor` - Opaque cursor for next page
+
+**Response includes pagination metadata:**
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "hasNext": true,
+    "hasPrev": false,
+    "nextCursor": "eyJpZCI6MTIzNDU2fQ==",
+    "prevCursor": null
+  }
+}
+```
+
+## Idempotency
+
+POST and PUT requests support idempotency to prevent duplicate operations:
+
+```http
+POST /v1/payments
+X-Idempotency-Key: unique-key-12345
+Content-Type: application/json
+
+{
+  "amount": {"value": 1000, "currency": "AED"},
+  "creditorAccount": "AE070331234567890123456"
+}
+```
+
+- Use unique idempotency keys for each request
+- Keys expire after 24 hours
+- Duplicate requests return original response
+
+## Testing
+
+<CardGroup cols={2}>
+  <Card title="Sandbox Environment" icon="flask">
+    Test all APIs with production-like data without affecting real accounts
+  </Card>
+  <Card title="Postman Collection" icon="square-code">
+    Pre-configured API requests with examples and test data
+  </Card>
+  <Card title="Mock Responses" icon="robot">
+    Predictable test scenarios for automated testing
+  </Card>
+  <Card title="Webhook Testing" icon="webhook">
+    Simulate webhook events for integration testing
+  </Card>
+</CardGroup>
+
+## Developer Resources
+
+<CardGroup cols={3}>
+  <Card title="SDKs" icon="cube" href="/resources/sdks">
+    Official client libraries for popular languages
+  </Card>
+  <Card title="Postman Collection" icon="download" href="/resources/postman">
+    Ready-to-use API collection
+  </Card>
+  <Card title="Code Examples" icon="code" href="https://github.com/adcb/api-examples">
+    Sample implementations and tutorials
+  </Card>
+  <Card title="OpenAPI Specs" icon="file-code" href="/api-specs">
+    Machine-readable API specifications
+  </Card>
+  <Card title="Changelog" icon="clock" href="/resources/changelog">
+    API updates and version history
+  </Card>
+  <Card title="Support" icon="headset" href="/resources/support">
+    Get help from our technical team
+  </Card>
+</CardGroup>
+
+## Getting Help
+
+<Info>
+  Need assistance? Our developer support team is here to help with integration questions, troubleshooting, and best practices.
+</Info>
+
+- 📧 **Email**: api-support@adcb.com
+- 💬 **Developer Forum**: [community.adcb.dev](https://community.adcb.dev)
+- 📞 **Phone**: +971 2 696 2222
+- 🔧 **Technical Docs**: [docs.adcb.dev](https://docs.adcb.dev)
+- 📊 **API Status**: [status.adcb.dev](https://status.adcb.dev)

@@ -1,0 +1,725 @@
+---
+title: 'Webhooks Guide'
+description: 'Real-time notifications for API events'
+---
+
+## Overview
+
+ADCB webhooks provide real-time notifications when events occur in your customers' accounts or transactions. This eliminates the need for constant polling and enables you to build responsive applications that react immediately to banking events.
+
+<Info>
+  Webhooks are HTTP callbacks sent to your application when specific events occur. They're essential for building real-time financial applications.
+</Info>
+
+## Supported Events
+
+<CardGroup cols={2}>
+  <Card title="Account Events" icon="wallet">
+    Balance changes, account status updates, new accounts
+  </Card>
+  <Card title="Transaction Events" icon="exchange">
+    New transactions, payment confirmations, reversals
+  </Card>
+  <Card title="Payment Events" icon="money-bill-wave">
+    Payment initiation, status changes, failures
+  </Card>
+  <Card title="Consent Events" icon="handshake">
+    Consent granted, revoked, or expired
+  </Card>
+</CardGroup>
+
+### Complete Event List
+
+<Tabs>
+  <Tab title="Account Events">
+    | Event Type | Description | Frequency |
+    |------------|-------------|-----------|
+    | `account.balance.updated` | Account balance changed | Real-time |
+    | `account.created` | New account opened | Real-time |
+    | `account.status.changed` | Account frozen/unfrozen | Real-time |
+    | `account.limit.exceeded` | Overdraft or credit limit exceeded | Real-time |
+    | `account.closed` | Account closure completed | Real-time |
+  </Tab>
+  <Tab title="Transaction Events">
+    | Event Type | Description | Frequency |
+    |------------|-------------|-----------|
+    | `transaction.created` | New transaction posted | Real-time |
+    | `transaction.pending` | Transaction pending approval | Real-time |
+    | `transaction.completed` | Transaction successful | Real-time |
+    | `transaction.failed` | Transaction failed | Real-time |
+    | `transaction.reversed` | Transaction reversed | Real-time |
+    | `transaction.disputed` | Dispute raised | Real-time |
+  </Tab>
+  <Tab title="Payment Events">
+    | Event Type | Description | Frequency |
+    |------------|-------------|-----------|
+    | `payment.initiated` | Payment request received | Real-time |
+    | `payment.authorized` | Payment authorized by customer | Real-time |
+    | `payment.processing` | Payment being processed | Real-time |
+    | `payment.completed` | Payment successful | Real-time |
+    | `payment.failed` | Payment failed | Real-time |
+    | `payment.cancelled` | Payment cancelled | Real-time |
+  </Tab>
+  <Tab title="Consent Events">
+    | Event Type | Description | Frequency |
+    |------------|-------------|-----------|
+    | `consent.granted` | New consent provided | Real-time |
+    | `consent.revoked` | Consent withdrawn by customer | Real-time |
+    | `consent.expired` | Consent reached expiry date | Daily batch |
+    | `consent.renewed` | Consent extended | Real-time |
+  </Tab>
+</Tabs>
+
+## Setting Up Webhooks
+
+### Step 1: Configure Webhook URL
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.adcb.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://yourapp.com/webhooks/adcb",
+    "events": [
+      "transaction.completed",
+      "payment.initiated",
+      "account.balance.updated"
+    ],
+    "secret": "your_webhook_secret_key",
+    "active": true
+  }'
+```
+
+```python Python
+import requests
+
+webhook_config = {
+    "url": "https://yourapp.com/webhooks/adcb",
+    "events": [
+        "transaction.completed",
+        "payment.initiated", 
+        "account.balance.updated"
+    ],
+    "secret": "your_webhook_secret_key",
+    "active": True
+}
+
+response = requests.post(
+    "https://api.adcb.com/v1/webhooks",
+    json=webhook_config,
+    headers={"Authorization": f"Bearer {access_token}"}
+)
+
+webhook = response.json()
+print(f"Webhook ID: {webhook['id']}")
+```
+
+```javascript Node.js
+const webhook = await fetch('https://api.adcb.com/v1/webhooks', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        url: 'https://yourapp.com/webhooks/adcb',
+        events: [
+            'transaction.completed',
+            'payment.initiated',
+            'account.balance.updated'
+        ],
+        secret: 'your_webhook_secret_key',
+        active: true
+    })
+});
+
+const webhookData = await webhook.json();
+console.log('Webhook ID:', webhookData.id);
+```
+
+</CodeGroup>
+
+### Step 2: Implement Webhook Endpoint
+
+<CodeGroup>
+
+```python Flask
+from flask import Flask, request, jsonify
+import hmac
+import hashlib
+import json
+
+app = Flask(__name__)
+WEBHOOK_SECRET = "your_webhook_secret_key"
+
+def verify_signature(payload, signature, secret):
+    """Verify webhook signature"""
+    expected = hmac.new(
+        secret.encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={expected}", signature)
+
+@app.route('/webhooks/adcb', methods=['POST'])
+def handle_webhook():
+    # Get signature from headers
+    signature = request.headers.get('X-ADCB-Signature')
+    if not signature:
+        return jsonify({'error': 'Missing signature'}), 401
+    
+    # Verify signature
+    payload = request.get_data()
+    if not verify_signature(payload, signature, WEBHOOK_SECRET):
+        return jsonify({'error': 'Invalid signature'}), 401
+    
+    # Process webhook
+    event = request.json
+    event_type = event.get('type')
+    
+    if event_type == 'transaction.completed':
+        handle_transaction_completed(event['data'])
+    elif event_type == 'payment.initiated':
+        handle_payment_initiated(event['data'])
+    elif event_type == 'account.balance.updated':
+        handle_balance_updated(event['data'])
+    
+    return jsonify({'status': 'success'}), 200
+
+def handle_transaction_completed(data):
+    print(f"Transaction completed: {data['transaction_id']}")
+    # Process transaction completion
+    
+def handle_payment_initiated(data):
+    print(f"Payment initiated: {data['payment_id']}")
+    # Process payment initiation
+    
+def handle_balance_updated(data):
+    print(f"Balance updated for account: {data['account_id']}")
+    # Process balance update
+```
+
+```javascript Express
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+const WEBHOOK_SECRET = 'your_webhook_secret_key';
+
+// Middleware to capture raw body
+app.use('/webhooks/adcb', express.raw({ type: 'application/json' }));
+
+function verifySignature(payload, signature, secret) {
+    const expected = crypto
+        .createHmac('sha256', secret)
+        .update(payload)
+        .digest('hex');
+    return crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(`sha256=${expected}`)
+    );
+}
+
+app.post('/webhooks/adcb', (req, res) => {
+    const signature = req.headers['x-adcb-signature'];
+    
+    if (!signature) {
+        return res.status(401).json({ error: 'Missing signature' });
+    }
+    
+    if (!verifySignature(req.body, signature, WEBHOOK_SECRET)) {
+        return res.status(401).json({ error: 'Invalid signature' });
+    }
+    
+    const event = JSON.parse(req.body);
+    const eventType = event.type;
+    
+    switch (eventType) {
+        case 'transaction.completed':
+            handleTransactionCompleted(event.data);
+            break;
+        case 'payment.initiated':
+            handlePaymentInitiated(event.data);
+            break;
+        case 'account.balance.updated':
+            handleBalanceUpdated(event.data);
+            break;
+        default:
+            console.log(`Unhandled event type: ${eventType}`);
+    }
+    
+    res.json({ status: 'success' });
+});
+
+function handleTransactionCompleted(data) {
+    console.log(`Transaction completed: ${data.transaction_id}`);
+    // Process transaction completion
+}
+
+function handlePaymentInitiated(data) {
+    console.log(`Payment initiated: ${data.payment_id}`);
+    // Process payment initiation
+}
+
+function handleBalanceUpdated(data) {
+    console.log(`Balance updated for account: ${data.account_id}`);
+    // Process balance update
+}
+
+app.listen(3000, () => {
+    console.log('Webhook server running on port 3000');
+});
+```
+
+</CodeGroup>
+
+## Webhook Payload Structure
+
+All webhook payloads follow a consistent structure:
+
+```json
+{
+  "id": "evt_1234567890",
+  "type": "transaction.completed",
+  "created_at": "2024-01-15T10:30:00Z",
+  "api_version": "v1",
+  "data": {
+    "transaction_id": "TXN123456789",
+    "account_id": "AE070331234567890123456",
+    "amount": {
+      "value": 1500.00,
+      "currency": "AED"
+    },
+    "description": "Online purchase - Amazon",
+    "status": "completed",
+    "booking_date": "2024-01-15",
+    "value_date": "2024-01-15"
+  },
+  "metadata": {
+    "customer_id": "CUST789012",
+    "channel": "mobile_app",
+    "location": "Dubai, UAE"
+  }
+}
+```
+
+### Event-Specific Payloads
+
+<Accordion title="Transaction Completed">
+```json
+{
+  "type": "transaction.completed",
+  "data": {
+    "transaction_id": "TXN123456789",
+    "account_id": "AE070331234567890123456",
+    "amount": {
+      "value": 1500.00,
+      "currency": "AED"
+    },
+    "description": "Online purchase",
+    "merchant": {
+      "name": "Amazon",
+      "category": "E-commerce",
+      "location": "Online"
+    },
+    "status": "completed",
+    "booking_date": "2024-01-15",
+    "value_date": "2024-01-15",
+    "balance_after": 45000.00
+  }
+}
+```
+</Accordion>
+
+<Accordion title="Payment Initiated">
+```json
+{
+  "type": "payment.initiated",
+  "data": {
+    "payment_id": "PAY987654321",
+    "from_account": "AE070331234567890123456",
+    "to_account": "AE070339876543210987654",
+    "amount": {
+      "value": 5000.00,
+      "currency": "AED"
+    },
+    "reference": "Invoice #INV-2024-001",
+    "execution_date": "2024-01-15",
+    "status": "initiated",
+    "payment_type": "domestic"
+  }
+}
+```
+</Accordion>
+
+<Accordion title="Account Balance Updated">
+```json
+{
+  "type": "account.balance.updated",
+  "data": {
+    "account_id": "AE070331234567890123456",
+    "previous_balance": {
+      "available": 46500.00,
+      "current": 46500.00,
+      "currency": "AED"
+    },
+    "new_balance": {
+      "available": 45000.00,
+      "current": 45000.00,
+      "currency": "AED"
+    },
+    "change": {
+      "amount": -1500.00,
+      "reason": "transaction_posted"
+    },
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+</Accordion>
+
+## Security Best Practices
+
+### Signature Verification
+
+<Warning>
+  Always verify webhook signatures to ensure requests are from ADCB. Never process unverified webhooks.
+</Warning>
+
+ADCB signs all webhook payloads using HMAC SHA-256:
+
+```python
+import hmac
+import hashlib
+
+def verify_webhook_signature(payload, signature, secret):
+    """Verify ADCB webhook signature"""
+    # Remove 'sha256=' prefix from signature
+    received_signature = signature.replace('sha256=', '')
+    
+    # Calculate expected signature
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Use constant-time comparison
+    return hmac.compare_digest(received_signature, expected_signature)
+
+# Example usage
+payload = request.get_data(as_text=True)
+signature = request.headers.get('X-ADCB-Signature')
+secret = 'your_webhook_secret'
+
+if verify_webhook_signature(payload, signature, secret):
+    # Process webhook
+    process_webhook(payload)
+else:
+    # Reject webhook
+    return 'Invalid signature', 401
+```
+
+### HTTPS Requirements
+
+<Info>
+  All webhook URLs must use HTTPS. HTTP URLs will be rejected.
+</Info>
+
+- Use valid SSL certificates
+- Support TLS 1.2 or higher
+- Ensure proper certificate chain
+- Test with SSL Labs or similar tools
+
+### Endpoint Security
+
+```python
+# Rate limiting example
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["1000 per hour"]
+)
+
+@app.route('/webhooks/adcb', methods=['POST'])
+@limiter.limit("100 per minute")
+def handle_webhook():
+    # Webhook processing logic
+    pass
+```
+
+## Retry Logic and Reliability
+
+### ADCB Retry Behavior
+
+ADCB will retry failed webhooks with exponential backoff:
+
+- **Immediate retry** after initial failure
+- **30 seconds** after first retry
+- **5 minutes** after second retry  
+- **1 hour** after third retry
+- **6 hours** after fourth retry
+- **24 hours** for final attempts
+
+### Response Requirements
+
+Your webhook endpoint must:
+
+- Respond within **30 seconds**
+- Return HTTP status **200** for success
+- Return **4xx** for permanent failures (won't retry)
+- Return **5xx** for temporary failures (will retry)
+
+```python
+@app.route('/webhooks/adcb', methods=['POST'])
+def handle_webhook():
+    try:
+        event = request.json
+        process_event(event)
+        return jsonify({'status': 'success'}), 200
+    except ValidationError as e:
+        # Permanent error - don't retry
+        return jsonify({'error': str(e)}), 400
+    except TemporaryError as e:
+        # Temporary error - retry
+        return jsonify({'error': str(e)}), 503
+```
+
+## Testing Webhooks
+
+### Webhook Testing Tool
+
+Use our webhook testing tool in the developer portal:
+
+1. Navigate to **Webhooks** → **Testing**
+2. Select event type to simulate
+3. Configure test payload
+4. Send test webhook to your endpoint
+
+### Local Development
+
+<CodeGroup>
+
+```bash ngrok
+# Install ngrok for local testing
+brew install ngrok
+
+# Start your local server
+python app.py  # runs on localhost:5000
+
+# In another terminal, expose local server
+ngrok http 5000
+
+# Use the ngrok URL for webhook configuration
+# https://abc123.ngrok.io/webhooks/adcb
+```
+
+```bash webhook.site
+# Use webhook.site for quick testing
+curl -X POST https://webhook.site/unique-url \
+  -H "Content-Type: application/json" \
+  -d '{"test": "webhook payload"}'
+```
+
+</CodeGroup>
+
+### Test Event Generator
+
+```python
+# Test webhook locally
+import requests
+import json
+import hmac
+import hashlib
+
+def send_test_webhook(url, event_data, secret):
+    payload = json.dumps(event_data)
+    signature = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'X-ADCB-Signature': f'sha256={signature}'
+    }
+    
+    response = requests.post(url, data=payload, headers=headers)
+    print(f"Response: {response.status_code}")
+
+# Test transaction webhook
+test_event = {
+    "id": "evt_test_123",
+    "type": "transaction.completed",
+    "created_at": "2024-01-15T10:30:00Z",
+    "data": {
+        "transaction_id": "TXN_TEST_456",
+        "account_id": "AE07033TEST000000000001",
+        "amount": {"value": 100.00, "currency": "AED"}
+    }
+}
+
+send_test_webhook(
+    'http://localhost:5000/webhooks/adcb',
+    test_event,
+    'your_test_secret'
+)
+```
+
+## Monitoring and Debugging
+
+### Webhook Logs
+
+Monitor webhook delivery in the developer portal:
+
+- **Delivery Status**: Success/failure rates
+- **Response Times**: Endpoint performance
+- **Error Details**: Failure reasons and codes
+- **Retry History**: Retry attempts and outcomes
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Webhook Timeouts">
+    **Symptoms**: Webhooks marked as failed due to timeouts
+    
+    **Solutions**:
+    - Optimize endpoint response time
+    - Process webhooks asynchronously
+    - Use background job queues
+    - Return 200 immediately, process later
+  </Accordion>
+  
+  <Accordion title="Signature Verification Failures">
+    **Symptoms**: 401 errors, signature mismatches
+    
+    **Solutions**:
+    - Check webhook secret configuration
+    - Verify payload encoding (UTF-8)
+    - Use raw request body for verification
+    - Check for middleware modifying payload
+  </Accordion>
+  
+  <Accordion title="Duplicate Events">
+    **Symptoms**: Same event received multiple times
+    
+    **Solutions**:
+    - Implement idempotency using event IDs
+    - Check for retry logic conflicts
+    - Use database constraints to prevent duplicates
+    - Log event IDs for tracking
+  </Accordion>
+</AccordionGroup>
+
+### Debug Mode
+
+Enable debug logging for troubleshooting:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+@app.route('/webhooks/adcb', methods=['POST'])
+def handle_webhook():
+    # Log incoming webhook
+    logger.debug(f"Received webhook: {request.headers}")
+    logger.debug(f"Payload: {request.get_data(as_text=True)}")
+    
+    # Process webhook
+    try:
+        result = process_webhook(request.json)
+        logger.info(f"Webhook processed successfully: {result}")
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        logger.error(f"Webhook processing failed: {e}")
+        return jsonify({'error': str(e)}), 500
+```
+
+## Webhook Management
+
+### List Configured Webhooks
+
+```python
+# Get all webhooks
+response = requests.get(
+    "https://api.adcb.com/v1/webhooks",
+    headers={"Authorization": f"Bearer {access_token}"}
+)
+
+webhooks = response.json()
+for webhook in webhooks['data']:
+    print(f"ID: {webhook['id']}")
+    print(f"URL: {webhook['url']}")
+    print(f"Events: {webhook['events']}")
+    print(f"Active: {webhook['active']}")
+```
+
+### Update Webhook Configuration
+
+```python
+# Update webhook events
+webhook_id = "webhook_123456"
+update_data = {
+    "events": [
+        "transaction.completed",
+        "payment.initiated",
+        "payment.completed",
+        "consent.revoked"
+    ],
+    "active": True
+}
+
+response = requests.patch(
+    f"https://api.adcb.com/v1/webhooks/{webhook_id}",
+    json=update_data,
+    headers={"Authorization": f"Bearer {access_token}"}
+)
+```
+
+### Delete Webhook
+
+```python
+# Delete webhook
+response = requests.delete(
+    f"https://api.adcb.com/v1/webhooks/{webhook_id}",
+    headers={"Authorization": f"Bearer {access_token}"}
+)
+```
+
+## Best Practices Summary
+
+<CardGroup cols={2}>
+  <Card title="Security First" icon="shield">
+    Always verify signatures, use HTTPS, and implement rate limiting
+  </Card>
+  <Card title="Idempotency" icon="refresh">
+    Handle duplicate events gracefully using unique event IDs
+  </Card>
+  <Card title="Fast Response" icon="bolt">
+    Respond within 30 seconds, process asynchronously if needed
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Return appropriate HTTP codes for retry/no-retry scenarios
+  </Card>
+  <Card title="Monitoring" icon="chart-line">
+    Log all webhook activity and monitor delivery rates
+  </Card>
+  <Card title="Testing" icon="flask">
+    Test thoroughly in sandbox before production deployment
+  </Card>
+</CardGroup>
+
+## Support
+
+For webhook-specific support:
+- 📧 **Webhook Support**: webhook-support@adcb.com
+- 📚 **Webhook Docs**: [webhooks.adcb.dev](https://webhooks.adcb.dev)
+- 🔧 **Debug Tools**: Available in Developer Portal

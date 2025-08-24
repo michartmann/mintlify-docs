@@ -1,0 +1,1107 @@
+---
+title: 'Error Handling Guide'
+description: 'Comprehensive guide to handling API errors and implementing robust retry strategies'
+---
+
+## Overview
+
+Robust error handling is crucial for building reliable financial applications. ADCB APIs use standard HTTP status codes combined with detailed error responses to help you understand and resolve issues quickly.
+
+<Info>
+  All ADCB API errors follow RFC 7807 Problem Details for HTTP APIs standard, providing consistent and actionable error information.
+</Info>
+
+## Error Response Format
+
+ADCB APIs return structured error responses with comprehensive details:
+
+```json
+{
+  "error": {
+    "type": "https://api.adcb.com/errors/validation_failed",
+    "title": "Validation Failed",
+    "status": 400,
+    "detail": "The request body contains invalid or missing required fields",
+    "instance": "/v1/payments",
+    "trace_id": "4d9c8b5a-f6e2-4c8a-9d3b-1e7f5a6c8d9e",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "errors": [
+      {
+        "field": "amount.value",
+        "code": "FIELD_REQUIRED",
+        "message": "Amount value is required"
+      },
+      {
+        "field": "creditorAccount.identification",
+        "code": "INVALID_FORMAT",
+        "message": "Invalid IBAN format"
+      }
+    ]
+  }
+}
+```
+
+### Error Response Fields
+
+<Table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`type`</td>
+      <td>URI</td>
+      <td>Link to error documentation</td>
+    </tr>
+    <tr>
+      <td>`title`</td>
+      <td>String</td>
+      <td>Human-readable error summary</td>
+    </tr>
+    <tr>
+      <td>`status`</td>
+      <td>Integer</td>
+      <td>HTTP status code</td>
+    </tr>
+    <tr>
+      <td>`detail`</td>
+      <td>String</td>
+      <td>Detailed error description</td>
+    </tr>
+    <tr>
+      <td>`instance`</td>
+      <td>String</td>
+      <td>API endpoint where error occurred</td>
+    </tr>
+    <tr>
+      <td>`trace_id`</td>
+      <td>String</td>
+      <td>Unique identifier for troubleshooting</td>
+    </tr>
+    <tr>
+      <td>`timestamp`</td>
+      <td>ISO 8601</td>
+      <td>When the error occurred</td>
+    </tr>
+    <tr>
+      <td>`errors`</td>
+      <td>Array</td>
+      <td>Field-specific validation errors</td>
+    </tr>
+  </tbody>
+</Table>
+
+## HTTP Status Codes
+
+### 4xx Client Errors
+
+<Tabs>
+  <Tab title="400 Bad Request">
+    **Meaning**: The request is malformed or contains invalid data.
+    
+    **Common Causes**:
+    - Invalid JSON syntax
+    - Missing required fields
+    - Invalid field formats
+    - Unsupported field values
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/bad_request",
+        "title": "Bad Request",
+        "status": 400,
+        "detail": "Request body is not valid JSON",
+        "trace_id": "abc123def456"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Fix the request and retry.
+  </Tab>
+  
+  <Tab title="401 Unauthorized">
+    **Meaning**: Authentication failed or token is invalid/expired.
+    
+    **Common Causes**:
+    - Missing Authorization header
+    - Invalid access token
+    - Expired access token
+    - Malformed Bearer token
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/unauthorized",
+        "title": "Unauthorized",
+        "status": 401,
+        "detail": "Access token has expired",
+        "trace_id": "def456ghi789"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Refresh access token and retry.
+  </Tab>
+  
+  <Tab title="403 Forbidden">
+    **Meaning**: Request is authenticated but not authorized.
+    
+    **Common Causes**:
+    - Insufficient scopes
+    - IP not whitelisted
+    - Invalid mTLS certificate
+    - Resource access denied
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/forbidden",
+        "title": "Forbidden",
+        "status": 403,
+        "detail": "Insufficient scope for this operation",
+        "required_scope": "payments:write",
+        "trace_id": "ghi789jkl012"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Check permissions, don't retry without fixing authorization.
+  </Tab>
+  
+  <Tab title="404 Not Found">
+    **Meaning**: The requested resource doesn't exist.
+    
+    **Common Causes**:
+    - Invalid resource ID
+    - Resource deleted
+    - Wrong endpoint URL
+    - Account not accessible with current consent
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/not_found",
+        "title": "Not Found",
+        "status": 404,
+        "detail": "Account not found or not accessible",
+        "trace_id": "jkl012mno345"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Verify resource exists, don't retry without correction.
+  </Tab>
+  
+  <Tab title="409 Conflict">
+    **Meaning**: Request conflicts with current state.
+    
+    **Common Causes**:
+    - Duplicate payment with same idempotency key
+    - Account already closed
+    - Consent already revoked
+    - Resource state conflict
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/conflict",
+        "title": "Conflict",
+        "status": 409,
+        "detail": "Payment with this idempotency key already exists",
+        "existing_resource": "/v1/payments/PAY123456",
+        "trace_id": "mno345pqr678"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Check resource state, use different idempotency key if needed.
+  </Tab>
+  
+  <Tab title="422 Unprocessable Entity">
+    **Meaning**: Valid request format but semantic errors.
+    
+    **Common Causes**:
+    - Insufficient account balance
+    - Invalid business logic
+    - Constraint violations
+    - Regulatory restrictions
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/unprocessable",
+        "title": "Unprocessable Entity",
+        "status": 422,
+        "detail": "Insufficient account balance",
+        "balance": 500.00,
+        "requested": 1000.00,
+        "trace_id": "pqr678stu901"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Fix business logic, don't retry without changes.
+  </Tab>
+  
+  <Tab title="429 Too Many Requests">
+    **Meaning**: Rate limit exceeded.
+    
+    **Common Causes**:
+    - Too many requests in time window
+    - Burst limit exceeded
+    - Account-specific limits reached
+    
+    **Example Response**:
+    ```json
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/rate_limited",
+        "title": "Too Many Requests",
+        "status": 429,
+        "detail": "Rate limit exceeded",
+        "limit": 100,
+        "remaining": 0,
+        "reset": 1641027600,
+        "retry_after": 60,
+        "trace_id": "stu901vwx234"
+      }
+    }
+    ```
+    
+    **Handling Strategy**: Implement exponential backoff, respect Retry-After header.
+  </Tab>
+</Tabs>
+
+### 5xx Server Errors
+
+<Tabs>
+  <Tab title="500 Internal Server Error">
+    **Meaning**: Unexpected server error.
+    
+    **Common Causes**:
+    - Temporary server issues
+    - Database connectivity problems
+    - Unexpected application errors
+    
+    **Handling Strategy**: Retry with exponential backoff.
+  </Tab>
+  
+  <Tab title="502 Bad Gateway">
+    **Meaning**: Upstream service error.
+    
+    **Handling Strategy**: Retry after short delay.
+  </Tab>
+  
+  <Tab title="503 Service Unavailable">
+    **Meaning**: Service temporarily unavailable.
+    
+    **Handling Strategy**: Retry with exponential backoff, check status page.
+  </Tab>
+  
+  <Tab title="504 Gateway Timeout">
+    **Meaning**: Upstream service timeout.
+    
+    **Handling Strategy**: Retry with longer timeout or exponential backoff.
+  </Tab>
+</Tabs>
+
+## Error Handling Implementation
+
+### Basic Error Handling
+
+<CodeGroup>
+
+```python Python
+import requests
+import time
+import logging
+from typing import Dict, Any, Optional
+
+class ADCBAPIError(Exception):
+    def __init__(self, response: requests.Response):
+        self.status_code = response.status_code
+        self.response = response
+        try:
+            self.error_data = response.json().get('error', {})
+        except:
+            self.error_data = {}
+        
+        self.trace_id = self.error_data.get('trace_id', 'unknown')
+        self.error_type = self.error_data.get('type', 'unknown')
+        self.title = self.error_data.get('title', 'Unknown Error')
+        self.detail = self.error_data.get('detail', 'No details provided')
+        
+        super().__init__(f"{self.title}: {self.detail}")
+
+def make_api_request(method: str, url: str, **kwargs) -> requests.Response:
+    """Make API request with proper error handling"""
+    try:
+        response = requests.request(method, url, **kwargs)
+        
+        if response.status_code >= 400:
+            raise ADCBAPIError(response)
+            
+        return response
+        
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error: {e}")
+        raise
+    except ADCBAPIError as e:
+        logging.error(f"API error: {e.trace_id} - {e}")
+        raise
+
+# Usage example
+try:
+    response = make_api_request(
+        'GET',
+        'https://api.adcb.com/v1/accounts',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    accounts = response.json()
+except ADCBAPIError as e:
+    if e.status_code == 401:
+        # Refresh token and retry
+        token = refresh_access_token()
+        response = make_api_request(
+            'GET',
+            'https://api.adcb.com/v1/accounts',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+```
+
+```javascript JavaScript
+class ADCBAPIError extends Error {
+    constructor(response) {
+        const errorData = response.data?.error || {};
+        super(`${errorData.title}: ${errorData.detail}`);
+        
+        this.statusCode = response.status;
+        this.response = response;
+        this.traceId = errorData.trace_id || 'unknown';
+        this.errorType = errorData.type || 'unknown';
+        this.title = errorData.title || 'Unknown Error';
+        this.detail = errorData.detail || 'No details provided';
+        this.errors = errorData.errors || [];
+    }
+}
+
+async function makeAPIRequest(method, url, config = {}) {
+    try {
+        const response = await axios({
+            method,
+            url,
+            ...config
+        });
+        
+        return response;
+        
+    } catch (error) {
+        if (error.response) {
+            // API returned error response
+            throw new ADCBAPIError(error.response);
+        } else if (error.request) {
+            // Network error
+            throw new Error(`Network error: ${error.message}`);
+        } else {
+            throw error;
+        }
+    }
+}
+
+// Usage example
+try {
+    const response = await makeAPIRequest(
+        'GET',
+        'https://api.adcb.com/v1/accounts',
+        {
+            headers: { Authorization: `Bearer ${token}` }
+        }
+    );
+    const accounts = response.data;
+} catch (error) {
+    if (error instanceof ADCBAPIError) {
+        console.error(`API Error [${error.traceId}]: ${error.message}`);
+        
+        if (error.statusCode === 401) {
+            // Refresh token and retry
+            const newToken = await refreshAccessToken();
+            const retryResponse = await makeAPIRequest(
+                'GET',
+                'https://api.adcb.com/v1/accounts',
+                {
+                    headers: { Authorization: `Bearer ${newToken}` }
+                }
+            );
+        }
+    } else {
+        console.error('Unexpected error:', error.message);
+    }
+}
+```
+
+</CodeGroup>
+
+### Retry Strategies
+
+<CodeGroup>
+
+```python Python
+import random
+import time
+from functools import wraps
+
+def exponential_backoff_retry(
+    max_retries=3,
+    base_delay=1,
+    max_delay=60,
+    backoff_factor=2,
+    jitter=True
+):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except ADCBAPIError as e:
+                    last_exception = e
+                    
+                    # Don't retry client errors (4xx) except 429
+                    if 400 <= e.status_code < 500 and e.status_code != 429:
+                        raise
+                    
+                    if attempt == max_retries:
+                        raise
+                    
+                    # Calculate delay
+                    delay = min(base_delay * (backoff_factor ** attempt), max_delay)
+                    
+                    # Add jitter to prevent thundering herd
+                    if jitter:
+                        delay *= (0.5 + random.random() * 0.5)
+                    
+                    # Respect Retry-After header for 429 errors
+                    if e.status_code == 429:
+                        retry_after = e.error_data.get('retry_after', delay)
+                        delay = max(delay, retry_after)
+                    
+                    logging.warning(
+                        f"Request failed (attempt {attempt + 1}/{max_retries + 1}), "
+                        f"retrying in {delay:.2f} seconds. Error: {e}"
+                    )
+                    time.sleep(delay)
+                except requests.exceptions.RequestException as e:
+                    last_exception = e
+                    if attempt == max_retries:
+                        raise
+                    
+                    delay = min(base_delay * (backoff_factor ** attempt), max_delay)
+                    if jitter:
+                        delay *= (0.5 + random.random() * 0.5)
+                    
+                    logging.warning(
+                        f"Network error (attempt {attempt + 1}/{max_retries + 1}), "
+                        f"retrying in {delay:.2f} seconds. Error: {e}"
+                    )
+                    time.sleep(delay)
+            
+            raise last_exception
+            
+        return wrapper
+    return decorator
+
+# Usage
+@exponential_backoff_retry(max_retries=3)
+def get_account_balance(account_id: str, token: str):
+    response = make_api_request(
+        'GET',
+        f'https://api.adcb.com/v1/accounts/{account_id}/balance',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    return response.json()
+```
+
+```javascript JavaScript
+class RetryConfig {
+    constructor({
+        maxRetries = 3,
+        baseDelay = 1000,
+        maxDelay = 60000,
+        backoffFactor = 2,
+        jitter = true
+    } = {}) {
+        this.maxRetries = maxRetries;
+        this.baseDelay = baseDelay;
+        this.maxDelay = maxDelay;
+        this.backoffFactor = backoffFactor;
+        this.jitter = jitter;
+    }
+}
+
+async function withRetry(fn, retryConfig = new RetryConfig()) {
+    let lastError;
+    
+    for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+            
+            // Don't retry client errors (except 429)
+            if (error instanceof ADCBAPIError) {
+                const status = error.statusCode;
+                if (status >= 400 && status < 500 && status !== 429) {
+                    throw error;
+                }
+            }
+            
+            if (attempt === retryConfig.maxRetries) {
+                throw error;
+            }
+            
+            // Calculate delay
+            let delay = Math.min(
+                retryConfig.baseDelay * Math.pow(retryConfig.backoffFactor, attempt),
+                retryConfig.maxDelay
+            );
+            
+            // Add jitter
+            if (retryConfig.jitter) {
+                delay *= (0.5 + Math.random() * 0.5);
+            }
+            
+            // Respect Retry-After header for 429 errors
+            if (error instanceof ADCBAPIError && error.statusCode === 429) {
+                const retryAfter = error.response.headers['retry-after'];
+                if (retryAfter) {
+                    delay = Math.max(delay, parseInt(retryAfter) * 1000);
+                }
+            }
+            
+            console.warn(
+                `Request failed (attempt ${attempt + 1}/${retryConfig.maxRetries + 1}), ` +
+                `retrying in ${delay}ms. Error: ${error.message}`
+            );
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    
+    throw lastError;
+}
+
+// Usage
+try {
+    const balance = await withRetry(async () => {
+        return await makeAPIRequest(
+            'GET',
+            `https://api.adcb.com/v1/accounts/${accountId}/balance`,
+            {
+                headers: { Authorization: `Bearer ${token}` }
+            }
+        );
+    });
+} catch (error) {
+    console.error('Failed after retries:', error);
+}
+```
+
+</CodeGroup>
+
+### Circuit Breaker Pattern
+
+<CodeGroup>
+
+```python Python
+import time
+from enum import Enum
+from typing import Callable, Any
+
+class CircuitState(Enum):
+    CLOSED = "closed"      # Normal operation
+    OPEN = "open"          # Circuit is open, failing fast
+    HALF_OPEN = "half_open"  # Testing if service recovered
+
+class CircuitBreaker:
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        recovery_timeout: int = 60,
+        expected_exception: type = ADCBAPIError
+    ):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.expected_exception = expected_exception
+        
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = CircuitState.CLOSED
+    
+    def call(self, func: Callable, *args, **kwargs) -> Any:
+        if self.state == CircuitState.OPEN:
+            if self._should_attempt_reset():
+                self.state = CircuitState.HALF_OPEN
+            else:
+                raise Exception("Circuit breaker is OPEN")
+        
+        try:
+            result = func(*args, **kwargs)
+            self._on_success()
+            return result
+        except self.expected_exception as e:
+            self._on_failure()
+            raise
+    
+    def _should_attempt_reset(self) -> bool:
+        return (
+            self.last_failure_time and
+            time.time() - self.last_failure_time >= self.recovery_timeout
+        )
+    
+    def _on_success(self):
+        self.failure_count = 0
+        self.state = CircuitState.CLOSED
+    
+    def _on_failure(self):
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+
+# Usage
+payment_circuit_breaker = CircuitBreaker(
+    failure_threshold=3,
+    recovery_timeout=30
+)
+
+try:
+    payment = payment_circuit_breaker.call(
+        make_api_request,
+        'POST',
+        'https://api.adcb.com/v1/payments',
+        json=payment_data,
+        headers={'Authorization': f'Bearer {token}'}
+    )
+except Exception as e:
+    logging.error(f"Payment failed: {e}")
+    # Fallback logic here
+```
+
+</CodeGroup>
+
+## Error Logging and Monitoring
+
+### Structured Logging
+
+<CodeGroup>
+
+```python Python
+import logging
+import json
+from datetime import datetime
+
+class ADCBAPILogger:
+    def __init__(self, name: str = "adcb_api"):
+        self.logger = logging.getLogger(name)
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
+    
+    def log_api_error(
+        self,
+        error: ADCBAPIError,
+        request_details: dict,
+        context: dict = None
+    ):
+        log_data = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'event_type': 'api_error',
+            'trace_id': error.trace_id,
+            'error': {
+                'type': error.error_type,
+                'title': error.title,
+                'detail': error.detail,
+                'status_code': error.status_code
+            },
+            'request': {
+                'method': request_details.get('method'),
+                'url': request_details.get('url'),
+                'endpoint': request_details.get('endpoint')
+            },
+            'context': context or {}
+        }
+        
+        if error.status_code >= 500:
+            self.logger.error(json.dumps(log_data))
+        elif error.status_code >= 400:
+            self.logger.warning(json.dumps(log_data))
+    
+    def log_retry_attempt(
+        self,
+        attempt: int,
+        max_attempts: int,
+        delay: float,
+        error: Exception
+    ):
+        log_data = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'event_type': 'retry_attempt',
+            'attempt': attempt,
+            'max_attempts': max_attempts,
+            'delay_seconds': delay,
+            'error': str(error)
+        }
+        
+        self.logger.info(json.dumps(log_data))
+
+# Usage
+api_logger = ADCBAPILogger()
+
+try:
+    response = make_api_request('POST', '/v1/payments', json=data)
+except ADCBAPIError as e:
+    api_logger.log_api_error(
+        error=e,
+        request_details={
+            'method': 'POST',
+            'url': '/v1/payments',
+            'endpoint': 'payment_initiation'
+        },
+        context={
+            'customer_id': customer_id,
+            'amount': data.get('amount'),
+            'currency': data.get('currency')
+        }
+    )
+```
+
+</CodeGroup>
+
+### Error Metrics and Alerting
+
+<CodeGroup>
+
+```python Python
+import time
+from collections import defaultdict, deque
+from typing import Dict, List
+
+class ErrorMetrics:
+    def __init__(self, window_size: int = 300):  # 5 minute window
+        self.window_size = window_size
+        self.errors = deque()
+        self.error_counts = defaultdict(int)
+        self.total_requests = 0
+        self.error_requests = 0
+    
+    def record_request(self, success: bool = True, error_type: str = None):
+        timestamp = time.time()
+        self.total_requests += 1
+        
+        if not success:
+            self.error_requests += 1
+            self.errors.append({
+                'timestamp': timestamp,
+                'error_type': error_type
+            })
+            self.error_counts[error_type] += 1
+        
+        # Clean old entries
+        self._cleanup_old_entries(timestamp)
+    
+    def _cleanup_old_entries(self, current_time: float):
+        cutoff_time = current_time - self.window_size
+        
+        while self.errors and self.errors[0]['timestamp'] < cutoff_time:
+            old_error = self.errors.popleft()
+            self.error_counts[old_error['error_type']] -= 1
+    
+    def get_error_rate(self) -> float:
+        if self.total_requests == 0:
+            return 0.0
+        return self.error_requests / self.total_requests
+    
+    def get_error_breakdown(self) -> Dict[str, int]:
+        return dict(self.error_counts)
+    
+    def should_alert(self, threshold: float = 0.05) -> bool:
+        return self.get_error_rate() > threshold
+
+# Usage
+metrics = ErrorMetrics()
+
+def monitored_api_call(func, *args, **kwargs):
+    try:
+        result = func(*args, **kwargs)
+        metrics.record_request(success=True)
+        return result
+    except ADCBAPIError as e:
+        metrics.record_request(
+            success=False,
+            error_type=f"{e.status_code}_{e.error_type}"
+        )
+        
+        if metrics.should_alert():
+            send_alert(f"High error rate: {metrics.get_error_rate():.2%}")
+        
+        raise
+
+def send_alert(message: str):
+    # Implement your alerting mechanism
+    print(f"ALERT: {message}")
+```
+
+</CodeGroup>
+
+## Common Error Scenarios
+
+<AccordionGroup>
+  <Accordion title="Token Expired During Long Operations">
+    **Scenario**: Access token expires while processing multiple requests.
+    
+    **Solution**: Implement proactive token refresh
+    ```python
+    import jwt
+    from datetime import datetime, timedelta
+    
+    def is_token_expired(token: str, buffer_minutes: int = 5) -> bool:
+        try:
+            decoded = jwt.decode(token, options={"verify_signature": False})
+            exp_timestamp = decoded.get('exp', 0)
+            exp_time = datetime.fromtimestamp(exp_timestamp)
+            buffer_time = datetime.utcnow() + timedelta(minutes=buffer_minutes)
+            return exp_time <= buffer_time
+        except:
+            return True
+    
+    def ensure_valid_token(current_token: str) -> str:
+        if is_token_expired(current_token):
+            return refresh_access_token()
+        return current_token
+    
+    # Use before each API call
+    token = ensure_valid_token(token)
+    ```
+  </Accordion>
+  
+  <Accordion title="Network Connectivity Issues">
+    **Scenario**: Intermittent network failures or timeouts.
+    
+    **Solution**: Implement connection pooling and timeouts
+    ```python
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    
+    session = requests.Session()
+    
+    # Configure retries for network issues
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=1,
+        status_forcelist=[502, 503, 504],
+        allowed_methods=["GET", "POST", "PUT", "DELETE"]
+    )
+    
+    adapter = HTTPAdapter(
+        max_retries=retry_strategy,
+        pool_connections=10,
+        pool_maxsize=20
+    )
+    
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    
+    # Set reasonable timeouts
+    def make_request_with_timeout(method, url, **kwargs):
+        kwargs.setdefault('timeout', (10, 30))  # connect, read
+        return session.request(method, url, **kwargs)
+    ```
+  </Accordion>
+  
+  <Accordion title="Rate Limiting with Burst Traffic">
+    **Scenario**: Application sends burst of requests exceeding rate limits.
+    
+    **Solution**: Implement request queuing and throttling
+    ```python
+    import asyncio
+    import time
+    from asyncio import Queue, Semaphore
+    
+    class RateLimitedClient:
+        def __init__(self, requests_per_minute: int = 60):
+            self.rate_limit = requests_per_minute
+            self.semaphore = Semaphore(requests_per_minute)
+            self.request_times = deque()
+        
+        async def make_request(self, request_func, *args, **kwargs):
+            async with self.semaphore:
+                # Implement sliding window rate limiting
+                now = time.time()
+                minute_ago = now - 60
+                
+                # Remove old requests from tracking
+                while self.request_times and self.request_times[0] < minute_ago:
+                    self.request_times.popleft()
+                
+                # Check if we're at the limit
+                if len(self.request_times) >= self.rate_limit:
+                    sleep_time = 60 - (now - self.request_times[0])
+                    await asyncio.sleep(sleep_time)
+                
+                self.request_times.append(now)
+                return await request_func(*args, **kwargs)
+    ```
+  </Accordion>
+  
+  <Accordion title="Partial System Failures">
+    **Scenario**: Some API endpoints work while others fail.
+    
+    **Solution**: Implement service-specific circuit breakers
+    ```python
+    class ServiceRegistry:
+        def __init__(self):
+            self.circuit_breakers = {
+                'accounts': CircuitBreaker(failure_threshold=3),
+                'payments': CircuitBreaker(failure_threshold=2),
+                'webhooks': CircuitBreaker(failure_threshold=5)
+            }
+        
+        def get_circuit_breaker(self, endpoint: str) -> CircuitBreaker:
+            # Map endpoint to service
+            if 'account' in endpoint:
+                return self.circuit_breakers['accounts']
+            elif 'payment' in endpoint:
+                return self.circuit_breakers['payments']
+            elif 'webhook' in endpoint:
+                return self.circuit_breakers['webhooks']
+            else:
+                return self.circuit_breakers.get('default', CircuitBreaker())
+        
+        def call_service(self, endpoint: str, func, *args, **kwargs):
+            circuit_breaker = self.get_circuit_breaker(endpoint)
+            return circuit_breaker.call(func, *args, **kwargs)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Testing Error Scenarios
+
+### Unit Testing Error Handling
+
+<CodeGroup>
+
+```python pytest
+import pytest
+import requests_mock
+from unittest.mock import patch
+
+def test_handles_401_unauthorized():
+    with requests_mock.Mocker() as m:
+        m.get(
+            'https://api.adcb.com/v1/accounts',
+            status_code=401,
+            json={
+                "error": {
+                    "type": "https://api.adcb.com/errors/unauthorized",
+                    "title": "Unauthorized",
+                    "status": 401,
+                    "detail": "Access token has expired",
+                    "trace_id": "test-trace-123"
+                }
+            }
+        )
+        
+        with pytest.raises(ADCBAPIError) as exc_info:
+            make_api_request('GET', 'https://api.adcb.com/v1/accounts')
+        
+        error = exc_info.value
+        assert error.status_code == 401
+        assert error.trace_id == "test-trace-123"
+        assert "expired" in error.detail.lower()
+
+def test_retry_on_500_error():
+    with requests_mock.Mocker() as m:
+        # First request fails, second succeeds
+        m.get(
+            'https://api.adcb.com/v1/accounts',
+            [
+                {'status_code': 500, 'json': {'error': {'title': 'Server Error'}}},
+                {'status_code': 200, 'json': {'data': {'accounts': []}}}
+            ]
+        )
+        
+        with patch('time.sleep'):  # Skip actual delays in tests
+            result = exponential_backoff_retry()(make_api_request)(
+                'GET',
+                'https://api.adcb.com/v1/accounts'
+            )
+        
+        assert result.status_code == 200
+
+def test_circuit_breaker_opens_after_failures():
+    circuit_breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1)
+    
+    # Simulate failures
+    for _ in range(2):
+        with pytest.raises(ADCBAPIError):
+            circuit_breaker.call(lambda: exec('raise ADCBAPIError(Mock())'))
+    
+    # Circuit should now be open
+    assert circuit_breaker.state == CircuitState.OPEN
+    
+    # Next call should fail fast
+    with pytest.raises(Exception, match="Circuit breaker is OPEN"):
+        circuit_breaker.call(lambda: "should not execute")
+```
+
+</CodeGroup>
+
+## Best Practices Summary
+
+<CardGroup cols={2}>
+  <Card title="Fail Fast" icon="bolt">
+    Don't retry 4xx errors (except 429). Fix the request instead.
+  </Card>
+  <Card title="Exponential Backoff" icon="chart-line">
+    Use exponential backoff with jitter for server errors and rate limits.
+  </Card>
+  <Card title="Circuit Breakers" icon="shield">
+    Implement circuit breakers to prevent cascading failures.
+  </Card>
+  <Card title="Comprehensive Logging" icon="file-text">
+    Log all errors with trace IDs and context for easier debugging.
+  </Card>
+  <Card title="Proactive Monitoring" icon="activity">
+    Monitor error rates and set up alerts for early detection.
+  </Card>
+  <Card title="Graceful Degradation" icon="layers">
+    Implement fallback mechanisms when possible.
+  </Card>
+</CardGroup>
+
+## Support
+
+For error-related support:
+- 📧 **Technical Support**: api-support@adcb.com
+- 📊 **API Status**: [status.adcb.dev](https://status.adcb.dev)
+- 🔍 **Error Lookup**: Use trace IDs when contacting support
