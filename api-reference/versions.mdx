@@ -1,0 +1,461 @@
+---
+title: 'API Versions'
+description: 'ADCB API versioning, migration guides, and compatibility information'
+---
+
+# API Versions & Migration
+
+ADCB APIs follow semantic versioning with comprehensive backward compatibility support and clear migration paths.
+
+## Current API Versions
+
+<CardGroup cols={2}>
+  <Card title="v2.1.0 (Current)" icon="check-circle" color="#22c55e">
+    **Latest Stable**
+    - Released: January 2024
+    - Status: ✅ Fully supported
+    - End of Life: TBD
+    
+    **New Features:**
+    - Enhanced webhook events
+    - Advanced rate limiting
+    - CDP Analytics improvements
+  </Card>
+  
+  <Card title="v2.0.0 (Stable)" icon="shield" color="#3b82f6">
+    **Previous Stable**
+    - Released: October 2023
+    - Status: ✅ Fully supported
+    - End of Life: October 2026
+    
+    **Key Changes:**
+    - OAuth 2.0 enhancements
+    - Standardized response format
+    - RFC 7807 error compliance
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="v1.3.x (Deprecated)" icon="exclamation-triangle" color="#f59e0b">
+    **Legacy Support**
+    - Deprecated: April 2024
+    - End of Life: April 2026
+    - Status: ⚠️ Security updates only
+    
+    **Migration Required**
+  </Card>
+  
+  <Card title="v1.2.x & Earlier" icon="x-circle" color="#ef4444">
+    **End of Life**
+    - Status: ❌ No longer supported
+    - Last update: February 2025
+    
+    **Immediate Migration Required**
+  </Card>
+</CardGroup>
+
+## Version Selection
+
+<Tabs>
+  <Tab title="Recommended: v2.1.0">
+    **Use v2.1.0 for new integrations**
+    
+    ```bash
+    # Base URL for v2.1.0
+    https://api.adcb.com/v2.1
+    
+    # Authentication endpoint
+    https://auth.adcb.com/v2.1/oauth/token
+    ```
+    
+    **Benefits:**
+    - Latest features and performance improvements
+    - Enhanced security capabilities
+    - Future-proof architecture
+    - Advanced analytics and monitoring
+    
+    **Best for:**
+    - New integrations
+    - Applications requiring latest features
+    - High-performance requirements
+  </Tab>
+  
+  <Tab title="Stable: v2.0.0">
+    **Use v2.0.0 for established integrations**
+    
+    ```bash
+    # Base URL for v2.0.0
+    https://api.adcb.com/v2.0
+    
+    # Authentication endpoint  
+    https://auth.adcb.com/v2.0/oauth/token
+    ```
+    
+    **Benefits:**
+    - Battle-tested stability
+    - Long-term support guarantee
+    - Comprehensive documentation
+    - Large community adoption
+    
+    **Best for:**
+    - Existing production systems
+    - Risk-averse implementations
+    - Gradual migration strategies
+  </Tab>
+  
+  <Tab title="Legacy: v1.3.x">
+    **Migration required by April 2026**
+    
+    ```bash
+    # Deprecated endpoints
+    https://api.adcb.com/v1.3
+    
+    # ⚠️ Security updates only
+    ```
+    
+    **Status:**
+    - Security patches only
+    - No new features
+    - Migration tools available
+    - Extended support until 2026
+    
+    **Action Required:**
+    - Plan migration to v2.x
+    - Review breaking changes
+    - Test in sandbox environment
+  </Tab>
+</Tabs>
+
+## Migration Assistant
+
+### Automated Migration Tools
+
+<AccordionGroup>
+  <Accordion title="Migration Analyzer">
+    **Analyze your current integration**
+    
+    ```bash
+    # Install migration analyzer
+    npm install -g @adcb/migration-analyzer
+    
+    # Analyze your codebase
+    adcb-migrate analyze --from v1.3 --to v2.1 --path ./src
+    
+    # Generate migration report
+    adcb-migrate report --format json --output migration-plan.json
+    ```
+    
+    **Features:**
+    - Automatic breaking change detection
+    - Code transformation suggestions
+    - Compatibility assessment
+    - Risk analysis and timeline estimation
+  </Accordion>
+  
+  <Accordion title="Code Transformer">
+    **Automatically update your code**
+    
+    ```bash
+    # Transform authentication code
+    adcb-migrate transform auth --from v1.3 --to v2.1
+    
+    # Transform API calls
+    adcb-migrate transform endpoints --from v1.3 --to v2.1
+    
+    # Transform error handling
+    adcb-migrate transform errors --from v1.3 --to v2.1
+    ```
+    
+    **Capabilities:**
+    - Automatic endpoint URL updates
+    - Response format transformations
+    - Error handling modernization
+    - Authentication flow updates
+  </Accordion>
+  
+  <Accordion title="Testing Suite">
+    **Validate your migration**
+    
+    ```bash
+    # Run compatibility tests
+    adcb-migrate test --version v2.1
+    
+    # Performance regression tests  
+    adcb-migrate benchmark --compare v1.3,v2.1
+    
+    # Integration validation
+    adcb-migrate validate --endpoints all
+    ```
+    
+    **Test Coverage:**
+    - API response validation
+    - Performance benchmarking
+    - Security compliance checks
+    - Backward compatibility verification
+  </Accordion>
+</AccordionGroup>
+
+## Breaking Changes Guide
+
+### v1.3.x → v2.0.0 Migration
+
+<Steps>
+  <Step title="Update Authentication">
+    **Change OAuth endpoints and headers**
+    
+    ```diff
+    // Before (v1.3.x)
+    - POST https://auth.adcb.com/auth/token
+    
+    // After (v2.0.0)
+    + POST https://auth.adcb.com/oauth/token
+    + X-Request-ID: unique-request-id (required)
+    ```
+  </Step>
+  
+  <Step title="Update Response Parsing">
+    **Handle new response format**
+    
+    ```diff
+    // Before (v1.3.x)
+    - const accounts = response.accounts
+    
+    // After (v2.0.0)  
+    + const accounts = response.data.accounts
+    + const pagination = response.meta
+    + const links = response.links
+    ```
+  </Step>
+  
+  <Step title="Update Error Handling">
+    **Implement RFC 7807 error format**
+    
+    ```diff
+    // Before (v1.3.x)
+    - if (error.code === 'INVALID_ACCOUNT') {
+    -   console.log(error.message)
+    - }
+    
+    // After (v2.0.0)
+    + if (error.error.type.includes('invalid_account')) {
+    +   console.log(error.error.detail)
+    +   console.log(`Trace ID: ${error.error.trace_id}`)
+    + }
+    ```
+  </Step>
+  
+  <Step title="Update OAuth Scopes">
+    **Use granular permissions**
+    
+    ```diff
+    // Before (v1.3.x)
+    - scope: "accounts payments"
+    
+    // After (v2.0.0)
+    + scope: "accounts:read accounts:detail payments:write"
+    ```
+  </Step>
+</Steps>
+
+### v2.0.0 → v2.1.0 Migration
+
+<Note>
+**Non-Breaking Migration**: v2.1.0 is backward compatible with v2.0.0. All existing integrations will continue to work.
+</Note>
+
+**Optional Enhancements:**
+- Update to new webhook event types
+- Implement advanced rate limiting headers
+- Integrate CDP analytics features
+- Utilize enhanced error messaging
+
+## Version Compatibility Matrix
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>v1.3.x</th>
+      <th>v2.0.0</th>
+      <th>v2.1.0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OAuth 2.0</td>
+      <td>✅ Basic</td>
+      <td>✅ Enhanced</td>
+      <td>✅ Advanced</td>
+    </tr>
+    <tr>
+      <td>mTLS Authentication</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>Webhook Events</td>
+      <td>✅ 8 types</td>
+      <td>✅ 15 types</td>
+      <td>✅ 25 types</td>
+    </tr>
+    <tr>
+      <td>Rate Limiting</td>
+      <td>✅ Basic</td>
+      <td>✅ Enhanced</td>
+      <td>✅ Granular</td>
+    </tr>
+    <tr>
+      <td>Error Format</td>
+      <td>❌ Custom</td>
+      <td>✅ RFC 7807</td>
+      <td>✅ RFC 7807+</td>
+    </tr>
+    <tr>
+      <td>Response Format</td>
+      <td>❌ Inconsistent</td>
+      <td>✅ Standardized</td>
+      <td>✅ Enhanced</td>
+    </tr>
+    <tr>
+      <td>CDP Analytics</td>
+      <td>❌</td>
+      <td>✅ Basic</td>
+      <td>✅ Advanced</td>
+    </tr>
+    <tr>
+      <td>Bulk Operations</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>✅ Optimized</td>
+    </tr>
+  </tbody>
+</table>
+
+## Migration Timeline & Support
+
+### Recommended Migration Schedule
+
+<Steps>
+  <Step title="Phase 1: Assessment (Week 1-2)">
+    - Run migration analyzer on your codebase
+    - Review breaking changes and impact assessment
+    - Create migration timeline and resource allocation
+    - Set up sandbox testing environment
+  </Step>
+  
+  <Step title="Phase 2: Development (Week 3-6)">
+    - Implement authentication changes
+    - Update API calls and response handling
+    - Modify error handling logic
+    - Update automated tests
+  </Step>
+  
+  <Step title="Phase 3: Testing (Week 7-8)">
+    - Comprehensive integration testing
+    - Performance regression testing
+    - Security compliance validation
+    - User acceptance testing
+  </Step>
+  
+  <Step title="Phase 4: Deployment (Week 9-10)">
+    - Gradual rollout with monitoring
+    - Fallback procedures preparation
+    - Go-live and production validation
+    - Documentation updates
+  </Step>
+</Steps>
+
+### Migration Support Services
+
+<CardGroup cols={2}>
+  <Card title="Self-Service Migration" icon="tools">
+    **Free migration tools and resources**
+    - Automated migration analyzer
+    - Code transformation tools
+    - Testing suites and validation
+    - Community support forum
+    
+    **Best for:** Standard integrations
+  </Card>
+  
+  <Card title="Assisted Migration" icon="headset">
+    **Professional migration services**
+    - Dedicated migration consultant
+    - Custom migration planning
+    - Code review and validation
+    - Priority support during migration
+    
+    **Best for:** Complex integrations
+  </Card>
+  
+  <Card title="White-Glove Migration" icon="shield">
+    **Full-service migration management**
+    - End-to-end migration management
+    - Custom development services
+    - Risk mitigation and rollback plans
+    - 24/7 support during transition
+    
+    **Best for:** Mission-critical systems
+  </Card>
+  
+  <Card title="Migration Insurance" icon="umbrella">
+    **Risk protection and guarantees**
+    - Migration success guarantee
+    - Downtime compensation
+    - Performance regression protection
+    - Extended support coverage
+    
+    **Best for:** High-stakes deployments
+  </Card>
+</CardGroup>
+
+## FAQ: API Versioning
+
+<AccordionGroup>
+  <Accordion title="How long are API versions supported?">
+    - **Current versions**: Supported indefinitely
+    - **Previous stable**: Minimum 24 months after deprecation
+    - **Legacy versions**: 24 months notice before end-of-life
+    - **Security patches**: Available for all supported versions
+  </Accordion>
+  
+  <Accordion title="Can I use multiple API versions simultaneously?">
+    Yes, you can mix API versions in the same application. However, we recommend standardizing on the latest version for consistency and future compatibility.
+  </Accordion>
+  
+  <Accordion title="What happens if I don't migrate from deprecated versions?">
+    - **After deprecation**: No new features, security patches only
+    - **After end-of-life**: No support, potential service termination
+    - **Grace period**: 6-month extended support available (fee-based)
+  </Accordion>
+  
+  <Accordion title="Are there any costs associated with API versioning?">
+    - **Migration tools**: Free for all customers
+    - **Self-service migration**: No additional costs
+    - **Professional services**: Custom pricing available
+    - **Extended support**: Fee-based for end-of-life versions
+  </Accordion>
+</AccordionGroup>
+
+## Get Migration Help
+
+Need assistance with your API migration? Our team is here to help:
+
+<CardGroup cols={2}>
+  <Card title="Schedule Migration Consultation" icon="calendar">
+    Book a free 30-minute consultation with our migration experts to plan your upgrade strategy.
+    
+    [**Book Consultation →**](https://calendly.com/adcb-migration)
+  </Card>
+  
+  <Card title="Join Migration Webinar" icon="video">
+    Weekly webinars covering migration best practices, common pitfalls, and Q&A sessions.
+    
+    [**Register Now →**](https://adcb.com/webinars/migration)
+  </Card>
+</CardGroup>
+
+<Warning>
+**Important**: End-of-life versions (v1.2.x and earlier) are no longer supported and may experience service interruptions. Immediate migration is strongly recommended.
+</Warning>

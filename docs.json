@@ -40,7 +40,14 @@
               "resources/postman",
               "resources/changelog",
               "resources/pricing",
-              "resources/support"
+              "resources/support",
+              "resources/community"
+            ]
+          },
+          {
+            "group": "API Versioning",
+            "pages": [
+              "api-reference/versions"
             ]
           },
           {
@@ -198,7 +205,8 @@
     }
   },
   "search": {
-    "prompt": "Search ADCB API docs..."
+    "prompt": "Ask anything about ADCB APIs... Try: 'How do I authenticate?' or 'Show me payment examples'",
+    "ai": true
   },
   "feedback": {
     "thumbsRating": true,
@@ -212,5 +220,44 @@
     "gtag": {
       "measurementId": "G-XXXXXXXXXX"
     }
+  },
+  "i18n": {
+    "locales": [
+      {
+        "code": "en",
+        "name": "English",
+        "default": true
+      },
+      {
+        "code": "ar",
+        "name": "العربية",
+        "direction": "rtl"
+      }
+    ]
+  },
+  "api": {
+    "playground": {
+      "mode": "show"
+    }
+  },
+  "integrations": {
+    "intercom": "adcb_developer_support"
+  },
+  "topbarLinks": [
+    {
+      "name": "Developer Console",
+      "url": "https://developers.adcb.com/console"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "API Status",
+      "url": "https://status.adcb.com"
+    }
+  ],
+  "versions": ["v2.1.0", "v2.0.0"],
+  "metadata": {
+    "og:image": "https://adcb.mintlify.app/images/og-image.png",
+    "twitter:site": "@adcb"
   }
 }

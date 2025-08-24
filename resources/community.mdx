@@ -1,0 +1,369 @@
+---
+title: 'Developer Community'
+description: 'Connect with ADCB developers, share knowledge, and get help from the community'
+---
+
+# Developer Community
+
+Join thousands of developers building the future of finance with ADCB APIs. Get help, share knowledge, and contribute to our growing ecosystem.
+
+## Community Platforms
+
+<CardGroup cols={2}>
+  <Card title="GitHub Discussions" icon="github">
+    **Primary community hub for developers**
+    - Technical discussions and Q&A
+    - Feature requests and feedback
+    - Code sharing and collaboration
+    - Release announcements
+    
+    [**Join GitHub Community →**](https://github.com/adcb/api-community/discussions)
+  </Card>
+  
+  <Card title="Stack Overflow" icon="stack-overflow">
+    **Get answers to technical questions**
+    - Tag your questions with `adcb-api`
+    - Browse existing solutions
+    - Contribute answers to help others
+    - Expert moderator support
+    
+    [**Ask on Stack Overflow →**](https://stackoverflow.com/questions/tagged/adcb-api)
+  </Card>
+  
+  <Card title="Developer Discord" icon="discord">
+    **Real-time chat and collaboration**
+    - Live help from community experts
+    - Regional channels (UAE, MENA, Global)
+    - Architecture discussions
+    - Networking and partnerships
+    
+    [**Join Discord Server →**](https://discord.gg/adcb-developers)
+  </Card>
+  
+  <Card title="LinkedIn Developer Group" icon="linkedin">
+    **Professional networking and insights**
+    - Industry trends and news
+    - Career opportunities
+    - Business use cases
+    - Executive insights
+    
+    [**Join LinkedIn Group →**](https://linkedin.com/groups/adcb-developers)
+  </Card>
+</CardGroup>
+
+## Community Resources
+
+### 📚 Knowledge Base
+
+<Tabs>
+  <Tab title="FAQ">
+    **Most frequently asked questions**
+    
+    <AccordionGroup>
+      <Accordion title="How do I get started with ADCB APIs?">
+        Start with our [Quickstart Guide](/quickstart) and follow the step-by-step tutorial. You'll have your first API call working in under 15 minutes.
+      </Accordion>
+      
+      <Accordion title="What programming languages are supported?">
+        We provide official SDKs for Python, Node.js, Java, Go, and .NET. Community SDKs are available for PHP, Ruby, and other languages.
+      </Accordion>
+      
+      <Accordion title="How do I handle webhook signature verification?">
+        Check our [Webhook Security Guide](/guides/webhooks#signature-verification) for complete implementation examples in multiple languages.
+      </Accordion>
+      
+      <Accordion title="What are the rate limits for different API tiers?">
+        Rate limits vary by endpoint and subscription tier. See our [Rate Limiting Guide](/guides/rate-limiting) for detailed information and optimization strategies.
+      </Accordion>
+    </AccordionGroup>
+  </Tab>
+  
+  <Tab title="Code Examples">
+    **Community-contributed code samples**
+    
+    ```python
+    # Popular: Account balance aggregation
+    async def get_total_balance(customer_id):
+        accounts = await adcb_client.get_accounts(customer_id)
+        total = sum(float(account['balance']['available']['amount']) 
+                   for account in accounts['data'])
+        return {'total_balance': total, 'currency': 'AED'}
+    ```
+    
+    ```javascript
+    // Popular: Payment status monitoring
+    const monitorPayment = (paymentId) => {
+      const checkStatus = async () => {
+        const payment = await adcbClient.getPaymentStatus(paymentId);
+        if (payment.status === 'completed') {
+          console.log('Payment successful!');
+          return payment;
+        }
+        setTimeout(checkStatus, 2000); // Check every 2 seconds
+      };
+      return checkStatus();
+    };
+    ```
+  </Tab>
+  
+  <Tab title="Troubleshooting">
+    **Common issues and solutions**
+    
+    | Issue | Solution | Community Rating |
+    |-------|----------|------------------|
+    | Certificate errors in sandbox | [Solution thread](https://github.com/adcb/api-community/discussions/45) | ⭐⭐⭐⭐⭐ |
+    | OAuth token expiration handling | [Best practices guide](https://github.com/adcb/api-community/discussions/23) | ⭐⭐⭐⭐⭐ |
+    | Rate limit optimization | [Performance tips](https://github.com/adcb/api-community/discussions/67) | ⭐⭐⭐⭐ |
+    | Webhook retry logic | [Implementation examples](https://github.com/adcb/api-community/discussions/34) | ⭐⭐⭐⭐⭐ |
+  </Tab>
+</Tabs>
+
+### 🛠️ Community Tools
+
+<CardGroup cols={2}>
+  <Card title="API Testing Tools" icon="wrench">
+    **Community-built testing utilities**
+    - Postman collection with 200+ requests
+    - Automated test suite generators  
+    - Performance benchmarking tools
+    - Mock server implementations
+    
+    [**Browse Tools →**](https://github.com/adcb/community-tools)
+  </Card>
+  
+  <Card title="Integration Templates" icon="template">
+    **Ready-to-use integration templates**
+    - E-commerce payment flows
+    - Banking dashboard starters
+    - Webhook handlers
+    - Compliance reporting tools
+    
+    [**View Templates →**](https://github.com/adcb/integration-templates)
+  </Card>
+  
+  <Card title="SDK Extensions" icon="puzzle-piece">
+    **Community SDK enhancements**
+    - Additional language bindings
+    - Framework integrations (Django, Express, Spring)
+    - Utility libraries and helpers
+    - Testing mocks and fixtures
+    
+    [**Explore Extensions →**](https://github.com/adcb/sdk-extensions)
+  </Card>
+  
+  <Card title="Monitoring Solutions" icon="chart-line">
+    **API monitoring and observability**
+    - Grafana dashboards
+    - Prometheus metrics collectors
+    - Custom alerting solutions
+    - Performance analytics tools
+    
+    [**Get Monitoring Tools →**](https://github.com/adcb/monitoring-tools)
+  </Card>
+</CardGroup>
+
+## Community Events
+
+### 🎯 Upcoming Events
+
+<CardGroup cols={2}>
+  <Card title="Monthly Developer Meetup" icon="calendar">
+    **Next: March 15, 2024 | Dubai**
+    - API best practices workshop
+    - New feature previews
+    - Community showcase
+    - Networking dinner
+    
+    *In-person + Virtual*
+    
+    [**Register Free →**](https://eventbrite.com/adcb-developer-meetup)
+  </Card>
+  
+  <Card title="Quarterly Hackathon" icon="code">
+    **Next: April 20-22, 2024 | Abu Dhabi**
+    - 48-hour fintech challenge
+    - $50,000 in prizes
+    - Mentorship from experts
+    - Demo to ADCB executives
+    
+    *Team registration open*
+    
+    [**Join Hackathon →**](https://hackathon.adcb.com)
+  </Card>
+</CardGroup>
+
+### 📅 Regular Programming
+
+<Tabs>
+  <Tab title="Weekly">
+    **Every Week**
+    - **Tuesday 2PM GMT**: Office Hours with ADCB engineers
+    - **Wednesday 6PM GST**: Community Discord chat
+    - **Thursday 10AM GST**: New developer onboarding session
+    - **Friday**: Community highlights newsletter
+  </Tab>
+  
+  <Tab title="Monthly">
+    **Every Month**
+    - **First Friday**: Developer meetup (Dubai/Abu Dhabi alternating)
+    - **Second Tuesday**: Technical deep-dive webinar
+    - **Third Wednesday**: Community project showcase
+    - **Last Friday**: Virtual API workshop
+  </Tab>
+  
+  <Tab title="Quarterly">
+    **Every Quarter**
+    - **Q1**: Fintech hackathon with prizes
+    - **Q2**: Partner conference and API summit
+    - **Q3**: Community awards and recognition
+    - **Q4**: Year-end celebration and roadmap preview
+  </Tab>
+</Tabs>
+
+## Recognition Program
+
+### 🏆 Community Contributors
+
+<CardGroup cols={3}>
+  <Card title="API Champions" icon="crown">
+    **Top community contributors**
+    - Exclusive beta access
+    - Direct line to product team
+    - Speaking opportunities
+    - Annual recognition event
+    
+    *25 champions selected yearly*
+  </Card>
+  
+  <Card title="Code Contributors" icon="code-branch">
+    **Open source contributors**
+    - GitHub profile badge
+    - Contribution leaderboard
+    - Merchandise rewards
+    - Conference travel stipends
+    
+    *All contributions recognized*
+  </Card>
+  
+  <Card title="Content Creators" icon="pen-nib">
+    **Blog writers and educators**
+    - Guest post opportunities
+    - Content amplification
+    - Creator fund participation
+    - Media interview opportunities
+    
+    *Monthly creator spotlight*
+  </Card>
+</CardGroup>
+
+### 🎖️ Achievement Badges
+
+Earn badges for community participation and unlock exclusive benefits:
+
+| Badge | Requirements | Benefits |
+|-------|-------------|----------|
+| 🌟 First Contributor | Submit your first PR or answer | Welcome kit |
+| 🔥 Helper | Help 10+ community members | Priority support |
+| 🚀 Pioneer | Early adopter of new APIs | Beta access |
+| 🎯 Expert | 50+ helpful contributions | Expert flair |
+| 👑 Legend | Top 1% contributor | Annual recognition |
+
+## Community Guidelines
+
+### 📋 Code of Conduct
+
+**Be Respectful**
+- Treat all community members with respect and professionalism
+- Welcome newcomers and help them learn
+- Avoid discriminatory language or behavior
+
+**Be Helpful**
+- Share knowledge generously
+- Provide constructive feedback
+- Help others troubleshoot issues
+
+**Be Professional**
+- Keep discussions technical and on-topic
+- Respect intellectual property
+- Follow security best practices
+
+### 🛡️ Moderation Policy
+
+Our community moderators ensure a positive environment:
+- **Warning**: First offense gets a friendly reminder
+- **Temporary ban**: Repeated violations result in 7-day suspension
+- **Permanent ban**: Serious violations or repeated offenses
+
+**Report Issues**: Use `@moderator` in Discord or email community@adcb.com
+
+## Get Involved
+
+### 🎯 Ways to Contribute
+
+<Steps>
+  <Step title="Join the Conversation">
+    Start by joining our GitHub Discussions or Discord server. Introduce yourself and let us know what you're building.
+  </Step>
+  
+  <Step title="Share Your Knowledge">
+    Answer questions, share code examples, or write tutorials. Every contribution helps the community grow.
+  </Step>
+  
+  <Step title="Build Something Cool">
+    Create tools, templates, or integrations that other developers can use. Share them in our showcase.
+  </Step>
+  
+  <Step title="Give Feedback">
+    Help us improve by providing feedback on APIs, documentation, and developer tools.
+  </Step>
+</Steps>
+
+### 🚀 Start Contributing Today
+
+<CardGroup cols={2}>
+  <Card title="Good First Issues" icon="heart">
+    Easy ways to start contributing to ADCB developer ecosystem
+    
+    [**Browse Issues →**](https://github.com/adcb/community/labels/good-first-issue)
+  </Card>
+  
+  <Card title="Idea Submissions" icon="lightbulb">
+    Share your ideas for new features, tools, or improvements
+    
+    [**Submit Idea →**](https://github.com/adcb/community/discussions/categories/ideas)
+  </Card>
+</CardGroup>
+
+---
+
+## Community Stats
+
+<CardGroup cols={4}>
+  <Card title="12,000+" icon="users">
+    **Active Developers**
+    Across all platforms
+  </Card>
+  
+  <Card title="2,500+" icon="message-circle">
+    **Questions Answered**
+    Community support this year
+  </Card>
+  
+  <Card title="150+" icon="github">
+    **Open Source Projects**
+    Built by community
+  </Card>
+  
+  <Card title="98%" icon="thumbs-up">
+    **Satisfaction Rate**
+    Community happiness score
+  </Card>
+</CardGroup>
+
+<Tip>
+**New to the community?** Start by introducing yourself in our [Welcome Thread](https://github.com/adcb/community/discussions/1) and let us know what you're building!
+</Tip>
+
+<Info>
+**Community Guidelines**: All community interactions are governed by our [Code of Conduct](https://github.com/adcb/community/blob/main/CODE_OF_CONDUCT.md). We're committed to creating an inclusive and welcoming environment for all developers.
+</Info>
