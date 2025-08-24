@@ -1,0 +1,828 @@
+---
+title: 'Postman Collection'
+description: 'Ready-to-use Postman collection for ADCB Open Banking APIs'
+---
+
+## Overview
+
+ADCB provides comprehensive Postman collections that include all API endpoints, pre-configured environments, automated tests, and examples. These collections help you explore APIs quickly, test integrations, and validate responses without writing code.
+
+<CardGroup cols={2}>
+  <Card title="Complete API Coverage" icon="layer-group">
+    All endpoints for CDP, TPP, and LFI APIs with examples
+  </Card>
+  <Card title="Pre-configured Environments" icon="settings">
+    Sandbox and production environments with variables
+  </Card>
+  <Card title="Automated Authentication" icon="key">
+    OAuth 2.0 flows with automatic token refresh
+  </Card>
+  <Card title="Test Automation" icon="check-double">
+    Built-in tests for response validation and workflows
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+### Step 1: Download Collection
+
+<Tabs>
+  <Tab title="Direct Download">
+    **Latest Collection (v2.1)**
+    - [ADCB Open Banking APIs.postman_collection.json](https://github.com/adcb/postman-collections/releases/download/v2.1/ADCB-Open-Banking-APIs.postman_collection.json)
+    - [ADCB Environments.postman_environment.json](https://github.com/adcb/postman-collections/releases/download/v2.1/ADCB-Environments.postman_environment.json)
+    
+    **Collection Contents:**
+    - 150+ pre-configured API requests
+    - Sandbox and production environments
+    - Authentication workflows
+    - Test data and examples
+    - Automated test scripts
+  </Tab>
+  
+  <Tab title="Postman Button">
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/12345678-abcd-1234-efgh-567890123456)
+    
+    **One-click import:**
+    1. Click "Run in Postman" button above
+    2. Select your workspace
+    3. Collection and environments will be imported automatically
+    4. Configure your credentials in environment variables
+  </Tab>
+  
+  <Tab title="Fork Collection">
+    **Postman Public Workspace:**
+    - Visit [ADCB Public Workspace](https://www.postman.com/adcb-apis)
+    - Fork the collection to your workspace
+    - Get automatic updates when we release new versions
+    - Collaborate with your team using shared workspace
+  </Tab>
+</Tabs>
+
+### Step 2: Configure Environment
+
+<Steps>
+  <Step title="Select Environment">
+    Choose "ADCB Sandbox" for testing or "ADCB Production" for live data
+  </Step>
+  <Step title="Set Credentials">
+    Update environment variables with your API credentials
+  </Step>
+  <Step title="Configure Certificates">
+    Add your mTLS certificates in Postman settings
+  </Step>
+  <Step title="Test Connection">
+    Run the "Health Check" request to verify setup
+  </Step>
+</Steps>
+
+## Environment Configuration
+
+### Sandbox Environment
+
+```json
+{
+  "id": "adcb-sandbox",
+  "name": "ADCB Sandbox",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://sandbox-api.adcb.com",
+      "enabled": true
+    },
+    {
+      "key": "client_id",
+      "value": "{{ADCB_SANDBOX_CLIENT_ID}}",
+      "enabled": true
+    },
+    {
+      "key": "client_secret",
+      "value": "{{ADCB_SANDBOX_CLIENT_SECRET}}",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "token_expires_at",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "test_account_id",
+      "value": "AE07033TEST000000000001",
+      "enabled": true
+    },
+    {
+      "key": "test_customer_id",
+      "value": "CUST_TEST_12345",
+      "enabled": true
+    }
+  ]
+}
+```
+
+### Production Environment
+
+```json
+{
+  "id": "adcb-production",
+  "name": "ADCB Production",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://api.adcb.com",
+      "enabled": true
+    },
+    {
+      "key": "client_id",
+      "value": "{{ADCB_PROD_CLIENT_ID}}",
+      "enabled": true
+    },
+    {
+      "key": "client_secret",
+      "value": "{{ADCB_PROD_CLIENT_SECRET}}",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "token_expires_at",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}
+```
+
+## Collection Structure
+
+### Folder Organization
+
+<AccordionGroup>
+  <Accordion title="🔐 Authentication">
+    **OAuth 2.0 Flows**
+    - Client Credentials Grant
+    - Authorization Code Grant  
+    - Token Refresh
+    - Token Introspection
+    
+    **Helper Requests**
+    - Health Check
+    - API Status
+    - Rate Limit Check
+  </Accordion>
+  
+  <Accordion title="👤 Account Information (TPP)">
+    **Account Management**
+    - List Accounts
+    - Get Account Details
+    - Get Account Balance
+    - Get Account Statements
+    
+    **Transaction History**
+    - Get Transactions
+    - Get Transaction Details
+    - Search Transactions
+    - Export Transactions
+    
+    **Standing Orders & Direct Debits**
+    - List Standing Orders
+    - List Direct Debits
+    - Get Mandate Details
+  </Accordion>
+  
+  <Accordion title="💳 Payment Initiation (TPP)">
+    **Payment Consents**
+    - Create Payment Consent
+    - Get Consent Status
+    - Revoke Consent
+    
+    **Domestic Payments**
+    - Immediate Payments
+    - Future-dated Payments
+    - Standing Order Setup
+    
+    **International Payments**
+    - SWIFT Transfers
+    - Currency Exchange
+    - Correspondent Banking
+  </Accordion>
+  
+  <Accordion title="✅ Confirmation of Payee (TPP)">
+    **CoP Verification**
+    - Verify Payee Details
+    - Bulk CoP Requests
+    - CoP Status Check
+  </Accordion>
+  
+  <Accordion title="🏪 Product Information (TPP)">
+    **Product Catalog**
+    - List Products
+    - Product Details
+    - Eligibility Check
+    - Terms and Conditions
+  </Accordion>
+  
+  <Accordion title="🎯 Customer Data Platform (CDP)">
+    **Customer Profiles**
+    - Get Customer Profile
+    - Customer Analytics
+    - Segmentation Data
+    - Behavioral Insights
+    
+    **Recommendations**
+    - Product Recommendations
+    - Next Best Action
+    - Risk Scoring
+    - Personalization
+  </Accordion>
+  
+  <Accordion title="🏛️ LFI-Specific APIs">
+    **Consent Management**
+    - Advanced Consent Creation
+    - Consent Analytics
+    - Bulk Consent Operations
+    
+    **Data Sharing**
+    - Bidirectional Data Exchange
+    - Data Quality Metrics
+    - Compliance Reporting
+    
+    **Authentication Services**
+    - Headless Authentication
+    - Multi-factor Authentication
+    - Device Registration
+  </Accordion>
+  
+  <Accordion title="📡 Webhooks">
+    **Webhook Management**
+    - Create Webhook
+    - List Webhooks
+    - Update Webhook
+    - Delete Webhook
+    - Test Webhook Delivery
+    
+    **Event Examples**
+    - Transaction Events
+    - Payment Events
+    - Account Events
+    - Consent Events
+  </Accordion>
+</AccordionGroup>
+
+## Authentication Setup
+
+### Pre-request Script for OAuth
+
+The collection includes automatic authentication handling:
+
+```javascript
+// Pre-request script for automatic token management
+const clientId = pm.environment.get("client_id");
+const clientSecret = pm.environment.get("client_secret");
+const baseUrl = pm.environment.get("base_url");
+const currentToken = pm.environment.get("access_token");
+const tokenExpiresAt = pm.environment.get("token_expires_at");
+
+// Check if token is expired or missing
+function isTokenExpired() {
+    if (!currentToken || !tokenExpiresAt) return true;
+    const now = Date.now();
+    const expiryTime = parseInt(tokenExpiresAt);
+    return now >= (expiryTime - 60000); // Refresh 1 minute before expiry
+}
+
+// Get new access token
+function refreshToken() {
+    const tokenRequest = {
+        url: `${baseUrl}/oauth/token`,
+        method: 'POST',
+        header: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: {
+            mode: 'urlencoded',
+            urlencoded: [
+                {key: 'grant_type', value: 'client_credentials'},
+                {key: 'client_id', value: clientId},
+                {key: 'client_secret', value: clientSecret},
+                {key: 'scope', value: 'accounts:read transactions:read payments:write'}
+            ]
+        }
+    };
+    
+    pm.sendRequest(tokenRequest, function (err, response) {
+        if (err) {
+            console.log('Token refresh failed:', err);
+            return;
+        }
+        
+        const jsonResponse = response.json();
+        if (jsonResponse.access_token) {
+            const expiresAt = Date.now() + (jsonResponse.expires_in * 1000);
+            pm.environment.set("access_token", jsonResponse.access_token);
+            pm.environment.set("token_expires_at", expiresAt.toString());
+            console.log('Token refreshed successfully');
+        }
+    });
+}
+
+// Refresh token if needed
+if (isTokenExpired()) {
+    refreshToken();
+}
+```
+
+### Test Script for Response Validation
+
+```javascript
+// Test script for automatic response validation
+pm.test("Status code is successful", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(5000);
+});
+
+pm.test("Response has required headers", function () {
+    pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    pm.expect(pm.response.headers.get("X-Request-ID")).to.not.be.null;
+});
+
+pm.test("Response body is valid JSON", function () {
+    pm.response.to.have.jsonBody();
+});
+
+// API-specific tests
+if (pm.response.code === 200) {
+    const jsonData = pm.response.json();
+    
+    // Test for accounts endpoint
+    if (pm.request.url.path.includes('accounts')) {
+        pm.test("Accounts response has data structure", function () {
+            pm.expect(jsonData).to.have.property('data');
+            pm.expect(jsonData.data).to.have.property('accounts');
+            pm.expect(jsonData.data.accounts).to.be.an('array');
+        });
+        
+        // Store first account ID for subsequent requests
+        if (jsonData.data.accounts.length > 0) {
+            pm.environment.set("first_account_id", jsonData.data.accounts[0].accountId);
+        }
+    }
+    
+    // Test for payment endpoints
+    if (pm.request.url.path.includes('payments')) {
+        pm.test("Payment response has status", function () {
+            pm.expect(jsonData).to.have.property('data');
+            pm.expect(jsonData.data).to.have.property('status');
+        });
+    }
+}
+```
+
+## Certificate Configuration
+
+### Setting up mTLS in Postman
+
+<Steps>
+  <Step title="Open Postman Settings">
+    Go to Settings → Certificates tab
+  </Step>
+  <Step title="Add Client Certificate">
+    Click "Add Certificate" and configure:
+    - Host: `*.adcb.com` (or specific domain)
+    - CRT file: Your client certificate (.crt or .pem)
+    - KEY file: Your private key (.key or .pem)
+    - Passphrase: If your key is encrypted
+  </Step>
+  <Step title="Verify Certificate">
+    Test with the "Health Check" request to ensure certificate is working
+  </Step>
+</Steps>
+
+<Warning>
+  Store certificates securely and never commit them to version control. Use Postman's certificate management for team sharing.
+</Warning>
+
+## Example Requests
+
+### Get Account Balance
+
+```http
+GET {{base_url}}/v1/accounts/{{test_account_id}}/balances
+Authorization: Bearer {{access_token}}
+Accept: application/json
+X-Request-ID: {{$randomUUID}}
+```
+
+**Expected Response:**
+```json
+{
+  "data": {
+    "balance": [
+      {
+        "accountId": "AE07033TEST000000000001",
+        "amount": {
+          "value": 50000.00,
+          "currency": "AED"
+        },
+        "creditDebitIndicator": "Credit",
+        "type": "InterimAvailable",
+        "dateTime": "2024-01-15T10:30:00Z"
+      }
+    ]
+  },
+  "links": {
+    "self": "https://sandbox-api.adcb.com/v1/accounts/AE07033TEST000000000001/balances"
+  },
+  "meta": {
+    "totalPages": 1
+  }
+}
+```
+
+### Create Payment
+
+```http
+POST {{base_url}}/v1/payments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+X-Request-ID: {{$randomUUID}}
+X-Idempotency-Key: {{$randomUUID}}
+
+{
+  "data": {
+    "consentId": "{{payment_consent_id}}",
+    "initiation": {
+      "instructionIdentification": "PAY{{$timestamp}}",
+      "endToEndIdentification": "E2E{{$timestamp}}",
+      "instructedAmount": {
+        "amount": "100.00",
+        "currency": "AED"
+      },
+      "creditorAccount": {
+        "schemeName": "IBAN",
+        "identification": "AE070331234567890123456"
+      },
+      "creditorName": "Test Beneficiary",
+      "remittanceInformation": {
+        "unstructured": "Test payment from Postman collection"
+      }
+    }
+  }
+}
+```
+
+### Webhook Configuration
+
+```http
+POST {{base_url}}/v1/webhooks
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+X-Request-ID: {{$randomUUID}}
+
+{
+  "url": "https://webhook.site/unique-url-here",
+  "events": [
+    "transaction.completed",
+    "payment.initiated",
+    "account.balance.updated"
+  ],
+  "secret": "{{webhook_secret}}",
+  "active": true
+}
+```
+
+## Running Tests
+
+### Individual Request Testing
+
+<Tabs>
+  <Tab title="Single Request">
+    1. Select a request from the collection
+    2. Ensure environment variables are set
+    3. Click "Send"
+    4. Review response and test results
+    5. Check the "Test Results" tab for validations
+  </Tab>
+  
+  <Tab title="Folder Testing">
+    1. Right-click on any folder
+    2. Select "Run folder"
+    3. Configure test settings
+    4. Click "Run" to execute all requests in sequence
+    5. Review the test report
+  </Tab>
+  
+  <Tab title="Collection Runner">
+    1. Click "Runner" in Postman
+    2. Select ADCB collection
+    3. Choose environment and data file (optional)
+    4. Configure iterations and delays
+    5. Click "Start Run" for comprehensive testing
+  </Tab>
+</Tabs>
+
+### Automated Test Flows
+
+The collection includes several pre-built test workflows:
+
+<AccordionGroup>
+  <Accordion title="🔄 Authentication Flow Test">
+    **Steps:**
+    1. Health Check
+    2. Get Access Token
+    3. Token Validation
+    4. Token Refresh Test
+    
+    **Validations:**
+    - Successful authentication
+    - Token format and expiry
+    - Refresh token functionality
+    - Error handling
+  </Accordion>
+  
+  <Accordion title="📊 Account Information Flow">
+    **Steps:**
+    1. Authenticate
+    2. List All Accounts
+    3. Get Account Details
+    4. Get Account Balance
+    5. Get Transaction History
+    
+    **Validations:**
+    - Account data structure
+    - Balance accuracy
+    - Transaction format
+    - Pagination handling
+  </Accordion>
+  
+  <Accordion title="💸 Payment Flow Test">
+    **Steps:**
+    1. Create Payment Consent
+    2. Authorize Payment (simulated in sandbox)
+    3. Submit Payment
+    4. Check Payment Status
+    5. Verify Account Balance Change
+    
+    **Validations:**
+    - Consent creation
+    - Payment submission
+    - Status updates
+    - Balance impact
+  </Accordion>
+  
+  <Accordion title="🔗 Webhook Integration Test">
+    **Steps:**
+    1. Create Webhook
+    2. Trigger Test Event
+    3. Verify Webhook Delivery
+    4. Validate Signature
+    5. Clean up Webhook
+    
+    **Validations:**
+    - Webhook creation
+    - Event delivery
+    - Signature verification
+    - Payload structure
+  </Accordion>
+</AccordionGroup>
+
+## Data-Driven Testing
+
+### CSV Data Files
+
+Create CSV files for testing multiple scenarios:
+
+**accounts_test_data.csv**
+```csv
+account_id,expected_currency,min_balance
+AE07033TEST000000000001,AED,0
+AE07033TEST000000000002,AED,1000
+AE07033TEST000000000003,AED,0
+```
+
+**payment_test_data.csv**
+```csv
+amount,currency,creditor_account,description
+100.00,AED,AE070331234567890123456,Test payment 1
+250.50,AED,AE070331234567890123457,Test payment 2
+1000.00,AED,AE070331234567890123458,Large payment test
+```
+
+### Using Data Files
+
+1. Click "Runner" in Postman
+2. Select your collection and environment
+3. Click "Select File" next to "Data"
+4. Upload your CSV file
+5. Configure iterations to match data rows
+6. Run tests with dynamic data
+
+## Monitoring and Reports
+
+### Newman CLI Integration
+
+Run collections from command line using Newman:
+
+```bash
+# Install Newman
+npm install -g newman
+
+# Run collection
+newman run "ADCB Open Banking APIs.postman_collection.json" \
+  --environment "ADCB Sandbox.postman_environment.json" \
+  --reporters html,cli \
+  --reporter-html-export report.html
+
+# Run with data file
+newman run collection.json \
+  --environment environment.json \
+  --data test-data.csv \
+  --iteration-count 3
+```
+
+### CI/CD Integration
+
+**GitHub Actions Example:**
+```yaml
+name: API Tests
+on: [push, pull_request]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install Newman
+      run: npm install -g newman
+    
+    - name: Run Postman Tests
+      run: |
+        newman run ./postman/collection.json \
+          --environment ./postman/sandbox.json \
+          --env-var "client_id=${{ secrets.ADCB_CLIENT_ID }}" \
+          --env-var "client_secret=${{ secrets.ADCB_CLIENT_SECRET }}" \
+          --reporters cli,junit \
+          --reporter-junit-export results.xml
+    
+    - name: Publish Test Results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: results.xml
+```
+
+## Collection Maintenance
+
+### Version Control
+
+<CardGroup cols={2}>
+  <Card title="Collection Versioning" icon="tag">
+    - Semantic versioning (e.g., v2.1.0)
+    - Release notes with each version
+    - Backward compatibility notes
+    - Migration guides for breaking changes
+  </Card>
+  
+  <Card title="Update Notifications" icon="bell">
+    - Follow GitHub releases for updates
+    - Subscribe to ADCB developer newsletter
+    - Check Postman workspace for changes
+    - Review changelog for new features
+  </Card>
+</CardGroup>
+
+### Customization
+
+```javascript
+// Custom pre-request script for your organization
+const orgPrefix = pm.environment.get("org_prefix") || "MYORG";
+const customRequestId = orgPrefix + "-" + pm.variables.replaceIn("{{$randomUUID}}");
+
+pm.request.headers.upsert({
+    key: "X-Request-ID",
+    value: customRequestId
+});
+
+// Custom logging
+console.log(`[${orgPrefix}] Making request to: ${pm.request.url}`);
+
+// Environment-specific configuration
+const environment = pm.environment.get("environment_name");
+if (environment === "production") {
+    // Add extra validation for production
+    pm.request.headers.upsert({
+        key: "X-Environment",
+        value: "production"
+    });
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Authentication Issues">
+    **Problem**: 401 Unauthorized errors
+    
+    **Solutions**:
+    - Verify client credentials in environment variables
+    - Check certificate configuration
+    - Ensure token hasn't expired
+    - Validate scope requirements
+    
+    **Debug Steps**:
+    ```javascript
+    // Add to test script for debugging
+    console.log("Current token:", pm.environment.get("access_token"));
+    console.log("Token expires at:", new Date(parseInt(pm.environment.get("token_expires_at"))));
+    console.log("Current time:", new Date());
+    ```
+  </Accordion>
+  
+  <Accordion title="Certificate Problems">
+    **Problem**: SSL handshake failures
+    
+    **Solutions**:
+    - Verify certificate format (PEM/P12)
+    - Check certificate expiry date
+    - Ensure private key matches certificate
+    - Validate certificate chain
+    
+    **Testing Certificate**:
+    ```bash
+    # Test certificate outside Postman
+    curl -v --cert cert.pem --key key.pem https://sandbox-api.adcb.com/health
+    ```
+  </Accordion>
+  
+  <Accordion title="Test Failures">
+    **Problem**: Tests failing unexpectedly
+    
+    **Solutions**:
+    - Check sandbox data availability
+    - Verify test assertions match current API responses
+    - Update test data references
+    - Review API changes in changelog
+    
+    **Common Test Fixes**:
+    ```javascript
+    // More flexible balance check
+    pm.test("Balance is a valid number", function () {
+        const balance = pm.response.json().data.balance[0].amount.value;
+        pm.expect(typeof balance).to.eql("number");
+        pm.expect(balance).to.be.at.least(0);
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Security" icon="shield">
+    - Never commit credentials to version control
+    - Use environment variables for sensitive data
+    - Rotate certificates before expiry
+    - Implement proper error handling
+  </Card>
+  
+  <Card title="Testing" icon="check-circle">
+    - Write comprehensive test assertions
+    - Use data files for multiple scenarios
+    - Implement retry logic for flaky tests
+    - Monitor test execution times
+  </Card>
+  
+  <Card title="Organization" icon="folder">
+    - Use descriptive request names
+    - Group related requests in folders
+    - Document complex workflows
+    - Share collections with your team
+  </Card>
+  
+  <Card title="Maintenance" icon="tools">
+    - Keep collections updated
+    - Review and update test assertions
+    - Clean up unused requests
+    - Monitor API changes
+  </Card>
+</CardGroup>
+
+## Support
+
+Need help with the Postman collection?
+
+- 📧 **Postman Support**: postman-support@adcb.com
+- 📚 **Collection Updates**: [GitHub Releases](https://github.com/adcb/postman-collections/releases)
+- 💬 **Community**: [community.adcb.dev/postman](https://community.adcb.dev/postman)
+- 🐛 **Report Issues**: [GitHub Issues](https://github.com/adcb/postman-collections/issues)

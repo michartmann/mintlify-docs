@@ -1,0 +1,1223 @@
+---
+title: 'Best Practices'
+description: 'Production-ready patterns and recommendations for ADCB API integration'
+---
+
+## Overview
+
+This guide compiles battle-tested best practices for integrating with ADCB APIs, covering security, performance, reliability, and maintainability. Following these recommendations will help you build robust, scalable applications.
+
+<Info>
+  These practices are based on real-world implementations by our most successful API partners and internal ADCB development teams.
+</Info>
+
+## Security Best Practices
+
+### Credential Management
+
+<CardGroup cols={2}>
+  <Card title="Secure Storage" icon="vault">
+    - Use hardware security modules (HSMs) for production keys
+    - Never hardcode credentials in source code  
+    - Rotate credentials regularly (quarterly minimum)
+    - Use separate credentials for each environment
+  </Card>
+  
+  <Card title="Access Control" icon="user-shield">
+    - Implement principle of least privilege
+    - Use role-based access control (RBAC)
+    - Enable multi-factor authentication
+    - Audit credential access regularly
+  </Card>
+</CardGroup>
+
+```python
+# ✅ Good: Secure credential management
+import os
+from cryptography.fernet import Fernet
+
+class SecureConfig:
+    def __init__(self):
+        self.encryption_key = os.environ.get('ENCRYPTION_KEY')
+        self.cipher = Fernet(self.encryption_key.encode())
+    
+    def get_credential(self, credential_name: str) -> str:
+        encrypted_value = os.environ.get(f'{credential_name}_ENCRYPTED')
+        if not encrypted_value:
+            raise ValueError(f"Credential {credential_name} not found")
+        return self.cipher.decrypt(encrypted_value.encode()).decode()
+
+# ❌ Bad: Hardcoded credentials
+client_secret = "hardcoded_secret_123"  # Never do this
+```
+
+### Network Security
+
+<AccordionGroup>
+  <Accordion title="TLS Configuration">
+    **Minimum Requirements:**
+    - TLS 1.2 or higher (TLS 1.3 recommended)
+    - Strong cipher suites only
+    - Certificate pinning for enhanced security
+    - OCSP stapling for certificate validation
+    
+    ```python
+    import ssl
+    import requests
+    
+    # Configure secure TLS context
+    context = ssl.create_default_context()
+    context.check_hostname = True
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    
+    # Disable weak ciphers
+    context.set_ciphers('HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA')
+    ```
+  </Accordion>
+  
+  <Accordion title="Certificate Management">
+    **Best Practices:**
+    - Use 2048-bit RSA or 256-bit ECC keys minimum
+    - Implement automated certificate renewal
+    - Monitor certificate expiry (30-day alerts)
+    - Maintain certificate chain integrity
+    
+    ```bash
+    # Monitor certificate expiry
+    openssl x509 -in cert.pem -noout -dates
+    
+    # Verify certificate chain
+    openssl verify -CAfile ca-bundle.pem cert.pem
+    
+    # Check certificate against private key
+    openssl rsa -noout -modulus -in key.pem | openssl md5
+    openssl x509 -noout -modulus -in cert.pem | openssl md5
+    ```
+  </Accordion>
+  
+  <Accordion title="IP Whitelisting">
+    **Implementation Strategy:**
+    - Use NAT gateways for consistent outbound IPs
+    - Implement IP rotation for high availability
+    - Document all whitelisted IPs with ownership
+    - Regular audits of IP whitelist
+    
+    ```python
+    # Example: Dynamic IP management
+    class IPManager:
+        def __init__(self):
+            self.current_ips = self.get_current_ips()
+            self.backup_ips = self.get_backup_ips()
+        
+        def register_ip_with_adcb(self, ip_address: str):
+            # Register new IP with ADCB whitelist
+            response = requests.post(
+                'https://api.adcb.com/v1/security/whitelist',
+                json={'ip_address': ip_address, 'description': 'Primary NAT Gateway'},
+                headers={'Authorization': f'Bearer {admin_token}'}
+            )
+            return response.json()
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance Optimization
+
+### Connection Management
+
+<CodeGroup>
+
+```python Python
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import threading
+
+class OptimizedADCBClient:
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialize()
+        return cls._instance
+    
+    def _initialize(self):
+        self.session = requests.Session()
+        
+        # Configure connection pooling
+        adapter = HTTPAdapter(
+            pool_connections=20,      # Number of connection pools
+            pool_maxsize=50,          # Maximum connections per pool
+            max_retries=self._get_retry_strategy(),
+            socket_options=[
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 45),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 10),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 6),
+            ]
+        )
+        
+        self.session.mount('https://', adapter)
+        self.session.mount('http://', adapter)
+    
+    def _get_retry_strategy(self):
+        return Retry(
+            total=3,
+            backoff_factor=0.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=['GET', 'POST', 'PUT', 'DELETE']
+        )
+```
+
+```javascript Node.js
+const https = require('https');
+const axios = require('axios');
+
+class OptimizedADCBClient {
+    constructor() {
+        if (OptimizedADCBClient.instance) {
+            return OptimizedADCBClient.instance;
+        }
+        
+        // Configure keep-alive agent
+        this.httpsAgent = new https.Agent({
+            keepAlive: true,
+            keepAliveMsecs: 30000,
+            maxSockets: 50,
+            maxFreeSockets: 10,
+            timeout: 60000,
+            freeSocketTimeout: 30000
+        });
+        
+        // Create axios instance with optimizations
+        this.client = axios.create({
+            httpsAgent: this.httpsAgent,
+            timeout: 30000,
+            maxRedirects: 3,
+            validateStatus: status => status < 500 // Don't throw on 4xx errors
+        });
+        
+        // Request interceptor for common headers
+        this.client.interceptors.request.use(config => {
+            config.headers['User-Agent'] = 'ADCB-Client/2.1.0';
+            config.headers['Accept-Encoding'] = 'gzip, deflate, br';
+            return config;
+        });
+        
+        OptimizedADCBClient.instance = this;
+    }
+    
+    // Graceful cleanup
+    destroy() {
+        if (this.httpsAgent) {
+            this.httpsAgent.destroy();
+        }
+    }
+}
+```
+
+</CodeGroup>
+
+### Caching Strategies
+
+<AccordionGroup>
+  <Accordion title="Multi-Layer Caching">
+    **Cache Hierarchy:**
+    1. **In-Memory Cache** (L1): Fastest access for frequently used data
+    2. **Redis Cache** (L2): Shared cache across application instances  
+    3. **HTTP Cache** (L3): Browser/proxy caching with proper headers
+    
+    ```python
+    import redis
+    from functools import wraps
+    import json
+    import hashlib
+    
+    class MultiLayerCache:
+        def __init__(self):
+            self.memory_cache = {}  # L1 cache
+            self.redis_client = redis.Redis(host='localhost', port=6379, db=0)  # L2 cache
+        
+        def cache_key(self, func_name: str, *args, **kwargs) -> str:
+            key_data = f"{func_name}:{args}:{sorted(kwargs.items())}"
+            return hashlib.md5(key_data.encode()).hexdigest()
+        
+        def cached(self, ttl: int = 300):
+            def decorator(func):
+                @wraps(func)
+                def wrapper(*args, **kwargs):
+                    cache_key = self.cache_key(func.__name__, *args, **kwargs)
+                    
+                    # Try L1 cache first
+                    if cache_key in self.memory_cache:
+                        return self.memory_cache[cache_key]
+                    
+                    # Try L2 cache
+                    cached_value = self.redis_client.get(cache_key)
+                    if cached_value:
+                        result = json.loads(cached_value)
+                        self.memory_cache[cache_key] = result  # Populate L1
+                        return result
+                    
+                    # Execute function and cache result
+                    result = func(*args, **kwargs)
+                    
+                    # Store in both caches
+                    self.memory_cache[cache_key] = result
+                    self.redis_client.setex(cache_key, ttl, json.dumps(result))
+                    
+                    return result
+                return wrapper
+            return decorator
+    
+    cache = MultiLayerCache()
+    
+    @cache.cached(ttl=600)  # 10 minutes
+    def get_account_balance(account_id: str):
+        return adcb_client.get_balance(account_id)
+    ```
+  </Accordion>
+  
+  <Accordion title="Cache Invalidation">
+    **Smart Invalidation Strategies:**
+    - Time-based expiration for static data
+    - Event-based invalidation for dynamic data
+    - Cache warming for predictable access patterns
+    - Graceful fallback when cache is unavailable
+    
+    ```python
+    class SmartCacheManager:
+        def __init__(self):
+            self.cache = redis.Redis()
+            self.event_handlers = {}
+        
+        def invalidate_pattern(self, pattern: str):
+            """Invalidate cache keys matching pattern"""
+            keys = self.cache.keys(pattern)
+            if keys:
+                self.cache.delete(*keys)
+        
+        def handle_webhook_event(self, event_type: str, data: dict):
+            """Invalidate cache based on webhook events"""
+            if event_type == 'account.balance.updated':
+                account_id = data.get('account_id')
+                self.invalidate_pattern(f"balance:{account_id}:*")
+                
+            elif event_type == 'transaction.completed':
+                account_id = data.get('account_id')
+                self.invalidate_pattern(f"transactions:{account_id}:*")
+                self.invalidate_pattern(f"balance:{account_id}:*")
+        
+        def warm_cache(self, cache_keys: list):
+            """Pre-populate cache with likely-needed data"""
+            for key_func in cache_keys:
+                try:
+                    key_func()  # Execute function to populate cache
+                except Exception as e:
+                    logging.warning(f"Cache warming failed for {key_func}: {e}")
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Batch Operations
+
+```python
+import asyncio
+from typing import List, Dict, Any
+
+class BatchProcessor:
+    def __init__(self, batch_size: int = 10, max_concurrent: int = 5):
+        self.batch_size = batch_size
+        self.semaphore = asyncio.Semaphore(max_concurrent)
+    
+    async def process_accounts_batch(self, account_ids: List[str]) -> Dict[str, Any]:
+        """Process multiple accounts efficiently"""
+        results = {}
+        
+        # Split into batches
+        batches = [account_ids[i:i + self.batch_size] 
+                  for i in range(0, len(account_ids), self.batch_size)]
+        
+        # Process batches concurrently
+        batch_tasks = [self._process_single_batch(batch) for batch in batches]
+        batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+        
+        # Combine results
+        for batch_result in batch_results:
+            if isinstance(batch_result, dict):
+                results.update(batch_result)
+            else:
+                logging.error(f"Batch processing error: {batch_result}")
+        
+        return results
+    
+    async def _process_single_batch(self, account_ids: List[str]) -> Dict[str, Any]:
+        async with self.semaphore:
+            tasks = []
+            for account_id in account_ids:
+                task = self._get_account_with_balance(account_id)
+                tasks.append(task)
+            
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            return {aid: result for aid, result in zip(account_ids, results) 
+                   if not isinstance(result, Exception)}
+    
+    async def _get_account_with_balance(self, account_id: str):
+        """Get account details and balance in parallel"""
+        account_task = self.client.get_account(account_id)
+        balance_task = self.client.get_balance(account_id)
+        
+        account, balance = await asyncio.gather(account_task, balance_task)
+        return {'account': account, 'balance': balance}
+```
+
+## Reliability Patterns
+
+### Circuit Breaker Implementation
+
+<CodeGroup>
+
+```python Python
+import time
+import threading
+from enum import Enum
+from typing import Callable, Any, Optional
+
+class CircuitState(Enum):
+    CLOSED = "closed"
+    OPEN = "open"  
+    HALF_OPEN = "half_open"
+
+class CircuitBreaker:
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        recovery_timeout: int = 60,
+        expected_exception: type = Exception,
+        success_threshold: int = 3  # For half-open state
+    ):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.expected_exception = expected_exception
+        self.success_threshold = success_threshold
+        
+        self.failure_count = 0
+        self.success_count = 0
+        self.last_failure_time: Optional[float] = None
+        self.state = CircuitState.CLOSED
+        self._lock = threading.RLock()
+        
+        # Metrics
+        self.total_requests = 0
+        self.total_failures = 0
+    
+    def call(self, func: Callable[..., Any], *args, **kwargs) -> Any:
+        with self._lock:
+            self.total_requests += 1
+            
+            if self.state == CircuitState.OPEN:
+                if self._should_attempt_reset():
+                    self.state = CircuitState.HALF_OPEN
+                    self.success_count = 0
+                else:
+                    raise Exception(f"Circuit breaker is OPEN. Last failure: {self.last_failure_time}")
+            
+            try:
+                result = func(*args, **kwargs)
+                self._on_success()
+                return result
+                
+            except self.expected_exception as e:
+                self._on_failure()
+                raise
+    
+    def _should_attempt_reset(self) -> bool:
+        return (
+            self.last_failure_time is not None and
+            time.time() - self.last_failure_time >= self.recovery_timeout
+        )
+    
+    def _on_success(self):
+        if self.state == CircuitState.HALF_OPEN:
+            self.success_count += 1
+            if self.success_count >= self.success_threshold:
+                self.state = CircuitState.CLOSED
+                self.failure_count = 0
+        else:
+            self.failure_count = 0
+    
+    def _on_failure(self):
+        self.total_failures += 1
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+    
+    @property
+    def failure_rate(self) -> float:
+        if self.total_requests == 0:
+            return 0.0
+        return self.total_failures / self.total_requests
+    
+    def reset(self):
+        """Manually reset circuit breaker"""
+        with self._lock:
+            self.state = CircuitState.CLOSED
+            self.failure_count = 0
+            self.success_count = 0
+            self.last_failure_time = None
+
+# Usage example
+payment_circuit = CircuitBreaker(
+    failure_threshold=3,
+    recovery_timeout=30,
+    expected_exception=ADCBAPIError
+)
+
+def make_payment(payment_data):
+    return payment_circuit.call(adcb_client.create_payment, payment_data)
+```
+
+</CodeGroup>
+
+### Bulkhead Pattern
+
+```python
+import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, Any
+
+class BulkheadManager:
+    """Isolate different types of operations to prevent cascading failures"""
+    
+    def __init__(self):
+        # Separate thread pools for different operations
+        self.pools = {
+            'account_ops': ThreadPoolExecutor(max_workers=10, thread_name_prefix='account'),
+            'payment_ops': ThreadPoolExecutor(max_workers=5, thread_name_prefix='payment'),  
+            'webhook_ops': ThreadPoolExecutor(max_workers=3, thread_name_prefix='webhook'),
+            'analytics_ops': ThreadPoolExecutor(max_workers=15, thread_name_prefix='analytics')
+        }
+        
+        # Separate semaphores for async operations
+        self.semaphores = {
+            'account_ops': asyncio.Semaphore(20),
+            'payment_ops': asyncio.Semaphore(10),
+            'webhook_ops': asyncio.Semaphore(5),
+            'analytics_ops': asyncio.Semaphore(30)
+        }
+    
+    async def execute_account_operation(self, func, *args, **kwargs):
+        async with self.semaphores['account_ops']:
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(
+                self.pools['account_ops'], 
+                func, *args, **kwargs
+            )
+    
+    async def execute_payment_operation(self, func, *args, **kwargs):
+        async with self.semaphores['payment_ops']:
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(
+                self.pools['payment_ops'],
+                func, *args, **kwargs
+            )
+    
+    def shutdown(self):
+        """Gracefully shutdown all thread pools"""
+        for pool in self.pools.values():
+            pool.shutdown(wait=True)
+
+# Usage
+bulkhead = BulkheadManager()
+
+# Account operations won't block payment operations
+account_task = bulkhead.execute_account_operation(get_account_balance, account_id)
+payment_task = bulkhead.execute_payment_operation(create_payment, payment_data)
+
+results = await asyncio.gather(account_task, payment_task)
+```
+
+## Error Handling Best Practices
+
+### Structured Error Handling
+
+<CodeGroup>
+
+```python Python
+import logging
+import json
+from datetime import datetime
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+
+@dataclass
+class ErrorContext:
+    operation: str
+    customer_id: Optional[str] = None
+    account_id: Optional[str] = None
+    payment_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+    additional_data: Optional[Dict[str, Any]] = None
+
+class StructuredErrorHandler:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        
+        # Configure structured logging
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
+    
+    def handle_api_error(
+        self, 
+        error: Exception, 
+        context: ErrorContext,
+        should_retry: bool = False
+    ) -> Dict[str, Any]:
+        """Centralized error handling with structured logging"""
+        
+        error_details = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'operation': context.operation,
+            'error_type': type(error).__name__,
+            'error_message': str(error),
+            'should_retry': should_retry,
+            'correlation_id': context.correlation_id,
+            'customer_id': context.customer_id,
+            'account_id': context.account_id,
+            'payment_id': context.payment_id
+        }
+        
+        # Add specific error details for ADCB API errors
+        if hasattr(error, 'status_code'):
+            error_details.update({
+                'http_status': error.status_code,
+                'trace_id': getattr(error, 'trace_id', None),
+                'error_code': getattr(error, 'error_code', None)
+            })
+        
+        # Add additional context
+        if context.additional_data:
+            error_details['additional_data'] = context.additional_data
+        
+        # Log with appropriate level
+        if hasattr(error, 'status_code') and error.status_code >= 500:
+            self.logger.error(json.dumps(error_details))
+        else:
+            self.logger.warning(json.dumps(error_details))
+        
+        # Send to monitoring system
+        self._send_to_monitoring(error_details)
+        
+        return error_details
+    
+    def _send_to_monitoring(self, error_details: Dict[str, Any]):
+        """Send error to monitoring/alerting system"""
+        try:
+            # Send to your monitoring system (DataDog, Sentry, etc.)
+            # monitoring_client.send_error(error_details)
+            pass
+        except Exception as e:
+            self.logger.error(f"Failed to send error to monitoring: {e}")
+
+# Usage example
+error_handler = StructuredErrorHandler()
+
+def transfer_funds(from_account: str, to_account: str, amount: float):
+    context = ErrorContext(
+        operation='transfer_funds',
+        account_id=from_account,
+        correlation_id=generate_correlation_id(),
+        additional_data={'to_account': to_account, 'amount': amount}
+    )
+    
+    try:
+        return adcb_client.create_payment({
+            'from_account': from_account,
+            'to_account': to_account,
+            'amount': amount
+        })
+    except ADCBAPIError as e:
+        should_retry = e.status_code >= 500
+        error_details = error_handler.handle_api_error(e, context, should_retry)
+        
+        if should_retry:
+            # Implement retry logic
+            return retry_with_backoff(transfer_funds, from_account, to_account, amount)
+        else:
+            # Re-raise non-retryable errors
+            raise
+```
+
+</CodeGroup>
+
+### Graceful Degradation
+
+```python
+class GracefulDegradationManager:
+    """Handle service degradation gracefully"""
+    
+    def __init__(self):
+        self.service_health = {
+            'accounts': True,
+            'payments': True,
+            'webhooks': True,
+            'analytics': True
+        }
+        self.fallback_data = {}
+    
+    def check_service_health(self, service: str) -> bool:
+        """Check if service is healthy"""
+        try:
+            response = requests.get(f'{base_url}/health/{service}', timeout=5)
+            healthy = response.status_code == 200
+            self.service_health[service] = healthy
+            return healthy
+        except:
+            self.service_health[service] = False
+            return False
+    
+    def get_account_balance_with_fallback(self, account_id: str):
+        """Get balance with fallback to cached data"""
+        if self.check_service_health('accounts'):
+            try:
+                return adcb_client.get_balance(account_id)
+            except Exception as e:
+                logging.warning(f"Primary balance service failed: {e}")
+        
+        # Fallback to cached balance
+        cached_balance = self.get_cached_balance(account_id)
+        if cached_balance:
+            cached_balance['warning'] = 'Using cached data - real-time balance unavailable'
+            return cached_balance
+        
+        # Final fallback
+        return {
+            'account_id': account_id,
+            'balance': 'unavailable',
+            'error': 'Balance service temporarily unavailable'
+        }
+    
+    def get_cached_balance(self, account_id: str):
+        """Retrieve last known balance from cache"""
+        return self.fallback_data.get(f'balance:{account_id}')
+    
+    def update_fallback_data(self, key: str, data: dict):
+        """Update fallback data cache"""
+        self.fallback_data[key] = {
+            **data,
+            'cached_at': datetime.utcnow().isoformat()
+        }
+```
+
+## Monitoring and Observability
+
+### Application Metrics
+
+<CodeGroup>
+
+```python Python
+import time
+import threading
+from collections import defaultdict, deque
+from typing import Dict, List
+import json
+
+class MetricsCollector:
+    def __init__(self, window_size: int = 300):  # 5-minute windows
+        self.window_size = window_size
+        self.metrics = defaultdict(lambda: defaultdict(deque))
+        self.lock = threading.RLock()
+    
+    def record_api_call(
+        self,
+        endpoint: str,
+        method: str,
+        status_code: int,
+        duration: float,
+        error_type: str = None
+    ):
+        """Record API call metrics"""
+        timestamp = time.time()
+        
+        with self.lock:
+            key = f"{method}:{endpoint}"
+            
+            # Record response time
+            self.metrics[key]['response_times'].append((timestamp, duration))
+            
+            # Record status codes
+            self.metrics[key]['status_codes'].append((timestamp, status_code))
+            
+            # Record errors
+            if error_type:
+                self.metrics[key]['errors'].append((timestamp, error_type))
+            
+            # Clean old data
+            self._cleanup_old_data(key, timestamp)
+    
+    def get_metrics_summary(self) -> Dict:
+        """Get current metrics summary"""
+        summary = {}
+        current_time = time.time()
+        
+        with self.lock:
+            for endpoint, data in self.metrics.items():
+                # Calculate response time stats
+                response_times = [duration for _, duration in data['response_times']]
+                if response_times:
+                    avg_response_time = sum(response_times) / len(response_times)
+                    p95_response_time = sorted(response_times)[int(len(response_times) * 0.95)]
+                else:
+                    avg_response_time = p95_response_time = 0
+                
+                # Calculate error rate
+                total_requests = len(data['status_codes'])
+                error_requests = len([1 for _, code in data['status_codes'] if code >= 400])
+                error_rate = error_requests / total_requests if total_requests > 0 else 0
+                
+                summary[endpoint] = {
+                    'total_requests': total_requests,
+                    'error_rate': error_rate,
+                    'avg_response_time': avg_response_time,
+                    'p95_response_time': p95_response_time,
+                    'requests_per_minute': len([1 for ts, _ in data['status_codes'] 
+                                              if current_time - ts <= 60])
+                }
+        
+        return summary
+    
+    def _cleanup_old_data(self, key: str, current_time: float):
+        """Remove data outside the time window"""
+        cutoff_time = current_time - self.window_size
+        
+        for metric_type in ['response_times', 'status_codes', 'errors']:
+            metric_data = self.metrics[key][metric_type]
+            while metric_data and metric_data[0][0] < cutoff_time:
+                metric_data.popleft()
+
+# Decorator for automatic metrics collection
+def monitor_api_call(endpoint: str, method: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            error_type = None
+            status_code = 200
+            
+            try:
+                result = func(*args, **kwargs)
+                if hasattr(result, 'status_code'):
+                    status_code = result.status_code
+                return result
+            except Exception as e:
+                error_type = type(e).__name__
+                if hasattr(e, 'status_code'):
+                    status_code = e.status_code
+                else:
+                    status_code = 500
+                raise
+            finally:
+                duration = time.time() - start_time
+                metrics_collector.record_api_call(
+                    endpoint, method, status_code, duration, error_type
+                )
+        
+        return wrapper
+    return decorator
+
+# Usage
+metrics_collector = MetricsCollector()
+
+@monitor_api_call('accounts', 'GET')
+def get_account_balance(account_id: str):
+    return adcb_client.get_balance(account_id)
+```
+
+</CodeGroup>
+
+### Health Checks
+
+```python
+from dataclasses import dataclass
+from typing import Dict, List, Optional
+import requests
+
+@dataclass
+class HealthCheckResult:
+    service: str
+    status: str  # 'healthy', 'degraded', 'unhealthy'
+    response_time: float
+    details: Optional[Dict] = None
+    error: Optional[str] = None
+
+class HealthChecker:
+    def __init__(self):
+        self.checks = {
+            'adcb_api': self._check_adcb_api,
+            'database': self._check_database,
+            'redis': self._check_redis,
+            'external_services': self._check_external_services
+        }
+    
+    def run_all_checks(self) -> Dict[str, HealthCheckResult]:
+        """Run all health checks"""
+        results = {}
+        
+        for check_name, check_func in self.checks.items():
+            try:
+                results[check_name] = check_func()
+            except Exception as e:
+                results[check_name] = HealthCheckResult(
+                    service=check_name,
+                    status='unhealthy',
+                    response_time=0,
+                    error=str(e)
+                )
+        
+        return results
+    
+    def _check_adcb_api(self) -> HealthCheckResult:
+        """Check ADCB API connectivity"""
+        start_time = time.time()
+        
+        try:
+            response = requests.get(
+                f'{base_url}/health',
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=5
+            )
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                return HealthCheckResult(
+                    service='adcb_api',
+                    status='healthy',
+                    response_time=response_time,
+                    details={'endpoint': f'{base_url}/health'}
+                )
+            else:
+                return HealthCheckResult(
+                    service='adcb_api',
+                    status='degraded',
+                    response_time=response_time,
+                    details={'status_code': response.status_code}
+                )
+        
+        except requests.exceptions.Timeout:
+            return HealthCheckResult(
+                service='adcb_api',
+                status='unhealthy',
+                response_time=5.0,
+                error='Timeout after 5 seconds'
+            )
+        except Exception as e:
+            return HealthCheckResult(
+                service='adcb_api',
+                status='unhealthy',
+                response_time=0,
+                error=str(e)
+            )
+    
+    def get_overall_health(self, results: Dict[str, HealthCheckResult]) -> str:
+        """Determine overall application health"""
+        unhealthy_count = sum(1 for r in results.values() if r.status == 'unhealthy')
+        degraded_count = sum(1 for r in results.values() if r.status == 'degraded')
+        
+        if unhealthy_count > 0:
+            return 'unhealthy'
+        elif degraded_count > 0:
+            return 'degraded'
+        else:
+            return 'healthy'
+
+# Flask health check endpoint
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+health_checker = HealthChecker()
+
+@app.route('/health')
+def health_check():
+    results = health_checker.run_all_checks()
+    overall_health = health_checker.get_overall_health(results)
+    
+    response_data = {
+        'status': overall_health,
+        'timestamp': datetime.utcnow().isoformat(),
+        'checks': {name: result.__dict__ for name, result in results.items()}
+    }
+    
+    status_code = 200 if overall_health == 'healthy' else 503
+    return jsonify(response_data), status_code
+```
+
+## Development Workflow
+
+### Environment Management
+
+<AccordionGroup>
+  <Accordion title="Configuration Management">
+    ```python
+    # config.py - Environment-specific configuration
+    import os
+    from enum import Enum
+    
+    class Environment(Enum):
+        DEVELOPMENT = "development"
+        STAGING = "staging"
+        PRODUCTION = "production"
+    
+    class Config:
+        def __init__(self):
+            self.environment = Environment(os.getenv('ENVIRONMENT', 'development'))
+            self.adcb_base_url = self._get_adcb_url()
+            self.client_id = os.getenv('ADCB_CLIENT_ID')
+            self.client_secret = os.getenv('ADCB_CLIENT_SECRET')
+            self.cert_path = os.getenv('ADCB_CERT_PATH')
+            self.key_path = os.getenv('ADCB_KEY_PATH')
+            
+        def _get_adcb_url(self) -> str:
+            urls = {
+                Environment.DEVELOPMENT: 'https://sandbox-api.adcb.com',
+                Environment.STAGING: 'https://staging-api.adcb.com',
+                Environment.PRODUCTION: 'https://api.adcb.com'
+            }
+            return urls[self.environment]
+        
+        def validate(self):
+            """Validate configuration completeness"""
+            required_vars = ['client_id', 'client_secret', 'cert_path', 'key_path']
+            missing_vars = [var for var in required_vars if not getattr(self, var)]
+            
+            if missing_vars:
+                raise ValueError(f"Missing required config: {missing_vars}")
+    ```
+  </Accordion>
+  
+  <Accordion title="Testing Strategy">
+    ```python
+    # Test pyramid implementation
+    import pytest
+    from unittest.mock import Mock, patch
+    
+    class TestADCBIntegration:
+        """Integration tests with real sandbox API"""
+        
+        @pytest.fixture(scope='class')
+        def sandbox_client(self):
+            return ADCBClient(environment='sandbox')
+        
+        @pytest.mark.integration
+        def test_account_flow(self, sandbox_client):
+            """Test complete account information flow"""
+            # Authenticate
+            token = sandbox_client.authenticate()
+            assert token is not None
+            
+            # Get accounts
+            accounts = sandbox_client.get_accounts()
+            assert len(accounts) > 0
+            
+            # Get balance
+            balance = sandbox_client.get_balance(accounts[0].id)
+            assert balance.amount >= 0
+        
+        @pytest.mark.contract
+        def test_api_contract_compliance(self, sandbox_client):
+            """Verify API responses match expected schema"""
+            accounts = sandbox_client.get_accounts()
+            
+            # Validate response structure
+            assert isinstance(accounts, list)
+            for account in accounts:
+                assert hasattr(account, 'id')
+                assert hasattr(account, 'currency')
+                assert hasattr(account, 'account_type')
+    
+    class TestADCBUnit:
+        """Unit tests with mocked dependencies"""
+        
+        @patch('requests.post')
+        def test_authentication_success(self, mock_post):
+            mock_post.return_value.json.return_value = {
+                'access_token': 'test_token',
+                'expires_in': 3600
+            }
+            
+            client = ADCBClient()
+            token = client.authenticate()
+            assert token == 'test_token'
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Code Quality
+
+<CodeGroup>
+
+```python Python - Pre-commit Hooks
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        language_version: python3.9
+  
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings]
+  
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+  
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        args: [-r, ., -f, json, -o, bandit-report.json]
+        exclude: ^tests/
+
+# Custom hook for API key scanning
+  - repo: local
+    hooks:
+      - id: check-api-keys
+        name: Check for API keys
+        entry: python scripts/check_secrets.py
+        language: system
+        files: \.(py|yml|yaml|json)$
+```
+
+```javascript JavaScript - ESLint Config
+// .eslintrc.js
+module.exports = {
+  extends: [
+    'eslint:recommended',
+    '@typescript-eslint/recommended',
+    'plugin:security/recommended'
+  ],
+  plugins: ['@typescript-eslint', 'security'],
+  rules: {
+    // Security rules
+    'security/detect-hardcoded-secrets': 'error',
+    'security/detect-non-literal-regexp': 'warn',
+    
+    // API integration specific rules
+    'no-console': 'warn', // Use proper logging instead
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+    
+    // Custom rules for ADCB integration
+    'adcb/require-request-id': 'error',
+    'adcb/secure-token-storage': 'error'
+  }
+};
+```
+
+</CodeGroup>
+
+## Team Best Practices
+
+### Documentation Standards
+
+- **API Integration Docs**: Document all API endpoints used, expected responses, and error scenarios
+- **Runbooks**: Step-by-step procedures for common operational tasks
+- **Architecture Decision Records (ADRs)**: Document major technical decisions
+- **Code Comments**: Focus on *why* rather than *what*, especially for business logic
+
+### Collaboration Patterns
+
+<AccordionGroup>
+  <Accordion title="Code Review Checklist">
+    **Security Review:**
+    - [ ] No hardcoded credentials or sensitive data
+    - [ ] Proper input validation and sanitization
+    - [ ] Secure error handling (no sensitive info in logs)
+    - [ ] Appropriate authentication/authorization checks
+    
+    **API Integration Review:**
+    - [ ] Proper error handling for all API calls
+    - [ ] Retry logic implemented where appropriate
+    - [ ] Rate limiting considerations addressed
+    - [ ] Webhook signature verification implemented
+    - [ ] Timeout configuration appropriate
+    
+    **Performance Review:**
+    - [ ] Connection pooling implemented
+    - [ ] Caching strategy appropriate
+    - [ ] Bulk operations used where possible
+    - [ ] Database queries optimized
+    
+    **Testing Review:**
+    - [ ] Unit tests cover critical paths
+    - [ ] Integration tests validate API contracts
+    - [ ] Error scenarios tested
+    - [ ] Mock data doesn't contain real credentials
+  </Accordion>
+  
+  <Accordion title="Incident Response">
+    **Incident Severity Levels:**
+    - **P0**: Complete API outage affecting customers
+    - **P1**: Partial functionality down, significant impact
+    - **P2**: Degraded performance, workarounds available  
+    - **P3**: Minor issues, no customer impact
+    
+    **Response Procedures:**
+    1. **Immediate Response** (5 minutes)
+       - Acknowledge incident
+       - Check API status page
+       - Verify monitoring systems
+    
+    2. **Investigation** (15 minutes)
+       - Review recent deployments
+       - Check error logs and metrics
+       - Validate certificate expiry
+    
+    3. **Resolution** (varies)
+       - Apply fix or rollback
+       - Verify fix in staging first
+       - Monitor for improvement
+    
+    4. **Post-Incident** (24 hours)
+       - Write incident report
+       - Identify root cause
+       - Implement prevention measures
+  </Accordion>
+</AccordionGroup>
+
+### Knowledge Sharing
+
+- **Regular Tech Talks**: Share integration patterns and lessons learned
+- **Internal Documentation**: Maintain team wiki with troubleshooting guides
+- **Pair Programming**: Rotate API integration knowledge across team
+- **Brown Bag Sessions**: Present interesting API use cases and solutions
+
+## Conclusion
+
+Following these best practices will help you build robust, maintainable, and secure integrations with ADCB APIs. Remember that these are guidelines - adapt them to your specific use case and organizational requirements.
+
+**Key Takeaways:**
+- Security should be built-in, not bolted-on
+- Design for failure - things will break
+- Monitor everything that matters
+- Automate what you can, document what you can't
+- Share knowledge and learn from failures
+
+For specific implementation questions or advanced use cases, reach out to our developer support team or engage with the community forum.

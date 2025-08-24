@@ -1,0 +1,619 @@
+---
+title: 'API Changelog'
+description: 'Version history, updates, and breaking changes for ADCB Open Banking APIs'
+---
+
+## Overview
+
+This changelog documents all notable changes to ADCB's Open Banking APIs, including new features, improvements, bug fixes, and breaking changes. We follow semantic versioning and provide clear migration guidance for any breaking changes.
+
+<Info>
+  **Current API Version**: v2.1.0 (Released January 15, 2024)
+  
+  All API versions remain supported for 24 months after deprecation announcement. We provide 6 months advance notice for breaking changes.
+</Info>
+
+## Version 2.1.0 (Current)
+*Released: January 15, 2024*
+
+### 🚀 New Features
+
+<AccordionGroup>
+  <Accordion title="Enhanced Webhook Events">
+    **New webhook event types added:**
+    - `consent.renewed` - Triggered when consent is extended
+    - `account.limit.exceeded` - Alert when account limits are breached  
+    - `payment.scheduled` - Notification for scheduled payments
+    - `customer.kyc.updated` - KYC status change notifications
+    
+    **Improved webhook delivery:**
+    - Reduced delivery latency to <5 seconds
+    - Enhanced retry mechanism with exponential backoff
+    - New webhook testing endpoint for development
+    
+    ```json
+    // New consent.renewed event payload
+    {
+      "type": "consent.renewed",
+      "data": {
+        "consentId": "CONS123456789",
+        "customerId": "CUST789012",
+        "previousExpiryDate": "2024-01-15T23:59:59Z",
+        "newExpiryDate": "2024-04-15T23:59:59Z",
+        "renewalReason": "customer_request"
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Advanced Rate Limiting">
+    **New rate limiting features:**
+    - Per-endpoint rate limits for granular control
+    - Burst allowance for temporary spikes
+    - Rate limit increase requests via API
+    - Enhanced rate limit headers with more details
+    
+    **New headers in responses:**
+    ```http
+    X-RateLimit-Category: account_information
+    X-RateLimit-Burst-Remaining: 10
+    X-RateLimit-Next-Reset: 1641027600
+    X-RateLimit-Tier: premium
+    ```
+  </Accordion>
+  
+  <Accordion title="CDP Analytics Enhancement">
+    **New Customer Data Platform features:**
+    - Real-time customer behavior tracking
+    - Enhanced segmentation with 50+ new attributes
+    - Predictive analytics for churn and lifetime value
+    - Custom event tracking for personalized insights
+    
+    **New endpoints:**
+    - `GET /cdp/v1/customers/{id}/behavior` - Real-time behavior data
+    - `POST /cdp/v1/events` - Custom event tracking
+    - `GET /cdp/v1/segments/{id}/customers` - Segment membership
+  </Accordion>
+</AccordionGroup>
+
+### ✨ Improvements
+
+- **Performance**: 25% reduction in average API response time
+- **Security**: Enhanced certificate validation with OCSP stapling
+- **Documentation**: Interactive API explorer with live examples
+- **Error Messages**: More descriptive error messages with resolution hints
+- **Pagination**: Cursor-based pagination for better performance
+- **Caching**: Improved cache headers for optimized client-side caching
+
+### 🐛 Bug Fixes
+
+- Fixed intermittent timeout issues in international payment processing
+- Resolved duplicate webhook delivery for high-frequency events  
+- Fixed balance calculation edge case for accounts with pending transactions
+- Corrected timezone handling in transaction date filtering
+- Improved error handling for malformed IBAN formats
+
+### 📚 API Documentation
+
+- Added 50+ new code examples across all SDKs
+- Enhanced error handling documentation with recovery strategies  
+- New troubleshooting guides for common integration issues
+- Improved OpenAPI specifications with better validation rules
+
+---
+
+## Version 2.0.0
+*Released: October 1, 2023*
+
+### 💥 Breaking Changes
+
+<Warning>
+  **Migration Required**: This version includes breaking changes. Review the migration guide below.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="Authentication Changes">
+    **OAuth 2.0 Enhancements:**
+    - Required scopes are now more granular
+    - Token endpoint moved from `/auth/token` to `/oauth/token`
+    - New mandatory `X-Request-ID` header for all requests
+    - Enhanced certificate validation requirements
+    
+    **Migration Steps:**
+    ```bash
+    # Before (v1.x)
+    POST /auth/token
+    
+    # After (v2.0+)  
+    POST /oauth/token
+    ```
+    
+    **New required scopes:**
+    ```json
+    {
+      "old_scope": "accounts",
+      "new_scopes": ["accounts:read", "accounts:detail"]
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Response Format Changes">
+    **Standardized Response Structure:**
+    All APIs now return data in a consistent wrapper format:
+    
+    ```json
+    // Before (v1.x)
+    {
+      "accounts": [...],
+      "totalCount": 10
+    }
+    
+    // After (v2.0+)
+    {
+      "data": {
+        "accounts": [...]
+      },
+      "links": {
+        "self": "https://api.adcb.com/v1/accounts",
+        "next": null
+      },
+      "meta": {
+        "totalCount": 10,
+        "pageCount": 1
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Error Format Updates">
+    **RFC 7807 Compliance:**
+    Error responses now follow Problem Details standard:
+    
+    ```json
+    // Before (v1.x)
+    {
+      "error": "Invalid account ID",
+      "code": "INVALID_ACCOUNT"
+    }
+    
+    // After (v2.0+)
+    {
+      "error": {
+        "type": "https://api.adcb.com/errors/invalid_account",
+        "title": "Invalid Account",
+        "status": 400,
+        "detail": "The specified account ID is not valid",
+        "instance": "/v1/accounts/invalid-id",
+        "trace_id": "abc-123-def-456"
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 🚀 New Features
+
+- **LFI APIs**: New Licensed Financial Institution endpoints
+- **Bulk Operations**: Batch processing for high-volume operations
+- **Webhook Signatures**: HMAC-SHA256 signing for webhook security
+- **Advanced Filtering**: Enhanced query parameters for data filtering
+- **Async Processing**: Long-running operations with status polling
+
+### ✨ Improvements
+
+- **SDK Updates**: All official SDKs updated with v2.0 support
+- **Rate Limits**: Increased default rate limits by 50%
+- **Monitoring**: Enhanced API metrics and health endpoints
+- **Compliance**: Full FAPI 1.0 Advanced compliance
+- **Testing**: Improved sandbox with more realistic test scenarios
+
+---
+
+## Version 1.3.2
+*Released: July 20, 2023*
+
+### 🐛 Bug Fixes
+
+- Fixed payment consent expiry calculation for timezone edge cases
+- Resolved webhook delivery delays during peak traffic periods
+- Corrected account balance rounding for currencies with 3 decimal places
+- Fixed pagination cursor encoding for special characters
+
+### ✨ Improvements
+
+- Enhanced error logging with structured JSON format
+- Improved certificate chain validation for mTLS
+- Better handling of concurrent payment submissions
+- Optimized database queries for faster response times
+
+---
+
+## Version 1.3.1
+*Released: June 15, 2023*
+
+### 🐛 Bug Fixes
+
+- Fixed intermittent 500 errors in transaction history endpoint
+- Resolved duplicate transaction IDs in high-frequency scenarios
+- Corrected standing order frequency calculation
+- Fixed webhook signature verification with special characters
+
+### 🔒 Security Updates
+
+- Updated TLS configuration to disable deprecated ciphers
+- Enhanced certificate revocation checking
+- Improved request sanitization for SQL injection prevention
+- Added additional rate limiting for authentication endpoints
+
+---
+
+## Version 1.3.0
+*Released: May 1, 2023*
+
+### 🚀 New Features
+
+<AccordionGroup>
+  <Accordion title="Confirmation of Payee">
+    **New CoP verification service:**
+    - Real-time beneficiary name verification
+    - Bulk CoP requests for batch processing
+    - Enhanced fraud prevention capabilities
+    - Support for both individual and business accounts
+    
+    **New endpoints:**
+    ```http
+    POST /v1/confirmation-of-payee
+    POST /v1/confirmation-of-payee/bulk
+    GET /v1/confirmation-of-payee/{requestId}/status
+    ```
+  </Accordion>
+  
+  <Accordion title="Enhanced Transaction Categorization">
+    **Smart transaction categorization:**
+    - AI-powered merchant category detection
+    - Custom category mapping for businesses
+    - Enhanced transaction descriptions
+    - Spending pattern analytics
+    
+    **New response fields:**
+    ```json
+    {
+      "transaction": {
+        "merchantCategory": "5411",
+        "categoryName": "Grocery Stores",
+        "subCategory": "Supermarket",
+        "enhancedDescription": "CARREFOUR MALL OF EMIRATES"
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### ✨ Improvements
+
+- **Performance**: 40% improvement in transaction endpoint response times
+- **Reliability**: Enhanced error recovery and retry mechanisms
+- **Monitoring**: New health check endpoints with detailed status
+- **Documentation**: Comprehensive API reference with interactive examples
+
+---
+
+## Version 1.2.1
+*Released: March 10, 2023*
+
+### 🐛 Bug Fixes
+
+- Fixed race condition in concurrent payment processing
+- Resolved webhook delivery ordering for rapid-fire events
+- Corrected balance calculations for multi-currency accounts
+- Fixed date range validation in transaction queries
+
+### 🔒 Security Updates
+
+- Enhanced input validation for all request parameters
+- Improved JWT token validation with additional claims checking
+- Updated certificate pinning configurations
+- Strengthened password policy for developer portal accounts
+
+---
+
+## Version 1.2.0
+*Released: February 1, 2023*
+
+### 🚀 New Features
+
+- **International Payments**: SWIFT integration for cross-border transfers
+- **Standing Orders**: Automated recurring payment setup
+- **Direct Debit Mandates**: Direct debit management capabilities
+- **Account Statements**: PDF statement generation and retrieval
+- **Enhanced Webhooks**: Additional event types and improved delivery
+
+### ✨ Improvements
+
+- Expanded sandbox test data with more realistic scenarios
+- Improved SDK error handling with detailed error codes
+- Enhanced API documentation with more code examples
+- Better rate limiting with per-client customization
+
+### 📋 API Changes
+
+**New endpoints added:**
+```http
+POST /v1/international-payments
+GET /v1/accounts/{id}/statements
+POST /v1/standing-orders  
+GET /v1/direct-debits
+```
+
+**Enhanced webhook events:**
+- `payment.international.initiated`
+- `statement.generated`
+- `direct.debit.created`
+- `standing.order.executed`
+
+---
+
+## Version 1.1.2
+*Released: December 15, 2022*
+
+### 🐛 Bug Fixes
+
+- Resolved timeout issues in high-volume transaction retrieval
+- Fixed inconsistent balance reporting during business hours transitions
+- Corrected webhook payload encoding for non-ASCII characters
+- Improved error handling for expired certificates
+
+### ✨ Improvements
+
+- Enhanced logging for better troubleshooting
+- Optimized database queries for account listing
+- Improved webhook retry logic with exponential backoff
+- Better handling of concurrent API requests
+
+---
+
+## Version 1.1.1
+*Released: November 20, 2022*
+
+### 🐛 Bug Fixes
+
+- Fixed payment consent validation for future-dated payments
+- Resolved duplicate webhook delivery issue
+- Corrected transaction amount formatting for large values
+- Fixed pagination metadata accuracy
+
+### 🔒 Security Updates
+
+- Enhanced certificate chain validation
+- Improved OAuth token validation
+- Updated security headers configuration
+- Strengthened API key validation
+
+---
+
+## Version 1.1.0
+*Released: October 15, 2022*
+
+### 🚀 New Features
+
+- **Payment Consents**: Enhanced payment authorization workflow
+- **Webhook Management**: API endpoints for webhook configuration
+- **Bulk Account Operations**: Retrieve multiple accounts in single request
+- **Enhanced Filtering**: Advanced query parameters for transaction filtering
+
+### ✨ Improvements
+
+- Improved API response times by 30%
+- Enhanced error messages with actionable guidance
+- Better SDK documentation with more examples
+- Expanded test coverage in sandbox environment
+
+### 📋 API Changes
+
+**New endpoints:**
+```http
+POST /v1/payment-consents
+GET /v1/payment-consents/{id}
+DELETE /v1/payment-consents/{id}
+POST /v1/webhooks
+PUT /v1/webhooks/{id}
+```
+
+---
+
+## Version 1.0.0
+*Released: August 1, 2022*
+
+### 🎉 Initial Release
+
+**Core Features:**
+- OAuth 2.0 authentication with mTLS
+- Account information retrieval
+- Transaction history access
+- Basic payment initiation
+- Webhook notifications
+- Comprehensive API documentation
+
+**Supported Operations:**
+- List customer accounts
+- Retrieve account balances
+- Access transaction history
+- Initiate domestic payments
+- Manage API credentials
+
+**Security Features:**
+- Mutual TLS authentication
+- OAuth 2.0 with PKCE
+- Request/response encryption
+- Comprehensive audit logging
+
+---
+
+## Migration Guides
+
+### Migrating from v1.x to v2.0
+
+<Steps>
+  <Step title="Update Authentication">
+    Change token endpoint and add new required headers
+    ```diff
+    - POST /auth/token
+    + POST /oauth/token
+    + X-Request-ID: unique-request-id
+    ```
+  </Step>
+  <Step title="Update Response Parsing">
+    Modify code to handle new response wrapper format
+    ```diff
+    - const accounts = response.accounts;
+    + const accounts = response.data.accounts;
+    ```
+  </Step>
+  <Step title="Update Error Handling">
+    Adapt error handling for new RFC 7807 format
+    ```diff
+    - console.log(error.message);
+    + console.log(error.error.detail);
+    ```
+  </Step>
+  <Step title="Review Scopes">
+    Update OAuth scopes to new granular permissions
+    ```diff
+    - scope: "accounts payments"
+    + scope: "accounts:read payments:write"
+    ```
+  </Step>
+</Steps>
+
+### Breaking Change Policy
+
+**Our Commitment:**
+- 6 months advance notice for breaking changes
+- 24 months support for deprecated versions
+- Clear migration documentation and tools
+- Sandbox environment for testing migrations
+
+**What We Consider Breaking:**
+- Removing API endpoints
+- Changing required parameters
+- Modifying response data structure
+- Authentication/authorization changes
+
+**What We Don't Consider Breaking:**
+- Adding new optional parameters
+- Adding new response fields
+- Bug fixes and security updates
+- Performance improvements
+
+## Deprecation Schedule
+
+<Table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Status</th>
+      <th>Deprecation Date</th>
+      <th>End of Life</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**v2.1.0**</td>
+      <td>Current</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>**v2.0.0**</td>
+      <td>Supported</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>**v1.3.x**</td>
+      <td>Supported</td>
+      <td>April 1, 2024</td>
+      <td>April 1, 2026</td>
+    </tr>
+    <tr>
+      <td>**v1.2.x**</td>
+      <td>Deprecated</td>
+      <td>October 1, 2023</td>
+      <td>October 1, 2025</td>
+    </tr>
+    <tr>
+      <td>**v1.1.x**</td>
+      <td>Deprecated</td>
+      <td>August 1, 2023</td>
+      <td>August 1, 2025</td>
+    </tr>
+    <tr>
+      <td>**v1.0.x**</td>
+      <td>End of Life</td>
+      <td>February 1, 2023</td>
+      <td>February 1, 2025</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Upcoming Changes
+
+### v2.2.0 (Planned: March 2024)
+
+**Planned Features:**
+- GraphQL API endpoints for flexible data querying
+- Enhanced CDP with machine learning insights  
+- Real-time payment status updates via WebSockets
+- Advanced consent management with granular permissions
+- Multi-factor authentication support for sensitive operations
+
+**Expected Breaking Changes:**
+- None planned for v2.2.0
+
+### v3.0.0 (Planned: Q3 2024)
+
+**Major Changes Under Consideration:**
+- Migration to OpenAPI 3.1 specification
+- Enhanced error taxonomy with more specific error codes
+- Restructured endpoint naming for better consistency
+- Advanced webhook filtering and transformation capabilities
+
+<Warning>
+  v3.0.0 is currently in planning phase. Specific changes and timelines may be adjusted based on customer feedback and market requirements.
+</Warning>
+
+## Stay Updated
+
+<CardGroup cols={2}>
+  <Card title="Developer Newsletter" icon="envelope">
+    Subscribe to receive monthly updates about API changes, new features, and best practices
+  </Card>
+  <Card title="RSS Feed" icon="rss">
+    Subscribe to our changelog RSS feed for automatic notifications
+  </Card>
+  <Card title="GitHub Releases" icon="tag">
+    Watch our documentation repository for release notifications
+  </Card>
+  <Card title="Developer Portal" icon="bell">
+    Enable notifications in your developer dashboard for important announcements
+  </Card>
+</CardGroup>
+
+### Notification Preferences
+
+Configure your notification preferences in the [Developer Portal](https://developers.adcb.com/settings/notifications):
+
+- **Breaking Changes**: High-priority notifications for breaking changes (Recommended: Email + SMS)
+- **New Features**: Updates about new API features and capabilities (Recommended: Email)
+- **Bug Fixes**: Notifications about important bug fixes (Recommended: Email)
+- **Security Updates**: Critical security patches and updates (Recommended: Email + SMS)
+- **Maintenance**: Scheduled maintenance and downtime notifications (Recommended: Email)
+
+## Feedback
+
+We value your feedback on API changes and future direction:
+
+- 📧 **API Feedback**: api-feedback@adcb.com
+- 💬 **Community Forum**: [community.adcb.dev/feedback](https://community.adcb.dev/feedback)
+- 📋 **Feature Requests**: Submit via Developer Portal
+- 🐛 **Bug Reports**: [github.com/adcb/api-issues](https://github.com/adcb/api-issues)

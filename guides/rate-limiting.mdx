@@ -1,0 +1,1033 @@
+---
+title: 'Rate Limiting Guide'
+description: 'Understanding and handling API rate limits effectively'
+---
+
+## Overview
+
+ADCB APIs implement rate limiting to ensure fair usage, maintain system stability, and provide consistent performance for all users. Understanding how rate limits work and implementing proper handling is crucial for building reliable applications.
+
+<Info>
+  Rate limits protect both ADCB's infrastructure and your application from being overwhelmed by excessive requests. They also ensure equitable access to API resources across all users.
+</Info>
+
+## Rate Limit Structure
+
+ADCB uses a multi-tier rate limiting system based on:
+
+<CardGroup cols={2}>
+  <Card title="Time Windows" icon="clock">
+    Different limits for second, minute, hour, and daily windows
+  </Card>
+  <Card title="API Categories" icon="layer-group">
+    Separate limits for different types of operations
+  </Card>
+  <Card title="Account Tiers" icon="trophy">
+    Higher limits for premium and enterprise customers
+  </Card>
+  <Card title="Endpoint Specific" icon="bullseye">
+    Some endpoints have specialized rate limits
+  </Card>
+</CardGroup>
+
+## Rate Limit Tiers
+
+<Tabs>
+  <Tab title="Standard Tier">
+    **Default tier for all new developers**
+    
+    | API Category | Per Second | Per Minute | Per Hour | Per Day |
+    |--------------|------------|------------|----------|---------|
+    | Authentication | 2 | 10 | 100 | 500 |
+    | Account Information | 5 | 100 | 1,000 | 10,000 |
+    | Transaction History | 3 | 60 | 600 | 5,000 |
+    | Payment Initiation | 1 | 20 | 200 | 1,000 |
+    | Balance Inquiry | 10 | 200 | 2,000 | 20,000 |
+    | Webhook Management | 1 | 10 | 100 | 500 |
+    | Metadata APIs | 20 | 500 | 5,000 | 50,000 |
+    
+    **Request for upgrade when you exceed 80% of daily limits consistently**
+  </Tab>
+  
+  <Tab title="Premium Tier">
+    **Available for high-volume applications**
+    
+    | API Category | Per Second | Per Minute | Per Hour | Per Day |
+    |--------------|------------|------------|----------|---------|
+    | Authentication | 5 | 50 | 500 | 2,500 |
+    | Account Information | 20 | 500 | 5,000 | 50,000 |
+    | Transaction History | 15 | 300 | 3,000 | 25,000 |
+    | Payment Initiation | 5 | 100 | 1,000 | 5,000 |
+    | Balance Inquiry | 50 | 1,000 | 10,000 | 100,000 |
+    | Webhook Management | 3 | 50 | 500 | 2,500 |
+    | Metadata APIs | 100 | 2,500 | 25,000 | 250,000 |
+    
+    **Requirements**: Consistent high usage, business justification, enhanced support
+  </Tab>
+  
+  <Tab title="Enterprise Tier">
+    **Custom limits for large institutions**
+    
+    | API Category | Per Second | Per Minute | Per Hour | Per Day |
+    |--------------|------------|------------|----------|---------|
+    | Authentication | 20 | 200 | 2,000 | 10,000 |
+    | Account Information | 100 | 2,000 | 20,000 | 200,000 |
+    | Transaction History | 50 | 1,000 | 10,000 | 100,000 |
+    | Payment Initiation | 20 | 500 | 5,000 | 25,000 |
+    | Balance Inquiry | 200 | 5,000 | 50,000 | 500,000 |
+    | Webhook Management | 10 | 200 | 2,000 | 10,000 |
+    | Metadata APIs | 500 | 10,000 | 100,000 | 1,000,000 |
+    
+    **Requirements**: Enterprise agreement, dedicated TAM, custom SLA
+  </Tab>
+  
+  <Tab title="LFI Tier">
+    **Enhanced limits for Licensed Financial Institutions**
+    
+    | API Category | Per Second | Per Minute | Per Hour | Per Day |
+    |--------------|------------|------------|----------|---------|
+    | All Standard APIs | 200 | 5,000 | 50,000 | 500,000 |
+    | LFI-Specific APIs | 100 | 2,500 | 25,000 | 250,000 |
+    | Data Sharing APIs | 50 | 1,000 | 10,000 | 100,000 |
+    | Bulk Operations | 10 | 100 | 1,000 | 5,000 |
+    | Real-time Events | Unlimited | Unlimited | Unlimited | Unlimited |
+    
+    **Requirements**: Valid LFI license, compliance approval, enhanced security
+  </Tab>
+</Tabs>
+
+## Rate Limit Headers
+
+Every API response includes rate limit information in the headers:
+
+```http
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1641027600
+X-RateLimit-Window: 60
+X-RateLimit-Category: account_information
+X-RateLimit-Tier: standard
+```
+
+### Header Descriptions
+
+<Table>
+  <thead>
+    <tr>
+      <th>Header</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`X-RateLimit-Limit`</td>
+      <td>Maximum requests allowed in current window</td>
+      <td>`100`</td>
+    </tr>
+    <tr>
+      <td>`X-RateLimit-Remaining`</td>
+      <td>Requests remaining in current window</td>
+      <td>`87`</td>
+    </tr>
+    <tr>
+      <td>`X-RateLimit-Reset`</td>
+      <td>Unix timestamp when window resets</td>
+      <td>`1641027600`</td>
+    </tr>
+    <tr>
+      <td>`X-RateLimit-Window`</td>
+      <td>Window size in seconds</td>
+      <td>`60`</td>
+    </tr>
+    <tr>
+      <td>`X-RateLimit-Category`</td>
+      <td>API category for this limit</td>
+      <td>`account_information`</td>
+    </tr>
+    <tr>
+      <td>`X-RateLimit-Tier`</td>
+      <td>Your current rate limit tier</td>
+      <td>`standard`</td>
+    </tr>
+  </tbody>
+</Table>
+
+## 429 Too Many Requests Response
+
+When rate limits are exceeded, APIs return a 429 status with detailed information:
+
+```json
+{
+  "error": {
+    "type": "https://api.adcb.com/errors/rate_limit_exceeded",
+    "title": "Too Many Requests",
+    "status": 429,
+    "detail": "Rate limit exceeded for account information APIs",
+    "instance": "/v1/accounts/AE070331234567890123456",
+    "trace_id": "rl_4d9c8b5a-f6e2-4c8a-9d3b-1e7f5a6c8d9e",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "rate_limit": {
+      "category": "account_information",
+      "limit": 100,
+      "window_seconds": 60,
+      "reset_at": "2024-01-15T10:31:00Z",
+      "retry_after": 30
+    }
+  }
+}
+```
+
+Additional headers included with 429 responses:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1641027660
+```
+
+## Implementation Strategies
+
+### Client-Side Rate Limiting
+
+<CodeGroup>
+
+```python Python
+import time
+import threading
+from collections import deque, defaultdict
+from typing import Dict, Optional
+
+class RateLimiter:
+    def __init__(self):
+        self.windows = defaultdict(lambda: defaultdict(deque))
+        self.lock = threading.RLock()
+    
+    def is_allowed(
+        self,
+        category: str,
+        limit: int,
+        window_seconds: int,
+        identifier: str = "default"
+    ) -> tuple[bool, Optional[float]]:
+        """
+        Check if request is allowed under rate limit.
+        Returns (is_allowed, retry_after_seconds)
+        """
+        with self.lock:
+            now = time.time()
+            window_key = f"{category}_{window_seconds}"
+            requests = self.windows[identifier][window_key]
+            
+            # Remove old requests outside the window
+            cutoff_time = now - window_seconds
+            while requests and requests[0] < cutoff_time:
+                requests.popleft()
+            
+            if len(requests) >= limit:
+                # Rate limit exceeded
+                oldest_request = requests[0]
+                retry_after = window_seconds - (now - oldest_request)
+                return False, max(0, retry_after)
+            
+            # Request allowed
+            requests.append(now)
+            return True, None
+
+# Usage with ADCB API
+class ADCBRateLimitedClient:
+    def __init__(self):
+        self.rate_limiter = RateLimiter()
+        self.category_limits = {
+            'account_information': {'limit': 100, 'window': 60},
+            'payment_initiation': {'limit': 20, 'window': 60},
+            'balance_inquiry': {'limit': 200, 'window': 60},
+        }
+    
+    def make_request(self, category: str, request_func, *args, **kwargs):
+        limits = self.category_limits.get(category, {'limit': 100, 'window': 60})
+        
+        allowed, retry_after = self.rate_limiter.is_allowed(
+            category,
+            limits['limit'],
+            limits['window']
+        )
+        
+        if not allowed:
+            print(f"Rate limit exceeded. Waiting {retry_after:.2f} seconds...")
+            time.sleep(retry_after + 0.1)  # Small buffer
+        
+        return request_func(*args, **kwargs)
+
+# Example usage
+client = ADCBRateLimitedClient()
+
+def get_account_info(account_id):
+    return client.make_request(
+        'account_information',
+        lambda: requests.get(
+            f'https://api.adcb.com/v1/accounts/{account_id}',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+    )
+```
+
+```javascript JavaScript
+class RateLimiter {
+    constructor() {
+        this.windows = new Map();
+    }
+    
+    isAllowed(category, limit, windowSeconds, identifier = 'default') {
+        const now = Date.now() / 1000;
+        const windowKey = `${identifier}:${category}:${windowSeconds}`;
+        
+        if (!this.windows.has(windowKey)) {
+            this.windows.set(windowKey, []);
+        }
+        
+        const requests = this.windows.get(windowKey);
+        const cutoffTime = now - windowSeconds;
+        
+        // Remove old requests
+        while (requests.length > 0 && requests[0] < cutoffTime) {
+            requests.shift();
+        }
+        
+        if (requests.length >= limit) {
+            const oldestRequest = requests[0];
+            const retryAfter = windowSeconds - (now - oldestRequest);
+            return { allowed: false, retryAfter: Math.max(0, retryAfter) };
+        }
+        
+        requests.push(now);
+        return { allowed: true, retryAfter: null };
+    }
+}
+
+class ADCBRateLimitedClient {
+    constructor() {
+        this.rateLimiter = new RateLimiter();
+        this.categoryLimits = {
+            'account_information': { limit: 100, window: 60 },
+            'payment_initiation': { limit: 20, window: 60 },
+            'balance_inquiry': { limit: 200, window: 60 }
+        };
+    }
+    
+    async makeRequest(category, requestFunc) {
+        const limits = this.categoryLimits[category] || { limit: 100, window: 60 };
+        
+        const { allowed, retryAfter } = this.rateLimiter.isAllowed(
+            category,
+            limits.limit,
+            limits.window
+        );
+        
+        if (!allowed) {
+            console.log(`Rate limit exceeded. Waiting ${retryAfter.toFixed(2)} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, (retryAfter + 0.1) * 1000));
+        }
+        
+        return await requestFunc();
+    }
+}
+
+// Usage
+const client = new ADCBRateLimitedClient();
+
+async function getAccountInfo(accountId) {
+    return await client.makeRequest(
+        'account_information',
+        () => fetch(`https://api.adcb.com/v1/accounts/${accountId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+    );
+}
+```
+
+</CodeGroup>
+
+### Adaptive Rate Limiting
+
+<CodeGroup>
+
+```python Python
+import requests
+from datetime import datetime, timedelta
+import logging
+
+class AdaptiveRateLimiter:
+    def __init__(self):
+        self.server_limits = {}
+        self.last_updated = {}
+        self.safety_margin = 0.1  # 10% safety margin
+    
+    def update_from_response(self, response: requests.Response, category: str):
+        """Update rate limits from server response headers"""
+        if 'X-RateLimit-Limit' in response.headers:
+            limit = int(response.headers['X-RateLimit-Limit'])
+            window = int(response.headers.get('X-RateLimit-Window', 60))
+            remaining = int(response.headers.get('X-RateLimit-Remaining', limit))
+            reset_timestamp = int(response.headers.get('X-RateLimit-Reset', 0))
+            
+            # Apply safety margin
+            effective_limit = int(limit * (1 - self.safety_margin))
+            
+            self.server_limits[category] = {
+                'limit': effective_limit,
+                'window': window,
+                'remaining': remaining,
+                'reset_at': reset_timestamp
+            }
+            self.last_updated[category] = datetime.utcnow()
+    
+    def get_wait_time(self, category: str) -> float:
+        """Calculate how long to wait before next request"""
+        if category not in self.server_limits:
+            return 0
+        
+        limits = self.server_limits[category]
+        
+        if limits['remaining'] <= 0:
+            # Calculate time until reset
+            reset_time = datetime.fromtimestamp(limits['reset_at'])
+            now = datetime.utcnow()
+            wait_time = (reset_time - now).total_seconds()
+            return max(0, wait_time)
+        
+        # Calculate optimal spacing to avoid bursts
+        remaining_time = limits['reset_at'] - datetime.utcnow().timestamp()
+        if remaining_time > 0 and limits['remaining'] > 0:
+            optimal_delay = remaining_time / limits['remaining']
+            return max(0, optimal_delay)
+        
+        return 0
+    
+    def should_make_request(self, category: str) -> tuple[bool, float]:
+        """Check if request should be made now"""
+        wait_time = self.get_wait_time(category)
+        
+        if wait_time > 0:
+            return False, wait_time
+        
+        return True, 0
+
+# Enhanced API client with adaptive rate limiting
+class SmartADCBClient:
+    def __init__(self):
+        self.rate_limiter = AdaptiveRateLimiter()
+        self.session = requests.Session()
+    
+    def make_request(self, method: str, url: str, category: str, **kwargs):
+        # Check if we should wait
+        should_proceed, wait_time = self.rate_limiter.should_make_request(category)
+        
+        if not should_proceed:
+            logging.info(f"Rate limiting: waiting {wait_time:.2f} seconds for {category}")
+            time.sleep(wait_time)
+        
+        # Make the request
+        response = self.session.request(method, url, **kwargs)
+        
+        # Update rate limits from response
+        self.rate_limiter.update_from_response(response, category)
+        
+        # Handle rate limit exceeded
+        if response.status_code == 429:
+            retry_after = int(response.headers.get('Retry-After', 60))
+            logging.warning(f"Rate limit exceeded, waiting {retry_after} seconds")
+            time.sleep(retry_after)
+            
+            # Retry the request
+            response = self.session.request(method, url, **kwargs)
+            self.rate_limiter.update_from_response(response, category)
+        
+        return response
+
+# Usage
+client = SmartADCBClient()
+
+def get_accounts():
+    return client.make_request(
+        'GET',
+        'https://api.adcb.com/v1/accounts',
+        'account_information',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+```
+
+</CodeGroup>
+
+### Batch Request Optimization
+
+<CodeGroup>
+
+```python Python
+import asyncio
+import aiohttp
+from typing import List, Dict, Any
+
+class BatchRequestManager:
+    def __init__(self, max_concurrent: int = 10):
+        self.max_concurrent = max_concurrent
+        self.semaphore = asyncio.Semaphore(max_concurrent)
+    
+    async def batch_account_requests(
+        self,
+        account_ids: List[str],
+        access_token: str,
+        include_balance: bool = True,
+        include_transactions: bool = False
+    ) -> Dict[str, Any]:
+        """Efficiently batch multiple account-related requests"""
+        
+        async def fetch_account_data(session: aiohttp.ClientSession, account_id: str):
+            async with self.semaphore:
+                results = {'account_id': account_id}
+                
+                try:
+                    # Get account details
+                    async with session.get(
+                        f'https://api.adcb.com/v1/accounts/{account_id}',
+                        headers={'Authorization': f'Bearer {access_token}'}
+                    ) as resp:
+                        if resp.status == 200:
+                            results['account'] = await resp.json()
+                        else:
+                            results['account_error'] = await resp.text()
+                    
+                    # Get balance if requested
+                    if include_balance:
+                        await asyncio.sleep(0.1)  # Small delay to avoid burst
+                        async with session.get(
+                            f'https://api.adcb.com/v1/accounts/{account_id}/balance',
+                            headers={'Authorization': f'Bearer {access_token}'}
+                        ) as resp:
+                            if resp.status == 200:
+                                results['balance'] = await resp.json()
+                            else:
+                                results['balance_error'] = await resp.text()
+                    
+                    # Get transactions if requested
+                    if include_transactions:
+                        await asyncio.sleep(0.2)  # Larger delay for transaction endpoint
+                        async with session.get(
+                            f'https://api.adcb.com/v1/accounts/{account_id}/transactions',
+                            headers={'Authorization': f'Bearer {access_token}'},
+                            params={'limit': 10}  # Limit recent transactions
+                        ) as resp:
+                            if resp.status == 200:
+                                results['transactions'] = await resp.json()
+                            else:
+                                results['transactions_error'] = await resp.text()
+                
+                except Exception as e:
+                    results['error'] = str(e)
+                
+                return results
+        
+        # Execute all requests concurrently
+        async with aiohttp.ClientSession() as session:
+            tasks = [
+                fetch_account_data(session, account_id) 
+                for account_id in account_ids
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        return {result['account_id']: result for result in results if isinstance(result, dict)}
+
+# Usage
+async def main():
+    batch_manager = BatchRequestManager(max_concurrent=5)
+    
+    account_ids = [
+        'AE070331234567890123456',
+        'AE070331234567890123457',
+        'AE070331234567890123458'
+    ]
+    
+    results = await batch_manager.batch_account_requests(
+        account_ids=account_ids,
+        access_token=token,
+        include_balance=True,
+        include_transactions=True
+    )
+    
+    for account_id, data in results.items():
+        print(f"Account {account_id}: {data}")
+
+# Run the batch process
+asyncio.run(main())
+```
+
+</CodeGroup>
+
+## Monitoring and Optimization
+
+### Rate Limit Tracking
+
+<CodeGroup>
+
+```python Python
+import time
+import json
+import logging
+from collections import defaultdict, deque
+from dataclasses import dataclass
+from typing import Dict, List
+
+@dataclass
+class RateLimitMetrics:
+    category: str
+    requests_made: int
+    requests_allowed: int
+    requests_blocked: int
+    total_wait_time: float
+    avg_remaining: float
+    min_remaining: int
+    max_remaining: int
+
+class RateLimitMonitor:
+    def __init__(self, window_size: int = 3600):  # 1 hour window
+        self.window_size = window_size
+        self.metrics = defaultdict(lambda: {
+            'requests': deque(),
+            'blocks': deque(),
+            'wait_times': deque(),
+            'remaining_counts': deque()
+        })
+    
+    def record_request(
+        self,
+        category: str,
+        was_blocked: bool = False,
+        wait_time: float = 0,
+        remaining_requests: int = None
+    ):
+        """Record a rate limit event"""
+        timestamp = time.time()
+        category_data = self.metrics[category]
+        
+        # Record the request
+        category_data['requests'].append(timestamp)
+        
+        if was_blocked:
+            category_data['blocks'].append(timestamp)
+            category_data['wait_times'].append(wait_time)
+        
+        if remaining_requests is not None:
+            category_data['remaining_counts'].append({
+                'timestamp': timestamp,
+                'remaining': remaining_requests
+            })
+        
+        # Clean old data
+        self._cleanup_old_data(category, timestamp)
+    
+    def _cleanup_old_data(self, category: str, current_time: float):
+        """Remove data outside the monitoring window"""
+        cutoff_time = current_time - self.window_size
+        category_data = self.metrics[category]
+        
+        # Clean requests
+        while category_data['requests'] and category_data['requests'][0] < cutoff_time:
+            category_data['requests'].popleft()
+        
+        # Clean blocks
+        while category_data['blocks'] and category_data['blocks'][0] < cutoff_time:
+            category_data['blocks'].popleft()
+        
+        # Clean remaining counts
+        while (category_data['remaining_counts'] and 
+               category_data['remaining_counts'][0]['timestamp'] < cutoff_time):
+            category_data['remaining_counts'].popleft()
+    
+    def get_metrics(self, category: str) -> RateLimitMetrics:
+        """Get rate limit metrics for a category"""
+        current_time = time.time()
+        self._cleanup_old_data(category, current_time)
+        
+        category_data = self.metrics[category]
+        
+        requests_made = len(category_data['requests'])
+        requests_blocked = len(category_data['blocks'])
+        requests_allowed = requests_made - requests_blocked
+        
+        total_wait_time = sum(category_data['wait_times'])
+        
+        # Calculate remaining request statistics
+        remaining_counts = [item['remaining'] for item in category_data['remaining_counts']]
+        if remaining_counts:
+            avg_remaining = sum(remaining_counts) / len(remaining_counts)
+            min_remaining = min(remaining_counts)
+            max_remaining = max(remaining_counts)
+        else:
+            avg_remaining = min_remaining = max_remaining = 0
+        
+        return RateLimitMetrics(
+            category=category,
+            requests_made=requests_made,
+            requests_allowed=requests_allowed,
+            requests_blocked=requests_blocked,
+            total_wait_time=total_wait_time,
+            avg_remaining=avg_remaining,
+            min_remaining=min_remaining,
+            max_remaining=max_remaining
+        )
+    
+    def get_all_metrics(self) -> Dict[str, RateLimitMetrics]:
+        """Get metrics for all categories"""
+        return {
+            category: self.get_metrics(category)
+            for category in self.metrics.keys()
+        }
+    
+    def log_metrics(self):
+        """Log current metrics"""
+        all_metrics = self.get_all_metrics()
+        
+        for category, metrics in all_metrics.items():
+            block_rate = (
+                metrics.requests_blocked / metrics.requests_made 
+                if metrics.requests_made > 0 else 0
+            )
+            
+            logging.info(
+                f"Rate Limit Metrics [{category}]: "
+                f"Requests: {metrics.requests_made}, "
+                f"Blocked: {metrics.requests_blocked} ({block_rate:.1%}), "
+                f"Avg Remaining: {metrics.avg_remaining:.1f}, "
+                f"Total Wait: {metrics.total_wait_time:.2f}s"
+            )
+
+# Enhanced client with monitoring
+class MonitoredADCBClient:
+    def __init__(self):
+        self.monitor = RateLimitMonitor()
+        self.session = requests.Session()
+    
+    def make_request(self, method: str, url: str, category: str, **kwargs):
+        start_time = time.time()
+        was_blocked = False
+        wait_time = 0
+        
+        try:
+            response = self.session.request(method, url, **kwargs)
+            
+            # Extract rate limit info
+            remaining = response.headers.get('X-RateLimit-Remaining')
+            if remaining:
+                remaining = int(remaining)
+            
+            # Handle rate limiting
+            if response.status_code == 429:
+                was_blocked = True
+                retry_after = int(response.headers.get('Retry-After', 60))
+                wait_time = retry_after
+                
+                logging.warning(f"Rate limited on {category}, waiting {retry_after}s")
+                time.sleep(retry_after)
+                
+                # Retry
+                response = self.session.request(method, url, **kwargs)
+                remaining = response.headers.get('X-RateLimit-Remaining')
+                if remaining:
+                    remaining = int(remaining)
+            
+            return response
+            
+        finally:
+            # Record metrics
+            total_time = time.time() - start_time
+            self.monitor.record_request(
+                category=category,
+                was_blocked=was_blocked,
+                wait_time=wait_time,
+                remaining_requests=remaining
+            )
+    
+    def get_metrics_summary(self):
+        """Get and log current metrics"""
+        self.monitor.log_metrics()
+        return self.monitor.get_all_metrics()
+```
+
+</CodeGroup>
+
+### Rate Limit Dashboard
+
+```python
+def create_rate_limit_dashboard():
+    """Simple dashboard for rate limit monitoring"""
+    import matplotlib.pyplot as plt
+    from datetime import datetime, timedelta
+    
+    def plot_rate_limit_usage(monitor: RateLimitMonitor):
+        metrics = monitor.get_all_metrics()
+        
+        categories = list(metrics.keys())
+        requests_made = [m.requests_made for m in metrics.values()]
+        requests_blocked = [m.requests_blocked for m in metrics.values()]
+        
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        
+        # Request volume chart
+        ax1.bar(categories, requests_made, label='Total Requests', alpha=0.7)
+        ax1.bar(categories, requests_blocked, label='Blocked Requests', alpha=0.7)
+        ax1.set_ylabel('Request Count')
+        ax1.set_title('Request Volume by Category (Last Hour)')
+        ax1.legend()
+        ax1.tick_params(axis='x', rotation=45)
+        
+        # Block rate chart
+        block_rates = [
+            (m.requests_blocked / m.requests_made * 100) if m.requests_made > 0 else 0
+            for m in metrics.values()
+        ]
+        ax2.bar(categories, block_rates, color='red', alpha=0.7)
+        ax2.set_ylabel('Block Rate (%)')
+        ax2.set_title('Rate Limit Block Rate by Category')
+        ax2.tick_params(axis='x', rotation=45)
+        
+        plt.tight_layout()
+        plt.show()
+    
+    return plot_rate_limit_usage
+```
+
+## Best Practices
+
+### 1. Proactive Rate Limit Management
+
+<CardGroup cols={2}>
+  <Card title="Monitor Your Usage" icon="chart-line">
+    - Track rate limit headers in all responses
+    - Set up alerts when approaching limits
+    - Monitor trends to predict capacity needs
+    - Log rate limit violations for analysis
+  </Card>
+  
+  <Card title="Implement Client-Side Limiting" icon="shield">
+    - Don't rely solely on server-side limits
+    - Implement local rate limiting with safety margins
+    - Use adaptive algorithms that learn from responses
+    - Queue requests when approaching limits
+  </Card>
+</CardGroup>
+
+### 2. Request Optimization
+
+<CardGroup cols={2}>
+  <Card title="Batch Related Requests" icon="layer-group">
+    - Group related API calls together
+    - Use concurrent requests with rate limit awareness
+    - Implement request deduplication
+    - Cache frequently accessed data
+  </Card>
+  
+  <Card title="Smart Retry Logic" icon="refresh">
+    - Respect Retry-After headers
+    - Use exponential backoff with jitter
+    - Don't retry on non-rate-limit errors
+    - Implement circuit breakers for failing endpoints
+  </Card>
+</CardGroup>
+
+### 3. Application Architecture
+
+<AccordionGroup>
+  <Accordion title="Queue-Based Processing">
+    ```python
+    import asyncio
+    from asyncio import Queue
+    
+    class RateLimitedQueue:
+        def __init__(self, rate_per_second: int):
+            self.rate = rate_per_second
+            self.queue = Queue()
+            self.last_request_time = 0
+        
+        async def process_requests(self):
+            while True:
+                # Wait for next request
+                request = await self.queue.get()
+                
+                # Ensure we don't exceed rate limit
+                now = time.time()
+                time_since_last = now - self.last_request_time
+                min_interval = 1.0 / self.rate
+                
+                if time_since_last < min_interval:
+                    await asyncio.sleep(min_interval - time_since_last)
+                
+                # Process the request
+                try:
+                    await request['func'](*request['args'], **request['kwargs'])
+                finally:
+                    self.last_request_time = time.time()
+                    self.queue.task_done()
+    ```
+  </Accordion>
+  
+  <Accordion title="Caching Strategy">
+    ```python
+    import redis
+    import json
+    from datetime import datetime, timedelta
+    
+    class ADCBResponseCache:
+        def __init__(self, redis_host='localhost', redis_port=6379):
+            self.redis = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        
+        def get_cache_key(self, method: str, url: str, params: dict = None) -> str:
+            """Generate cache key for request"""
+            key_data = f"{method}:{url}"
+            if params:
+                key_data += f":{json.dumps(params, sort_keys=True)}"
+            return f"adcb:cache:{key_data}"
+        
+        def get(self, method: str, url: str, params: dict = None) -> dict:
+            """Get cached response"""
+            key = self.get_cache_key(method, url, params)
+            cached = self.redis.get(key)
+            return json.loads(cached) if cached else None
+        
+        def set(self, method: str, url: str, response: dict, ttl: int = 300, params: dict = None):
+            """Cache response with TTL"""
+            key = self.get_cache_key(method, url, params)
+            self.redis.setex(key, ttl, json.dumps(response))
+        
+        def should_cache(self, method: str, status_code: int) -> bool:
+            """Determine if response should be cached"""
+            return method == 'GET' and 200 <= status_code < 300
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting Common Issues
+
+<AccordionGroup>
+  <Accordion title="Unexpected Rate Limit Errors">
+    **Symptoms**: Getting 429 errors despite low request volume
+    
+    **Common Causes**:
+    - Multiple applications using same credentials
+    - Burst requests exceeding per-second limits
+    - Clock skew affecting window calculations
+    - Shared IP address with other high-volume users
+    
+    **Solutions**:
+    - Implement request spacing
+    - Check for other applications using same credentials
+    - Monitor per-second vs per-minute limits
+    - Contact support if limits seem incorrect
+  </Accordion>
+  
+  <Accordion title="Inconsistent Rate Limit Headers">
+    **Symptoms**: Rate limit headers don't match expected values
+    
+    **Common Causes**:
+    - Different API categories have different limits
+    - Rate limits updated but client not aware
+    - Load balancer returning cached headers
+    - Multiple time windows (second/minute/hour) applying
+    
+    **Solutions**:
+    - Always read headers from actual responses
+    - Implement adaptive rate limiting
+    - Check API category in X-RateLimit-Category header
+    - Monitor multiple time window limits
+  </Accordion>
+  
+  <Accordion title="Rate Limits Not Resetting">
+    **Symptoms**: Rate limit remaining count doesn't increase over time
+    
+    **Common Causes**:
+    - Misunderstanding sliding window vs fixed window
+    - Time zone issues with reset timestamps
+    - Continuous request stream preventing reset
+    - System clock synchronization issues
+    
+    **Solutions**:
+    - Understand ADCB uses sliding windows for most limits
+    - Use UTC for all time calculations
+    - Implement request pausing to allow reset
+    - Synchronize system clock with NTP
+  </Accordion>
+</AccordionGroup>
+
+## Rate Limit Increase Requests
+
+### When to Request an Increase
+
+<Steps>
+  <Step title="Monitor Your Usage">
+    Track your API usage for at least 30 days to establish patterns
+  </Step>
+  <Step title="Document Business Need">
+    Provide clear business justification for higher limits
+  </Step>
+  <Step title="Submit Request">
+    Contact support with usage data and requirements
+  </Step>
+  <Step title="Implementation Plan">
+    Show how you'll handle the increased capacity responsibly
+  </Step>
+</Steps>
+
+### Required Information
+
+When requesting rate limit increases, provide:
+
+- **Current Usage Patterns**: Daily/weekly/monthly request volumes
+- **Business Justification**: Why higher limits are needed
+- **Growth Projections**: Expected usage growth over next 12 months  
+- **Technical Implementation**: How you handle rate limiting
+- **Error Handling**: Your approach to 429 responses
+- **Monitoring**: How you track and optimize usage
+
+### Sample Request Template
+
+```markdown
+Subject: Rate Limit Increase Request - [Your Application Name]
+
+Application Details:
+- Client ID: [your_client_id]
+- Current Tier: Standard
+- Requested Tier: Premium
+
+Current Usage:
+- Account Information API: 8,500 requests/day (85% of limit)
+- Payment Initiation API: 750 requests/day (75% of limit)
+- Peak Usage Time: 9:00 AM - 11:00 AM GST
+
+Business Justification:
+We're launching a new personal finance management feature that will
+aggregate account data for 50,000+ users. This requires increased
+API capacity to provide real-time balance updates.
+
+Growth Projection:
+- Month 1-3: 15,000 requests/day
+- Month 4-6: 25,000 requests/day  
+- Month 7-12: 40,000 requests/day
+
+Technical Implementation:
+- Client-side rate limiting with 20% safety margin
+- Exponential backoff retry logic
+- Request batching where possible
+- Redis-based caching for frequently accessed data
+
+We've implemented comprehensive monitoring and are prepared to
+handle the increased capacity responsibly.
+```
+
+## Support
+
+For rate limiting support:
+- 📧 **Rate Limit Support**: ratelimits@adcb.com
+- 📊 **Usage Dashboard**: Available in Developer Portal
+- 📈 **Increase Requests**: Submit via support portal

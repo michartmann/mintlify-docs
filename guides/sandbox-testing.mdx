@@ -1,0 +1,1035 @@
+---
+title: 'Sandbox Testing Guide'
+description: 'Comprehensive guide to testing ADCB APIs in the sandbox environment'
+---
+
+## Overview
+
+ADCB's sandbox environment provides a safe, production-like testing environment where you can develop and test your integration without affecting real customer data or incurring transaction costs. The sandbox mimics all production functionality while using test data.
+
+<Info>
+  The sandbox environment is completely isolated from production and uses synthetic test data. No real customer information or actual transactions are processed.
+</Info>
+
+## Sandbox vs Production
+
+<Table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Sandbox</th>
+      <th>Production</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Base URL**</td>
+      <td>`https://sandbox-api.adcb.com`</td>
+      <td>`https://api.adcb.com`</td>
+    </tr>
+    <tr>
+      <td>**Data**</td>
+      <td>Synthetic test data</td>
+      <td>Real customer data</td>
+    </tr>
+    <tr>
+      <td>**Transactions**</td>
+      <td>Simulated (no money moves)</td>
+      <td>Real financial transactions</td>
+    </tr>
+    <tr>
+      <td>**Rate Limits**</td>
+      <td>Relaxed (10x higher)</td>
+      <td>Standard production limits</td>
+    </tr>
+    <tr>
+      <td>**Certificates**</td>
+      <td>Self-signed allowed</td>
+      <td>CA-signed required</td>
+    </tr>
+    <tr>
+      <td>**Availability**</td>
+      <td>Best effort</td>
+      <td>99.9% SLA</td>
+    </tr>
+    <tr>
+      <td>**Support**</td>
+      <td>Standard support</td>
+      <td>Full SLA support</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Getting Started
+
+### Step 1: Sandbox Credentials
+
+<Steps>
+  <Step title="Register Application">
+    Create your application in the [Developer Portal](https://developers.adcb.com) and select "Sandbox" environment
+  </Step>
+  <Step title="Get Credentials">
+    Download your sandbox client credentials and test certificates
+  </Step>
+  <Step title="Configure Environment">
+    Update your application configuration to use sandbox endpoints
+  </Step>
+  <Step title="Test Connection">
+    Make your first API call to verify connectivity
+  </Step>
+</Steps>
+
+### Step 2: Environment Configuration
+
+<CodeGroup>
+
+```bash Environment Variables
+# Sandbox Configuration
+export ADCB_API_BASE_URL="https://sandbox-api.adcb.com"
+export ADCB_CLIENT_ID="sandbox_client_12345"
+export ADCB_CLIENT_SECRET="sandbox_secret_67890"
+export ADCB_CERT_PATH="./certs/sandbox-cert.pem"
+export ADCB_KEY_PATH="./certs/sandbox-key.pem"
+export ADCB_ENVIRONMENT="sandbox"
+```
+
+```python Python
+# config/sandbox.py
+SANDBOX_CONFIG = {
+    'base_url': 'https://sandbox-api.adcb.com',
+    'client_id': 'sandbox_client_12345',
+    'client_secret': 'sandbox_secret_67890',
+    'cert_path': './certs/sandbox-cert.pem',
+    'key_path': './certs/sandbox-key.pem',
+    'timeout': 30,
+    'verify_ssl': True
+}
+
+# Initialize client
+from adcb_sdk import ADCBClient
+client = ADCBClient(**SANDBOX_CONFIG)
+```
+
+```javascript JavaScript
+// config/sandbox.js
+const sandboxConfig = {
+    baseURL: 'https://sandbox-api.adcb.com',
+    clientId: 'sandbox_client_12345',
+    clientSecret: 'sandbox_secret_67890',
+    certPath: './certs/sandbox-cert.pem',
+    keyPath: './certs/sandbox-key.pem',
+    timeout: 30000
+};
+
+// Initialize client
+const { ADCBClient } = require('@adcb/openbanking-sdk');
+const client = new ADCBClient(sandboxConfig);
+```
+
+</CodeGroup>
+
+### Step 3: Test Authentication
+
+```bash
+# Test OAuth token endpoint
+curl -X POST https://sandbox-api.adcb.com/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --cert ./certs/sandbox-cert.pem \
+  --key ./certs/sandbox-key.pem \
+  -d "grant_type=client_credentials" \
+  -d "client_id=sandbox_client_12345" \
+  -d "client_secret=sandbox_secret_67890" \
+  -d "scope=accounts:read"
+```
+
+## Test Data
+
+### Test Accounts
+
+The sandbox provides a variety of test accounts to simulate different scenarios:
+
+<Tabs>
+  <Tab title="Current Accounts">
+    | IBAN | Account Type | Balance (AED) | Status | Description |
+    |------|-------------|---------------|---------|-------------|
+    | `AE07033TEST000000000001` | Current | 50,000.00 | Active | Standard current account |
+    | `AE07033TEST000000000002` | Current | 1,500.00 | Active | Low balance account |
+    | `AE07033TEST000000000003` | Current | 0.00 | Active | Zero balance account |
+    | `AE07033TEST000000000004` | Current | -500.00 | Active | Overdrawn account |
+    | `AE07033TEST000000000005` | Current | 75,000.00 | Frozen | Frozen account for testing |
+    | `AE07033TEST000000000006` | Current | 25,000.00 | Active | Account with pending transactions |
+  </Tab>
+  
+  <Tab title="Savings Accounts">
+    | IBAN | Account Type | Balance (AED) | Interest Rate | Description |
+    |------|-------------|---------------|---------------|-------------|
+    | `AE07033TEST000000000011` | Savings | 100,000.00 | 2.5% | High balance savings |
+    | `AE07033TEST000000000012` | Savings | 25,000.00 | 2.5% | Standard savings |
+    | `AE07033TEST000000000013` | Savings | 5,000.00 | 1.5% | Low balance savings |
+    | `AE07033TEST000000000014` | Fixed Deposit | 200,000.00 | 4.0% | 12-month fixed deposit |
+    | `AE07033TEST000000000015` | Savings | 50,000.00 | 2.5% | Account with regular deposits |
+  </Tab>
+  
+  <Tab title="Credit Accounts">
+    | IBAN | Account Type | Credit Limit | Used Amount | Status |
+    |------|-------------|--------------|-------------|--------|
+    | `AE07033TEST000000000021` | Credit Card | 20,000.00 | 5,000.00 | Active |
+    | `AE07033TEST000000000022` | Credit Card | 50,000.00 | 35,000.00 | Active |
+    | `AE07033TEST000000000023` | Personal Loan | 100,000.00 | 100,000.00 | Active |
+    | `AE07033TEST000000000024` | Overdraft | 10,000.00 | 2,500.00 | Active |
+    | `AE07033TEST000000000025` | Credit Card | 15,000.00 | 14,800.00 | Near limit |
+  </Tab>
+  
+  <Tab title="Business Accounts">
+    | IBAN | Account Type | Balance (AED) | Business Type | Description |
+    |------|-------------|---------------|---------------|-------------|
+    | `AE07033TEST000000000031` | Business Current | 250,000.00 | SME | Small business account |
+    | `AE07033TEST000000000032` | Business Current | 1,000,000.00 | Corporate | Large corporate account |
+    | `AE07033TEST000000000033` | Business Savings | 500,000.00 | SME | Business savings account |
+    | `AE07033TEST000000000034` | Trade Finance | 2,000,000.00 | Corporate | Trade finance facility |
+    | `AE07033TEST000000000035` | Business Current | 75,000.00 | Startup | Startup business account |
+  </Tab>
+</Tabs>
+
+### Test Customers
+
+Each test account is associated with test customer profiles:
+
+<AccordionGroup>
+  <Accordion title="Individual Customers">
+    **Ahmed Al Rashid** (Primary test customer)
+    - Emirates ID: `784-1985-1234567-1`
+    - Accounts: AE07033TEST000000000001, AE07033TEST000000000011
+    - Phone: `+971501234567`
+    - Email: `ahmed.test@example.com`
+    
+    **Fatima Al Zahra** (High-value customer)
+    - Emirates ID: `784-1990-2345678-2`
+    - Accounts: AE07033TEST000000000002, AE07033TEST000000000014
+    - Phone: `+971502345678`
+    - Email: `fatima.test@example.com`
+    
+    **Mohammed Hassan** (Business owner)
+    - Emirates ID: `784-1980-3456789-3`
+    - Accounts: AE07033TEST000000000031, AE07033TEST000000000033
+    - Phone: `+971503456789`
+    - Email: `mohammed.test@example.com`
+  </Accordion>
+  
+  <Accordion title="Business Customers">
+    **Tech Innovations LLC**
+    - Trade License: `CN-1234567`
+    - Accounts: AE07033TEST000000000032, AE07033TEST000000000034
+    - Contact: `contact@techinnovations.test.ae`
+    - Authorized Signatories: Ahmed Al Rashid, Fatima Al Zahra
+    
+    **Green Energy Solutions**
+    - Trade License: `CN-2345678`
+    - Accounts: AE07033TEST000000000035
+    - Contact: `info@greenenergy.test.ae`
+    - Authorized Signatory: Mohammed Hassan
+  </Accordion>
+</AccordionGroup>
+
+### Test Transactions
+
+The sandbox generates realistic transaction history for test accounts:
+
+<Tabs>
+  <Tab title="Recent Transactions">
+    ```json
+    // GET /v1/accounts/AE07033TEST000000000001/transactions
+    {
+      "data": {
+        "transactions": [
+          {
+            "id": "TXN_TEST_001",
+            "amount": {"value": -150.00, "currency": "AED"},
+            "description": "CARREFOUR MALL OF EMIRATES",
+            "booking_date": "2024-01-15",
+            "value_date": "2024-01-15",
+            "merchant_category": "5411",
+            "status": "completed"
+          },
+          {
+            "id": "TXN_TEST_002",
+            "amount": {"value": 5000.00, "currency": "AED"},
+            "description": "Salary Transfer - ADCB",
+            "booking_date": "2024-01-01",
+            "value_date": "2024-01-01",
+            "transaction_type": "credit",
+            "status": "completed"
+          }
+        ]
+      }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Simulated Transaction Types">
+    - **ATM Withdrawals**: Various amounts and locations
+    - **POS Purchases**: Retail, restaurants, fuel stations
+    - **Online Transactions**: E-commerce, subscriptions
+    - **Salary Credits**: Monthly salary deposits
+    - **Bill Payments**: Utilities, telecom, insurance
+    - **Bank Transfers**: Domestic and international
+    - **Standing Orders**: Regular automated payments
+    - **Loan Payments**: Installment and interest payments
+  </Tab>
+</Tabs>
+
+## Testing Scenarios
+
+### Basic API Testing
+
+<CodeGroup>
+
+```python Python
+import requests
+import pytest
+from datetime import datetime, timedelta
+
+class TestADCBSandbox:
+    def __init__(self):
+        self.base_url = "https://sandbox-api.adcb.com"
+        self.access_token = None
+    
+    def authenticate(self):
+        """Test OAuth authentication"""
+        response = requests.post(
+            f"{self.base_url}/oauth/token",
+            data={
+                "grant_type": "client_credentials",
+                "client_id": "sandbox_client_12345",
+                "client_secret": "sandbox_secret_67890",
+                "scope": "accounts:read transactions:read"
+            },
+            cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+        )
+        
+        assert response.status_code == 200, f"Auth failed: {response.text}"
+        self.access_token = response.json()["access_token"]
+        return self.access_token
+    
+    def test_get_accounts(self):
+        """Test account listing"""
+        if not self.access_token:
+            self.authenticate()
+        
+        response = requests.get(
+            f"{self.base_url}/v1/accounts",
+            headers={"Authorization": f"Bearer {self.access_token}"},
+            cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert "data" in data
+        assert "accounts" in data["data"]
+        assert len(data["data"]["accounts"]) > 0
+        
+        # Verify account structure
+        account = data["data"]["accounts"][0]
+        required_fields = ["accountId", "currency", "accountType", "account"]
+        for field in required_fields:
+            assert field in account, f"Missing field: {field}"
+    
+    def test_get_account_balance(self):
+        """Test balance retrieval"""
+        test_account = "AE07033TEST000000000001"
+        
+        response = requests.get(
+            f"{self.base_url}/v1/accounts/{test_account}/balances",
+            headers={"Authorization": f"Bearer {self.access_token}"},
+            cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Verify balance structure
+        balance = data["data"]["balance"][0]
+        assert "amount" in balance
+        assert "currency" in balance
+        assert balance["currency"] == "AED"
+        assert isinstance(balance["amount"]["value"], (int, float))
+    
+    def test_get_transactions(self):
+        """Test transaction history"""
+        test_account = "AE07033TEST000000000001"
+        from_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+        
+        response = requests.get(
+            f"{self.base_url}/v1/accounts/{test_account}/transactions",
+            headers={"Authorization": f"Bearer {self.access_token}"},
+            params={
+                "fromBookingDateTime": from_date,
+                "limit": 10
+            },
+            cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Verify transaction structure
+        if data["data"]["transactions"]:
+            transaction = data["data"]["transactions"][0]
+            required_fields = ["transactionId", "amount", "bookingDate", "status"]
+            for field in required_fields:
+                assert field in transaction
+
+# Run tests
+def run_sandbox_tests():
+    test_client = TestADCBSandbox()
+    test_client.test_get_accounts()
+    test_client.test_get_account_balance()
+    test_client.test_get_transactions()
+    print("All sandbox tests passed!")
+
+if __name__ == "__main__":
+    run_sandbox_tests()
+```
+
+```javascript Jest
+const { ADCBClient } = require('@adcb/openbanking-sdk');
+
+describe('ADCB Sandbox API Tests', () => {
+    let client;
+    let accessToken;
+    
+    beforeAll(async () => {
+        client = new ADCBClient({
+            baseURL: 'https://sandbox-api.adcb.com',
+            clientId: 'sandbox_client_12345',
+            clientSecret: 'sandbox_secret_67890',
+            certPath: './certs/sandbox-cert.pem',
+            keyPath: './certs/sandbox-key.pem'
+        });
+        
+        // Authenticate
+        const auth = await client.authenticate({
+            scopes: ['accounts:read', 'transactions:read']
+        });
+        accessToken = auth.access_token;
+    });
+    
+    test('should authenticate successfully', async () => {
+        expect(accessToken).toBeDefined();
+        expect(typeof accessToken).toBe('string');
+    });
+    
+    test('should get accounts list', async () => {
+        const accounts = await client.accounts.list();
+        
+        expect(accounts).toHaveProperty('data');
+        expect(accounts.data).toHaveProperty('accounts');
+        expect(Array.isArray(accounts.data.accounts)).toBe(true);
+        expect(accounts.data.accounts.length).toBeGreaterThan(0);
+        
+        // Verify account structure
+        const account = accounts.data.accounts[0];
+        expect(account).toHaveProperty('accountId');
+        expect(account).toHaveProperty('currency');
+        expect(account).toHaveProperty('accountType');
+    });
+    
+    test('should get account balance', async () => {
+        const testAccount = 'AE07033TEST000000000001';
+        const balance = await client.accounts.getBalance(testAccount);
+        
+        expect(balance).toHaveProperty('data');
+        expect(balance.data).toHaveProperty('balance');
+        
+        const balanceInfo = balance.data.balance[0];
+        expect(balanceInfo).toHaveProperty('amount');
+        expect(balanceInfo).toHaveProperty('currency');
+        expect(balanceInfo.currency).toBe('AED');
+    });
+    
+    test('should get transaction history', async () => {
+        const testAccount = 'AE07033TEST000000000001';
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - 90);
+        
+        const transactions = await client.transactions.list(testAccount, {
+            fromBookingDateTime: fromDate.toISOString().split('T')[0],
+            limit: 10
+        });
+        
+        expect(transactions).toHaveProperty('data');
+        expect(transactions.data).toHaveProperty('transactions');
+        
+        if (transactions.data.transactions.length > 0) {
+            const transaction = transactions.data.transactions[0];
+            expect(transaction).toHaveProperty('transactionId');
+            expect(transaction).toHaveProperty('amount');
+            expect(transaction).toHaveProperty('bookingDate');
+        }
+    });
+});
+```
+
+</CodeGroup>
+
+### Payment Testing
+
+<CodeGroup>
+
+```python Payment Tests
+def test_payment_scenarios():
+    """Test various payment scenarios"""
+    
+    # Test successful domestic payment
+    payment_data = {
+        "instructionIdentification": "PAY_TEST_001",
+        "endToEndIdentification": "E2E_TEST_001",
+        "instructedAmount": {
+            "amount": "1000.00",
+            "currency": "AED"
+        },
+        "creditorAccount": {
+            "schemeName": "IBAN",
+            "identification": "AE07033TEST000000000002"
+        },
+        "creditorName": "Test Beneficiary",
+        "remittanceInformation": {
+            "unstructured": "Test payment from sandbox"
+        }
+    }
+    
+    # Create payment consent
+    consent_response = requests.post(
+        f"{base_url}/v1/payment-consents",
+        json={"data": {"initiation": payment_data}},
+        headers={"Authorization": f"Bearer {access_token}"},
+        cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+    )
+    
+    assert consent_response.status_code == 201
+    consent_id = consent_response.json()["data"]["consentId"]
+    
+    # Submit payment
+    payment_response = requests.post(
+        f"{base_url}/v1/payments",
+        json={
+            "data": {
+                "consentId": consent_id,
+                "initiation": payment_data
+            }
+        },
+        headers={"Authorization": f"Bearer {access_token}"},
+        cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+    )
+    
+    assert payment_response.status_code == 201
+    payment = payment_response.json()
+    assert payment["data"]["status"] in ["AcceptedSettlementInProcess", "AcceptedSettlementCompleted"]
+
+def test_payment_errors():
+    """Test payment error scenarios"""
+    
+    # Test insufficient balance
+    payment_data = {
+        "instructionIdentification": "PAY_TEST_FAIL_001",
+        "instructedAmount": {
+            "amount": "999999.00",  # Amount exceeding account balance
+            "currency": "AED"
+        },
+        "creditorAccount": {
+            "schemeName": "IBAN",
+            "identification": "AE07033TEST000000000002"
+        },
+        "creditorName": "Test Beneficiary"
+    }
+    
+    # This should fail with insufficient funds
+    # Implementation depends on your error handling strategy
+```
+
+</CodeGroup>
+
+### Webhook Testing
+
+<CodeGroup>
+
+```python Webhook Testing
+import json
+import hmac
+import hashlib
+from flask import Flask, request
+
+app = Flask(__name__)
+
+# Store received webhooks for testing
+received_webhooks = []
+
+@app.route('/test-webhook', methods=['POST'])
+def test_webhook_handler():
+    """Test webhook endpoint"""
+    
+    # Verify signature
+    signature = request.headers.get('X-ADCB-Signature')
+    payload = request.get_data()
+    expected_signature = hmac.new(
+        b'test_webhook_secret',
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    if not hmac.compare_digest(signature, f'sha256={expected_signature}'):
+        return 'Invalid signature', 401
+    
+    # Store webhook for verification
+    webhook_data = request.json
+    received_webhooks.append(webhook_data)
+    
+    print(f"Received webhook: {webhook_data['type']}")
+    return 'OK', 200
+
+def test_webhook_delivery():
+    """Test webhook delivery in sandbox"""
+    
+    # Configure webhook URL
+    webhook_config = {
+        "url": "https://your-test-server.ngrok.io/test-webhook",
+        "events": ["transaction.completed", "payment.initiated"],
+        "secret": "test_webhook_secret"
+    }
+    
+    response = requests.post(
+        f"{base_url}/v1/webhooks",
+        json=webhook_config,
+        headers={"Authorization": f"Bearer {access_token}"},
+        cert=("./certs/sandbox-cert.pem", "./certs/sandbox-key.pem")
+    )
+    
+    assert response.status_code == 201
+    webhook_id = response.json()["id"]
+    
+    # Trigger a test transaction to generate webhook
+    # Make a payment or transaction that would trigger webhook
+    
+    # Wait and verify webhook was received
+    import time
+    time.sleep(5)  # Wait for webhook delivery
+    
+    assert len(received_webhooks) > 0, "No webhooks received"
+    webhook = received_webhooks[-1]
+    assert webhook["type"] in ["transaction.completed", "payment.initiated"]
+
+if __name__ == "__main__":
+    app.run(port=5000)
+```
+
+</CodeGroup>
+
+## Advanced Testing
+
+### Load Testing
+
+<CodeGroup>
+
+```python Load Testing
+import asyncio
+import aiohttp
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+class SandboxLoadTester:
+    def __init__(self, base_url="https://sandbox-api.adcb.com"):
+        self.base_url = base_url
+        self.access_token = None
+        self.test_accounts = [
+            "AE07033TEST000000000001",
+            "AE07033TEST000000000002",
+            "AE07033TEST000000000003"
+        ]
+    
+    async def authenticate(self):
+        """Get access token for load testing"""
+        # Implementation similar to previous examples
+        pass
+    
+    async def load_test_accounts(self, concurrent_requests=10, total_requests=100):
+        """Load test account endpoints"""
+        
+        async def make_request(session, semaphore, account_id):
+            async with semaphore:
+                start_time = time.time()
+                try:
+                    async with session.get(
+                        f"{self.base_url}/v1/accounts/{account_id}/balance",
+                        headers={"Authorization": f"Bearer {self.access_token}"}
+                    ) as response:
+                        status = response.status
+                        duration = time.time() - start_time
+                        return {"status": status, "duration": duration, "success": status == 200}
+                except Exception as e:
+                    duration = time.time() - start_time
+                    return {"status": 0, "duration": duration, "success": False, "error": str(e)}
+        
+        # Create semaphore to limit concurrent requests
+        semaphore = asyncio.Semaphore(concurrent_requests)
+        
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for i in range(total_requests):
+                account_id = self.test_accounts[i % len(self.test_accounts)]
+                task = make_request(session, semaphore, account_id)
+                tasks.append(task)
+            
+            results = await asyncio.gather(*tasks)
+        
+        # Analyze results
+        successful_requests = sum(1 for r in results if r["success"])
+        avg_duration = sum(r["duration"] for r in results) / len(results)
+        max_duration = max(r["duration"] for r in results)
+        min_duration = min(r["duration"] for r in results)
+        
+        print(f"Load Test Results:")
+        print(f"Total Requests: {total_requests}")
+        print(f"Successful: {successful_requests} ({successful_requests/total_requests*100:.1f}%)")
+        print(f"Average Duration: {avg_duration:.3f}s")
+        print(f"Min/Max Duration: {min_duration:.3f}s / {max_duration:.3f}s")
+        
+        return results
+
+# Usage
+async def run_load_test():
+    tester = SandboxLoadTester()
+    await tester.authenticate()
+    results = await tester.load_test_accounts(concurrent_requests=5, total_requests=50)
+
+if __name__ == "__main__":
+    asyncio.run(run_load_test())
+```
+
+</CodeGroup>
+
+### Integration Testing
+
+```python
+class IntegrationTestSuite:
+    """Complete integration test suite for sandbox"""
+    
+    def __init__(self):
+        self.client = ADCBClient(sandbox_config)
+        self.test_results = {}
+    
+    def run_complete_flow_test(self):
+        """Test complete banking flow"""
+        try:
+            # 1. Authentication
+            token = self.client.authenticate()
+            assert token, "Authentication failed"
+            
+            # 2. Get accounts
+            accounts = self.client.get_accounts()
+            assert len(accounts) > 0, "No accounts returned"
+            test_account = accounts[0]["accountId"]
+            
+            # 3. Get account balance
+            balance = self.client.get_balance(test_account)
+            initial_balance = balance["balance"][0]["amount"]["value"]
+            
+            # 4. Get transaction history
+            transactions = self.client.get_transactions(test_account, limit=5)
+            assert "transactions" in transactions, "No transactions returned"
+            
+            # 5. Create payment consent
+            payment_data = self.create_test_payment_data()
+            consent = self.client.create_payment_consent(payment_data)
+            assert consent["status"] == "AwaitingAuthorisation"
+            
+            # 6. Submit payment (in sandbox, auto-approved)
+            payment = self.client.submit_payment(consent["consentId"], payment_data)
+            assert payment["status"] in ["AcceptedSettlementInProcess", "AcceptedSettlementCompleted"]
+            
+            # 7. Verify balance changed (in sandbox simulation)
+            time.sleep(2)  # Wait for processing
+            new_balance = self.client.get_balance(test_account)
+            # Note: In sandbox, balance changes are simulated
+            
+            self.test_results["complete_flow"] = "PASS"
+            
+        except Exception as e:
+            self.test_results["complete_flow"] = f"FAIL: {str(e)}"
+    
+    def create_test_payment_data(self):
+        return {
+            "instructionIdentification": f"TEST_{int(time.time())}",
+            "instructedAmount": {"amount": "100.00", "currency": "AED"},
+            "creditorAccount": {
+                "schemeName": "IBAN",
+                "identification": "AE07033TEST000000000002"
+            },
+            "creditorName": "Test Beneficiary"
+        }
+```
+
+## Debugging and Troubleshooting
+
+### Common Sandbox Issues
+
+<AccordionGroup>
+  <Accordion title="Certificate Issues">
+    **Symptoms**: SSL/TLS handshake failures
+    
+    **Solutions**:
+    ```bash
+    # Verify certificate format
+    openssl x509 -in sandbox-cert.pem -text -noout
+    
+    # Test certificate with curl
+    curl -v --cert sandbox-cert.pem --key sandbox-key.pem \
+      https://sandbox-api.adcb.com/health
+    
+    # Check certificate expiry
+    openssl x509 -in sandbox-cert.pem -enddate -noout
+    ```
+  </Accordion>
+  
+  <Accordion title="Rate Limiting in Sandbox">
+    **Issue**: Hitting rate limits during testing
+    
+    **Solutions**:
+    - Sandbox has relaxed limits but they still exist
+    - Implement delays between requests in tests
+    - Use different test accounts to distribute load
+    - Contact support for temporary limit increases
+  </Accordion>
+  
+  <Accordion title="Data Consistency">
+    **Issue**: Test data not behaving as expected
+    
+    **Solutions**:
+    - Sandbox data is reset periodically
+    - Don't rely on specific balance amounts
+    - Use relative comparisons (balance changes)
+    - Check sandbox maintenance schedule
+  </Accordion>
+</AccordionGroup>
+
+### Test Data Management
+
+```python
+class SandboxDataManager:
+    """Manage test data in sandbox environment"""
+    
+    def __init__(self, client):
+        self.client = client
+    
+    def setup_test_scenario(self, scenario_name: str):
+        """Set up specific test scenario"""
+        scenarios = {
+            "high_balance": {
+                "account": "AE07033TEST000000000001",
+                "expected_balance": 50000,
+                "description": "Account with high balance for payment testing"
+            },
+            "low_balance": {
+                "account": "AE07033TEST000000000002", 
+                "expected_balance": 1500,
+                "description": "Account with low balance for insufficient funds testing"
+            },
+            "frozen_account": {
+                "account": "AE07033TEST000000000005",
+                "status": "frozen",
+                "description": "Frozen account for error scenario testing"
+            }
+        }
+        
+        if scenario_name not in scenarios:
+            raise ValueError(f"Unknown scenario: {scenario_name}")
+        
+        scenario = scenarios[scenario_name]
+        
+        # Verify scenario is available
+        account_info = self.client.get_account(scenario["account"])
+        print(f"Using scenario '{scenario_name}': {scenario['description']}")
+        
+        return scenario
+    
+    def cleanup_test_data(self):
+        """Clean up any test data (sandbox auto-resets)"""
+        # In sandbox, data is automatically reset
+        # This method can be used for any custom cleanup
+        pass
+```
+
+## Automated Testing Pipeline
+
+### CI/CD Integration
+
+```yaml
+# .github/workflows/sandbox-tests.yml
+name: Sandbox API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sandbox-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-test.txt
+    
+    - name: Set up certificates
+      run: |
+        echo "${{ secrets.SANDBOX_CERT }}" > sandbox-cert.pem
+        echo "${{ secrets.SANDBOX_KEY }}" > sandbox-key.pem
+        chmod 600 sandbox-*.pem
+    
+    - name: Run sandbox tests
+      env:
+        ADCB_CLIENT_ID: ${{ secrets.SANDBOX_CLIENT_ID }}
+        ADCB_CLIENT_SECRET: ${{ secrets.SANDBOX_CLIENT_SECRET }}
+        ADCB_BASE_URL: https://sandbox-api.adcb.com
+      run: |
+        python -m pytest tests/test_sandbox.py -v
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: test-results.xml
+```
+
+### Test Reporting
+
+```python
+import json
+import pytest
+from datetime import datetime
+
+class SandboxTestReporter:
+    def __init__(self):
+        self.results = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "environment": "sandbox",
+            "test_results": []
+        }
+    
+    def add_test_result(self, test_name: str, status: str, duration: float, details: dict = None):
+        """Add test result to report"""
+        self.results["test_results"].append({
+            "test_name": test_name,
+            "status": status,  # PASS, FAIL, SKIP
+            "duration_seconds": duration,
+            "details": details or {}
+        })
+    
+    def generate_report(self, output_file: str = "sandbox-test-report.json"):
+        """Generate test report"""
+        summary = {
+            "total_tests": len(self.results["test_results"]),
+            "passed": sum(1 for r in self.results["test_results"] if r["status"] == "PASS"),
+            "failed": sum(1 for r in self.results["test_results"] if r["status"] == "FAIL"),
+            "skipped": sum(1 for r in self.results["test_results"] if r["status"] == "SKIP"),
+            "total_duration": sum(r["duration_seconds"] for r in self.results["test_results"])
+        }
+        
+        self.results["summary"] = summary
+        
+        with open(output_file, 'w') as f:
+            json.dump(self.results, f, indent=2)
+        
+        print(f"Test Report Generated: {output_file}")
+        print(f"Tests: {summary['total_tests']}, "
+              f"Passed: {summary['passed']}, "
+              f"Failed: {summary['failed']}, "
+              f"Duration: {summary['total_duration']:.2f}s")
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Test Coverage" icon="check-circle">
+    - Test all API endpoints you'll use in production
+    - Include error scenarios and edge cases
+    - Test rate limiting and retry logic
+    - Verify webhook delivery and signature validation
+  </Card>
+  
+  <Card title="Data Management" icon="database">
+    - Don't rely on specific test data values
+    - Use relative comparisons where possible
+    - Understand sandbox data reset schedule
+    - Create reproducible test scenarios
+  </Card>
+  
+  <Card title="Environment Isolation" icon="shield">
+    - Keep sandbox credentials separate from production
+    - Use environment variables for configuration
+    - Never use production certificates in sandbox
+    - Implement proper config management
+  </Card>
+  
+  <Card title="Continuous Testing" icon="refresh">
+    - Integrate sandbox tests in CI/CD pipeline
+    - Run tests on every code change
+    - Monitor test results and trends
+    - Set up alerts for test failures
+  </Card>
+</CardGroup>
+
+## Moving to Production
+
+### Pre-Production Checklist
+
+<Steps>
+  <Step title="Complete Testing">
+    Verify all functionality works correctly in sandbox
+  </Step>
+  <Step title="Security Review">
+    Complete security assessment and penetration testing
+  </Step>
+  <Step title="Compliance Check">
+    Ensure all regulatory requirements are met
+  </Step>
+  <Step title="Production Credentials">
+    Obtain production API credentials and certificates
+  </Step>
+  <Step title="Go-Live Process">
+    Follow ADCB's production deployment process
+  </Step>
+</Steps>
+
+### Configuration Changes
+
+```python
+# Production configuration differences
+PRODUCTION_CONFIG = {
+    'base_url': 'https://api.adcb.com',  # Changed
+    'client_id': 'prod_client_id',       # Different credentials
+    'client_secret': 'prod_secret',      # Different credentials
+    'cert_path': './certs/prod-cert.pem', # CA-signed certificate
+    'key_path': './certs/prod-key.pem',   # Production private key
+    'timeout': 30,
+    'verify_ssl': True,                   # Must be True for production
+    'rate_limit_buffer': 0.2             # More conservative buffer
+}
+```
+
+## Support
+
+For sandbox testing support:
+- 📧 **Sandbox Support**: sandbox-support@adcb.com
+- 🔧 **Test Data Issues**: testdata@adcb.com
+- 📋 **Testing Guide**: [testing.adcb.dev](https://testing.adcb.dev)
+- 💬 **Developer Forum**: [community.adcb.dev/sandbox](https://community.adcb.dev/sandbox)

@@ -1,0 +1,1316 @@
+---
+title: 'Official SDKs'
+description: 'Client libraries and software development kits for ADCB APIs'
+---
+
+## Overview
+
+ADCB provides official SDKs (Software Development Kits) for popular programming languages, making it easy to integrate our Open Banking APIs into your applications. These SDKs handle authentication, request signing, error handling, and other common tasks.
+
+<CardGroup cols={2}>
+  <Card title="Easy Integration" icon="plug">
+    Pre-built methods for all API endpoints with proper error handling
+  </Card>
+  <Card title="Built-in Security" icon="shield">
+    Automatic OAuth 2.0, mTLS, and request signing implementation
+  </Card>
+  <Card title="Type Safety" icon="check-circle">
+    Full TypeScript definitions and strongly-typed responses
+  </Card>
+  <Card title="Production Ready" icon="rocket">
+    Battle-tested with retry logic, rate limiting, and monitoring
+  </Card>
+</CardGroup>
+
+## Available SDKs
+
+### Python SDK
+
+<Tabs>
+  <Tab title="Installation">
+    ```bash
+    # Install from PyPI
+    pip install adcb-openbanking
+    
+    # Or from source
+    pip install git+https://github.com/adcb/openbanking-python-sdk.git
+    
+    # With optional dependencies
+    pip install adcb-openbanking[async,redis]
+    ```
+  </Tab>
+  
+  <Tab title="Quick Start">
+    ```python
+    from adcb import OpenBankingClient
+    import os
+    
+    # Initialize client
+    client = OpenBankingClient(
+        client_id=os.environ['ADCB_CLIENT_ID'],
+        client_secret=os.environ['ADCB_CLIENT_SECRET'],
+        environment='sandbox',  # or 'production'
+        cert_path='./certs/cert.pem',
+        key_path='./certs/key.pem'
+    )
+    
+    # Authenticate
+    token = client.authenticate(scopes=['accounts:read', 'transactions:read'])
+    
+    # Get accounts
+    accounts = client.accounts.list()
+    for account in accounts:
+        print(f"Account: {account.id}")
+        print(f"Balance: {account.balance.amount} {account.balance.currency}")
+        
+        # Get transactions
+        transactions = client.transactions.list(
+            account_id=account.id,
+            from_date='2024-01-01',
+            limit=10
+        )
+        print(f"Recent transactions: {len(transactions)}")
+    ```
+  </Tab>
+  
+  <Tab title="Advanced Features">
+    ```python
+    # Async support
+    import asyncio
+    from adcb.async_client import AsyncOpenBankingClient
+    
+    async def main():
+        async with AsyncOpenBankingClient(
+            client_id=client_id,
+            client_secret=client_secret,
+            environment='sandbox'
+        ) as client:
+            # Concurrent requests
+            accounts_task = client.accounts.list()
+            balance_task = client.accounts.get_balance('AE070331234567890123456')
+            
+            accounts, balance = await asyncio.gather(accounts_task, balance_task)
+    
+    # Caching support
+    from adcb.cache import RedisCache
+    
+    client = OpenBankingClient(
+        # ... config ...
+        cache=RedisCache(
+            host='localhost',
+            port=6379,
+            default_ttl=300
+        )
+    )
+    
+    # Webhook verification
+    from adcb.webhooks import verify_webhook_signature
+    
+    @app.route('/webhooks/adcb', methods=['POST'])
+    def handle_webhook():
+        payload = request.get_data()
+        signature = request.headers.get('X-ADCB-Signature')
+        
+        if verify_webhook_signature(payload, signature, webhook_secret):
+            event = request.json
+            # Process webhook event
+            return 'OK', 200
+        return 'Invalid signature', 401
+    ```
+  </Tab>
+</Tabs>
+
+**Documentation**: [python-sdk.adcb.dev](https://python-sdk.adcb.dev)
+**GitHub**: [github.com/adcb/openbanking-python-sdk](https://github.com/adcb/openbanking-python-sdk)
+**PyPI**: [pypi.org/project/adcb-openbanking](https://pypi.org/project/adcb-openbanking)
+
+---
+
+### Node.js SDK
+
+<Tabs>
+  <Tab title="Installation">
+    ```bash
+    # Install from npm
+    npm install @adcb/openbanking-sdk
+    
+    # Or with yarn
+    yarn add @adcb/openbanking-sdk
+    
+    # TypeScript definitions included
+    ```
+  </Tab>
+  
+  <Tab title="Quick Start">
+    ```javascript
+    const { OpenBankingClient } = require('@adcb/openbanking-sdk');
+    
+    // Initialize client
+    const client = new OpenBankingClient({
+        clientId: process.env.ADCB_CLIENT_ID,
+        clientSecret: process.env.ADCB_CLIENT_SECRET,
+        environment: 'sandbox', // or 'production'
+        certPath: './certs/cert.pem',
+        keyPath: './certs/key.pem'
+    });
+    
+    async function main() {
+        try {
+            // Authenticate
+            const auth = await client.authenticate({
+                scopes: ['accounts:read', 'transactions:read']
+            });
+            
+            // Get accounts
+            const accounts = await client.accounts.list();
+            
+            for (const account of accounts) {
+                console.log(`Account: ${account.id}`);
+                
+                // Get balance
+                const balance = await client.accounts.getBalance(account.id);
+                console.log(`Balance: ${balance.amount} ${balance.currency}`);
+                
+                // Get transactions
+                const transactions = await client.transactions.list(account.id, {
+                    fromDate: '2024-01-01',
+                    limit: 10
+                });
+                console.log(`Recent transactions: ${transactions.length}`);
+            }
+        } catch (error) {
+            if (error.name === 'ADCBAPIError') {
+                console.error(`API Error: ${error.message} (${error.statusCode})`);
+                console.error(`Trace ID: ${error.traceId}`);
+            } else {
+                console.error('Unexpected error:', error);
+            }
+        }
+    }
+    
+    main();
+    ```
+  </Tab>
+  
+  <Tab title="TypeScript Support">
+    ```typescript
+    import { 
+        OpenBankingClient, 
+        Account, 
+        Transaction, 
+        PaymentRequest,
+        ADCBAPIError 
+    } from '@adcb/openbanking-sdk';
+    
+    const client = new OpenBankingClient({
+        clientId: process.env.ADCB_CLIENT_ID!,
+        clientSecret: process.env.ADCB_CLIENT_SECRET!,
+        environment: 'sandbox'
+    });
+    
+    // Strongly typed responses
+    async function getAccountInfo(): Promise<Account[]> {
+        const accounts: Account[] = await client.accounts.list();
+        return accounts;
+    }
+    
+    // Type-safe payment creation
+    const paymentRequest: PaymentRequest = {
+        amount: { value: 1000, currency: 'AED' },
+        creditorAccount: 'AE070331234567890123456',
+        creditorName: 'Beneficiary Name',
+        reference: 'Payment reference'
+    };
+    
+    const payment = await client.payments.create(paymentRequest);
+    
+    // Webhook handling with types
+    import { WebhookEvent, TransactionCompletedEvent } from '@adcb/openbanking-sdk/webhooks';
+    
+    function handleWebhook(event: WebhookEvent) {
+        switch (event.type) {
+            case 'transaction.completed':
+                const txnEvent = event as TransactionCompletedEvent;
+                console.log(`Transaction ${txnEvent.data.transactionId} completed`);
+                break;
+            default:
+                console.log(`Unhandled event type: ${event.type}`);
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Documentation**: [nodejs-sdk.adcb.dev](https://nodejs-sdk.adcb.dev)
+**GitHub**: [github.com/adcb/openbanking-nodejs-sdk](https://github.com/adcb/openbanking-nodejs-sdk)
+**npm**: [@adcb/openbanking-sdk](https://www.npmjs.com/package/@adcb/openbanking-sdk)
+
+---
+
+### Java SDK
+
+<Tabs>
+  <Tab title="Installation">
+    ```xml
+    <!-- Maven -->
+    <dependency>
+        <groupId>com.adcb</groupId>
+        <artifactId>openbanking-sdk</artifactId>
+        <version>1.2.0</version>
+    </dependency>
+    ```
+    
+    ```gradle
+    // Gradle
+    implementation 'com.adcb:openbanking-sdk:1.2.0'
+    ```
+  </Tab>
+  
+  <Tab title="Quick Start">
+    ```java
+    import com.adcb.openbanking.OpenBankingClient;
+    import com.adcb.openbanking.models.*;
+    import java.util.Arrays;
+    import java.util.List;
+    
+    public class ADCBExample {
+        public static void main(String[] args) {
+            // Initialize client
+            OpenBankingClient client = OpenBankingClient.builder()
+                .clientId(System.getenv("ADCB_CLIENT_ID"))
+                .clientSecret(System.getenv("ADCB_CLIENT_SECRET"))
+                .environment(Environment.SANDBOX)
+                .certPath("./certs/cert.pem")
+                .keyPath("./certs/key.pem")
+                .build();
+            
+            try {
+                // Authenticate
+                AccessToken token = client.authenticate(
+                    Arrays.asList("accounts:read", "transactions:read")
+                );
+                
+                // Get accounts
+                List<Account> accounts = client.accounts().list();
+                
+                for (Account account : accounts) {
+                    System.out.println("Account: " + account.getId());
+                    
+                    // Get balance
+                    Balance balance = client.accounts().getBalance(account.getId());
+                    System.out.println("Balance: " + balance.getAmount() + " " + balance.getCurrency());
+                    
+                    // Get transactions
+                    TransactionQuery query = TransactionQuery.builder()
+                        .fromDate(LocalDate.of(2024, 1, 1))
+                        .limit(10)
+                        .build();
+                        
+                    List<Transaction> transactions = client.transactions()
+                        .list(account.getId(), query);
+                    System.out.println("Recent transactions: " + transactions.size());
+                }
+                
+            } catch (ADCBAPIException e) {
+                System.err.println("API Error: " + e.getMessage());
+                System.err.println("Status Code: " + e.getStatusCode());
+                System.err.println("Trace ID: " + e.getTraceId());
+            } catch (Exception e) {
+                System.err.println("Unexpected error: " + e.getMessage());
+            }
+        }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Spring Boot Integration">
+    ```java
+    @Configuration
+    @ConfigurationProperties(prefix = "adcb")
+    public class ADCBConfig {
+        private String clientId;
+        private String clientSecret;
+        private String environment;
+        private String certPath;
+        private String keyPath;
+        
+        // getters and setters...
+        
+        @Bean
+        public OpenBankingClient adcbClient() {
+            return OpenBankingClient.builder()
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .environment(Environment.valueOf(environment.toUpperCase()))
+                .certPath(certPath)
+                .keyPath(keyPath)
+                .build();
+        }
+    }
+    
+    @Service
+    public class BankingService {
+        
+        @Autowired
+        private OpenBankingClient adcbClient;
+        
+        public List<Account> getUserAccounts(String userId) {
+            try {
+                return adcbClient.accounts().list();
+            } catch (ADCBAPIException e) {
+                log.error("Failed to fetch accounts for user {}: {}", userId, e.getMessage());
+                throw new ServiceException("Unable to fetch account information", e);
+            }
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Documentation**: [java-sdk.adcb.dev](https://java-sdk.adcb.dev)
+**GitHub**: [github.com/adcb/openbanking-java-sdk](https://github.com/adcb/openbanking-java-sdk)
+**Maven Central**: [com.adcb:openbanking-sdk](https://search.maven.org/artifact/com.adcb/openbanking-sdk)
+
+---
+
+### Go SDK
+
+<Tabs>
+  <Tab title="Installation">
+    ```bash
+    # Install SDK
+    go get github.com/adcb/openbanking-go-sdk
+    
+    # Install CLI tool (optional)
+    go install github.com/adcb/openbanking-go-sdk/cmd/adcb-cli@latest
+    ```
+  </Tab>
+  
+  <Tab title="Quick Start">
+    ```go
+    package main
+    
+    import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+        "time"
+        
+        "github.com/adcb/openbanking-go-sdk/adcb"
+    )
+    
+    func main() {
+        // Initialize client
+        client, err := adcb.NewClient(&adcb.Config{
+            ClientID:     os.Getenv("ADCB_CLIENT_ID"),
+            ClientSecret: os.Getenv("ADCB_CLIENT_SECRET"),
+            Environment:  adcb.Sandbox,
+            CertPath:     "./certs/cert.pem",
+            KeyPath:      "./certs/key.pem",
+            Timeout:      30 * time.Second,
+        })
+        if err != nil {
+            log.Fatal("Failed to create client:", err)
+        }
+        defer client.Close()
+        
+        ctx := context.Background()
+        
+        // Authenticate
+        token, err := client.Authenticate(ctx, []string{"accounts:read", "transactions:read"})
+        if err != nil {
+            log.Fatal("Authentication failed:", err)
+        }
+        
+        // Get accounts
+        accounts, err := client.Accounts.List(ctx)
+        if err != nil {
+            log.Fatal("Failed to get accounts:", err)
+        }
+        
+        for _, account := range accounts {
+            fmt.Printf("Account: %s\n", account.ID)
+            
+            // Get balance
+            balance, err := client.Accounts.GetBalance(ctx, account.ID)
+            if err != nil {
+                log.Printf("Failed to get balance for %s: %v", account.ID, err)
+                continue
+            }
+            fmt.Printf("Balance: %.2f %s\n", balance.Amount, balance.Currency)
+            
+            // Get transactions
+            transactions, err := client.Transactions.List(ctx, account.ID, &adcb.TransactionQuery{
+                FromDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+                Limit:    10,
+            })
+            if err != nil {
+                log.Printf("Failed to get transactions for %s: %v", account.ID, err)
+                continue
+            }
+            fmt.Printf("Recent transactions: %d\n", len(transactions))
+        }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Advanced Usage">
+    ```go
+    // Custom HTTP client with retry
+    import (
+        "net/http"
+        "github.com/hashicorp/go-retryablehttp"
+    )
+    
+    retryClient := retryablehttp.NewClient()
+    retryClient.RetryMax = 3
+    
+    client, err := adcb.NewClient(&adcb.Config{
+        ClientID:     clientID,
+        ClientSecret: clientSecret,
+        HTTPClient:   retryClient.StandardClient(),
+    })
+    
+    // Context with timeout
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+    
+    // Concurrent requests
+    type result struct {
+        AccountID string
+        Balance   *adcb.Balance
+        Error     error
+    }
+    
+    results := make(chan result, len(accounts))
+    
+    for _, account := range accounts {
+        go func(accountID string) {
+            balance, err := client.Accounts.GetBalance(ctx, accountID)
+            results <- result{accountID, balance, err}
+        }(account.ID)
+    }
+    
+    for i := 0; i < len(accounts); i++ {
+        res := <-results
+        if res.Error != nil {
+            log.Printf("Error for account %s: %v", res.AccountID, res.Error)
+        } else {
+            fmt.Printf("Account %s: %.2f %s\n", res.AccountID, res.Balance.Amount, res.Balance.Currency)
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Documentation**: [go-sdk.adcb.dev](https://go-sdk.adcb.dev)
+**GitHub**: [github.com/adcb/openbanking-go-sdk](https://github.com/adcb/openbanking-go-sdk)
+**Go Package**: [pkg.go.dev/github.com/adcb/openbanking-go-sdk](https://pkg.go.dev/github.com/adcb/openbanking-go-sdk)
+
+---
+
+### .NET SDK
+
+<Tabs>
+  <Tab title="Installation">
+    ```bash
+    # Package Manager Console
+    Install-Package ADCB.OpenBanking.SDK
+    
+    # .NET CLI
+    dotnet add package ADCB.OpenBanking.SDK
+    
+    # PackageReference
+    <PackageReference Include="ADCB.OpenBanking.SDK" Version="1.2.0" />
+    ```
+  </Tab>
+  
+  <Tab title="Quick Start">
+    ```csharp
+    using ADCB.OpenBanking.SDK;
+    using ADCB.OpenBanking.SDK.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            // Initialize client
+            var client = new OpenBankingClient(new OpenBankingConfig
+            {
+                ClientId = Environment.GetEnvironmentVariable("ADCB_CLIENT_ID"),
+                ClientSecret = Environment.GetEnvironmentVariable("ADCB_CLIENT_SECRET"),
+                Environment = ADCBEnvironment.Sandbox,
+                CertificatePath = "./certs/cert.pfx",
+                CertificatePassword = "cert_password"
+            });
+            
+            try
+            {
+                // Authenticate
+                var token = await client.AuthenticateAsync(new[] { "accounts:read", "transactions:read" });
+                
+                // Get accounts
+                var accounts = await client.Accounts.ListAsync();
+                
+                foreach (var account in accounts)
+                {
+                    Console.WriteLine($"Account: {account.Id}");
+                    
+                    // Get balance
+                    var balance = await client.Accounts.GetBalanceAsync(account.Id);
+                    Console.WriteLine($"Balance: {balance.Amount} {balance.Currency}");
+                    
+                    // Get transactions
+                    var transactions = await client.Transactions.ListAsync(account.Id, new TransactionQuery
+                    {
+                        FromDate = new DateTime(2024, 1, 1),
+                        Limit = 10
+                    });
+                    Console.WriteLine($"Recent transactions: {transactions.Count}");
+                }
+            }
+            catch (ADCBAPIException ex)
+            {
+                Console.WriteLine($"API Error: {ex.Message}");
+                Console.WriteLine($"Status Code: {ex.StatusCode}");
+                Console.WriteLine($"Trace ID: {ex.TraceId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+            }
+        }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Dependency Injection">
+    ```csharp
+    // Startup.cs or Program.cs (.NET 6+)
+    using ADCB.OpenBanking.SDK.Extensions;
+    
+    // Configure services
+    services.AddADCBOpenBanking(options =>
+    {
+        options.ClientId = configuration["ADCB:ClientId"];
+        options.ClientSecret = configuration["ADCB:ClientSecret"];
+        options.Environment = ADCBEnvironment.Sandbox;
+        options.CertificatePath = configuration["ADCB:CertificatePath"];
+    });
+    
+    // Controller usage
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AccountsController : ControllerBase
+    {
+        private readonly IOpenBankingClient _adcbClient;
+        
+        public AccountsController(IOpenBankingClient adcbClient)
+        {
+            _adcbClient = adcbClient;
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        {
+            try
+            {
+                var accounts = await _adcbClient.Accounts.ListAsync();
+                return Ok(accounts);
+            }
+            catch (ADCBAPIException ex)
+            {
+                return StatusCode((int)ex.StatusCode, new { error = ex.Message, traceId = ex.TraceId });
+            }
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+**Documentation**: [dotnet-sdk.adcb.dev](https://dotnet-sdk.adcb.dev)
+**GitHub**: [github.com/adcb/openbanking-dotnet-sdk](https://github.com/adcb/openbanking-dotnet-sdk)
+**NuGet**: [ADCB.OpenBanking.SDK](https://www.nuget.org/packages/ADCB.OpenBanking.SDK)
+
+## SDK Features Comparison
+
+<Table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Python</th>
+      <th>Node.js</th>
+      <th>Java</th>
+      <th>Go</th>
+      <th>.NET</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**OAuth 2.0**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**mTLS Support**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Request Signing**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Async Support**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Retry Logic**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Rate Limiting**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Webhook Utils**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Type Safety**</td>
+      <td>Partial</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>**Caching**</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>**CLI Tools**</td>
+      <td>✅</td>
+      <td>❌</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+  </tbody>
+</Table>
+
+## Common SDK Operations
+
+### Authentication
+
+All SDKs support multiple authentication flows:
+
+<AccordionGroup>
+  <Accordion title="Client Credentials Flow">
+    Best for server-to-server applications without user interaction.
+    
+    ```python
+    # Client credentials - no user involved
+    token = client.authenticate(scopes=['accounts:read'])
+    ```
+  </Accordion>
+  
+  <Accordion title="Authorization Code Flow">
+    For applications that act on behalf of users.
+    
+    ```python
+    # Step 1: Get authorization URL
+    auth_url = client.get_authorization_url(
+        scopes=['accounts:read'],
+        redirect_uri='https://yourapp.com/callback',
+        state='random_state_string'
+    )
+    
+    # Step 2: Exchange code for token
+    token = client.exchange_authorization_code(
+        code='auth_code_from_callback',
+        redirect_uri='https://yourapp.com/callback'
+    )
+    ```
+  </Accordion>
+  
+  <Accordion title="Token Refresh">
+    Automatically refresh expired tokens.
+    
+    ```python
+    # Enable automatic token refresh
+    client.auto_refresh_token = True
+    
+    # Or manually refresh
+    new_token = client.refresh_token(refresh_token)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Error Handling
+
+All SDKs provide structured error handling:
+
+<CodeGroup>
+
+```python Python
+from adcb.exceptions import (
+    ADCBAPIError,
+    AuthenticationError,
+    RateLimitError,
+    ValidationError,
+    NetworkError
+)
+
+try:
+    accounts = client.accounts.list()
+except AuthenticationError as e:
+    # Handle authentication failure
+    print(f"Auth error: {e.message}")
+    # Refresh token and retry
+except RateLimitError as e:
+    # Handle rate limiting
+    print(f"Rate limited. Retry after: {e.retry_after}")
+    time.sleep(e.retry_after)
+except ValidationError as e:
+    # Handle validation errors
+    for error in e.field_errors:
+        print(f"Field {error.field}: {error.message}")
+except NetworkError as e:
+    # Handle network issues
+    print(f"Network error: {e.message}")
+except ADCBAPIError as e:
+    # Handle general API errors
+    print(f"API error: {e.message} (Status: {e.status_code})")
+```
+
+```javascript JavaScript
+try {
+    const accounts = await client.accounts.list();
+} catch (error) {
+    if (error instanceof ADCBAuthenticationError) {
+        console.log('Auth error:', error.message);
+        // Refresh token and retry
+    } else if (error instanceof ADCBRateLimitError) {
+        console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
+        await sleep(error.retryAfter * 1000);
+    } else if (error instanceof ADCBValidationError) {
+        console.log('Validation errors:', error.fieldErrors);
+    } else if (error instanceof ADCBAPIError) {
+        console.log(`API error: ${error.message} (${error.statusCode})`);
+        console.log(`Trace ID: ${error.traceId}`);
+    }
+}
+```
+
+</CodeGroup>
+
+### Pagination
+
+Handle paginated responses consistently:
+
+<CodeGroup>
+
+```python Python
+# Manual pagination
+accounts = client.accounts.list(limit=20)
+while accounts.has_next:
+    # Process current batch
+    for account in accounts:
+        print(f"Processing account: {account.id}")
+    
+    # Get next page
+    accounts = accounts.get_next()
+
+# Automatic pagination
+for account in client.accounts.list_all():
+    print(f"Account: {account.id}")
+```
+
+```javascript JavaScript
+// Manual pagination
+let accounts = await client.accounts.list({ limit: 20 });
+while (accounts.hasNext) {
+    // Process current batch
+    for (const account of accounts.data) {
+        console.log(`Processing account: ${account.id}`);
+    }
+    
+    // Get next page
+    accounts = await accounts.getNext();
+}
+
+// Automatic pagination with async iterator
+for await (const account of client.accounts.listAll()) {
+    console.log(`Account: ${account.id}`);
+}
+```
+
+</CodeGroup>
+
+## SDK Configuration
+
+### Environment Configuration
+
+<CodeGroup>
+
+```python Python
+# config.py
+import os
+from dataclasses import dataclass
+
+@dataclass
+class ADCBConfig:
+    client_id: str
+    client_secret: str
+    environment: str  # 'sandbox' or 'production'
+    cert_path: str
+    key_path: str
+    timeout: int = 30
+    max_retries: int = 3
+    enable_caching: bool = True
+    cache_ttl: int = 300
+
+def get_config() -> ADCBConfig:
+    return ADCBConfig(
+        client_id=os.environ.get('ADCB_CLIENT_ID'),
+        client_secret=os.environ.get('ADCB_CLIENT_SECRET'),
+        environment=os.environ.get('ADCB_ENVIRONMENT', 'sandbox'),
+        cert_path=os.environ.get('ADCB_CERT_PATH', './certs/cert.pem'),
+        key_path=os.environ.get('ADCB_KEY_PATH', './certs/key.pem'),
+    )
+
+# Usage
+config = get_config()
+client = OpenBankingClient(**config.__dict__)
+```
+
+```javascript JavaScript
+// config.js
+const config = {
+    development: {
+        baseURL: 'https://sandbox-api.adcb.com',
+        clientId: process.env.ADCB_SANDBOX_CLIENT_ID,
+        clientSecret: process.env.ADCB_SANDBOX_CLIENT_SECRET,
+        certPath: './certs/sandbox-cert.pem',
+        keyPath: './certs/sandbox-key.pem'
+    },
+    production: {
+        baseURL: 'https://api.adcb.com',
+        clientId: process.env.ADCB_PROD_CLIENT_ID,
+        clientSecret: process.env.ADCB_PROD_CLIENT_SECRET,
+        certPath: './certs/prod-cert.pem',
+        keyPath: './certs/prod-key.pem'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+module.exports = config[environment];
+```
+
+</CodeGroup>
+
+### Logging Configuration
+
+<CodeGroup>
+
+```python Python
+import logging
+from adcb.logging import configure_logging
+
+# Configure SDK logging
+configure_logging({
+    'level': logging.INFO,
+    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    'handlers': [
+        {
+            'type': 'console',
+            'level': logging.DEBUG
+        },
+        {
+            'type': 'file',
+            'filename': 'adcb-api.log',
+            'level': logging.INFO,
+            'max_bytes': 10485760,  # 10MB
+            'backup_count': 5
+        }
+    ]
+})
+
+# Enable request/response logging
+client = OpenBankingClient(
+    # ... other config ...
+    debug=True,  # Enables detailed logging
+    log_requests=True,
+    log_responses=True
+)
+```
+
+```javascript JavaScript
+const client = new OpenBankingClient({
+    // ... other config ...
+    logging: {
+        level: 'info',
+        format: 'json',
+        logRequests: true,
+        logResponses: true,
+        logSensitiveData: false  // Never log credentials
+    }
+});
+
+// Custom logger
+const winston = require('winston');
+const customLogger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.File({ filename: 'adcb-api.log' }),
+        new winston.transports.Console()
+    ]
+});
+
+client.setLogger(customLogger);
+```
+
+</CodeGroup>
+
+## Testing with SDKs
+
+### Unit Testing
+
+<CodeGroup>
+
+```python Python
+import pytest
+from unittest.mock import Mock, patch
+from adcb import OpenBankingClient
+
+@pytest.fixture
+def mock_client():
+    with patch('adcb.OpenBankingClient') as mock:
+        client = Mock()
+        mock.return_value = client
+        yield client
+
+def test_get_accounts(mock_client):
+    # Arrange
+    expected_accounts = [
+        {'id': 'ACC001', 'currency': 'AED', 'balance': 1000},
+        {'id': 'ACC002', 'currency': 'AED', 'balance': 2000}
+    ]
+    mock_client.accounts.list.return_value = expected_accounts
+    
+    # Act
+    accounts = mock_client.accounts.list()
+    
+    # Assert
+    assert len(accounts) == 2
+    assert accounts[0]['id'] == 'ACC001'
+    mock_client.accounts.list.assert_called_once()
+
+def test_authentication_error(mock_client):
+    # Arrange
+    from adcb.exceptions import AuthenticationError
+    mock_client.authenticate.side_effect = AuthenticationError("Invalid credentials")
+    
+    # Act & Assert
+    with pytest.raises(AuthenticationError):
+        mock_client.authenticate()
+```
+
+```javascript JavaScript (Jest)
+const { OpenBankingClient } = require('@adcb/openbanking-sdk');
+
+jest.mock('@adcb/openbanking-sdk');
+
+describe('ADCB SDK Tests', () => {
+    let mockClient;
+    
+    beforeEach(() => {
+        mockClient = new OpenBankingClient();
+        mockClient.accounts = {
+            list: jest.fn(),
+            getBalance: jest.fn()
+        };
+    });
+    
+    test('should get accounts list', async () => {
+        // Arrange
+        const expectedAccounts = [
+            { id: 'ACC001', currency: 'AED', balance: 1000 },
+            { id: 'ACC002', currency: 'AED', balance: 2000 }
+        ];
+        mockClient.accounts.list.mockResolvedValue(expectedAccounts);
+        
+        // Act
+        const accounts = await mockClient.accounts.list();
+        
+        // Assert
+        expect(accounts).toHaveLength(2);
+        expect(accounts[0].id).toBe('ACC001');
+        expect(mockClient.accounts.list).toHaveBeenCalledTimes(1);
+    });
+    
+    test('should handle authentication errors', async () => {
+        // Arrange
+        const authError = new Error('Authentication failed');
+        mockClient.authenticate = jest.fn().mockRejectedValue(authError);
+        
+        // Act & Assert
+        await expect(mockClient.authenticate()).rejects.toThrow('Authentication failed');
+    });
+});
+```
+
+</CodeGroup>
+
+### Integration Testing
+
+<CodeGroup>
+
+```python Python
+import pytest
+from adcb import OpenBankingClient
+
+@pytest.mark.integration
+class TestADCBIntegration:
+    @classmethod
+    def setup_class(cls):
+        cls.client = OpenBankingClient(
+            client_id='sandbox_client_id',
+            client_secret='sandbox_secret',
+            environment='sandbox',
+            cert_path='./tests/certs/test-cert.pem',
+            key_path='./tests/certs/test-key.pem'
+        )
+    
+    def test_full_authentication_flow(self):
+        # Test authentication
+        token = self.client.authenticate(['accounts:read'])
+        assert token is not None
+        assert hasattr(token, 'access_token')
+        assert hasattr(token, 'expires_in')
+    
+    def test_account_operations(self):
+        # Get accounts
+        accounts = self.client.accounts.list()
+        assert len(accounts) > 0
+        
+        # Get balance for first account
+        account_id = accounts[0].id
+        balance = self.client.accounts.get_balance(account_id)
+        assert balance.currency == 'AED'
+        assert isinstance(balance.amount, (int, float))
+    
+    def test_transaction_history(self):
+        accounts = self.client.accounts.list()
+        account_id = accounts[0].id
+        
+        transactions = self.client.transactions.list(
+            account_id=account_id,
+            limit=5
+        )
+        
+        if transactions:
+            assert hasattr(transactions[0], 'transaction_id')
+            assert hasattr(transactions[0], 'amount')
+```
+
+</CodeGroup>
+
+## Community SDKs
+
+In addition to official SDKs, the community has contributed libraries:
+
+<AccordionGroup>
+  <Accordion title="PHP SDK (Community)">
+    **Maintainer**: Open source community
+    **GitHub**: [github.com/adcb-community/php-openbanking-sdk](https://github.com/adcb-community/php-openbanking-sdk)
+    **Packagist**: [adcb/openbanking-php](https://packagist.org/packages/adcb/openbanking-php)
+    
+    ```php
+    <?php
+    use ADCB\OpenBanking\Client;
+    
+    $client = new Client([
+        'client_id' => getenv('ADCB_CLIENT_ID'),
+        'client_secret' => getenv('ADCB_CLIENT_SECRET'),
+        'environment' => 'sandbox'
+    ]);
+    
+    $accounts = $client->accounts()->list();
+    ```
+  </Accordion>
+  
+  <Accordion title="Ruby SDK (Community)">
+    **Maintainer**: Open source community
+    **GitHub**: [github.com/adcb-community/ruby-openbanking-sdk](https://github.com/adcb-community/ruby-openbanking-sdk)
+    **RubyGems**: [adcb-openbanking](https://rubygems.org/gems/adcb-openbanking)
+    
+    ```ruby
+    require 'adcb/openbanking'
+    
+    client = ADCB::OpenBanking::Client.new(
+      client_id: ENV['ADCB_CLIENT_ID'],
+      client_secret: ENV['ADCB_CLIENT_SECRET'],
+      environment: :sandbox
+    )
+    
+    accounts = client.accounts.list
+    ```
+  </Accordion>
+  
+  <Accordion title="Rust SDK (Community)">
+    **Maintainer**: Open source community
+    **GitHub**: [github.com/adcb-community/rust-openbanking-sdk](https://github.com/adcb-community/rust-openbanking-sdk)
+    **Crates.io**: [adcb-openbanking](https://crates.io/crates/adcb-openbanking)
+    
+    ```rust
+    use adcb_openbanking::Client;
+    
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let client = Client::new()
+            .client_id(&std::env::var("ADCB_CLIENT_ID")?)
+            .client_secret(&std::env::var("ADCB_CLIENT_SECRET")?)
+            .environment(adcb_openbanking::Environment::Sandbox)
+            .build()?;
+        
+        let accounts = client.accounts().list().await?;
+        Ok(())
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Migration Guides
+
+### Upgrading SDK Versions
+
+<Warning>
+  Always review the changelog before upgrading SDK versions. Breaking changes are clearly documented with migration instructions.
+</Warning>
+
+<Tabs>
+  <Tab title="Python SDK v1.x → v2.x">
+    **Major Changes:**
+    - Async client is now the default
+    - Configuration structure changed
+    - Error classes restructured
+    
+    ```python
+    # Before (v1.x)
+    from adcb import Client
+    client = Client(client_id, client_secret, environment='sandbox')
+    accounts = client.get_accounts()
+    
+    # After (v2.x)
+    from adcb import OpenBankingClient
+    client = OpenBankingClient(
+        client_id=client_id,
+        client_secret=client_secret,
+        environment='sandbox'
+    )
+    accounts = client.accounts.list()  # or await client.accounts.list() for async
+    ```
+  </Tab>
+  
+  <Tab title="Node.js SDK v1.x → v2.x">
+    **Major Changes:**
+    - TypeScript rewrite with better types
+    - Promise-based API (no more callbacks)
+    - New authentication flow
+    
+    ```javascript
+    // Before (v1.x)
+    const adcb = require('adcb-sdk');
+    const client = new adcb.Client(config);
+    client.getAccounts((err, accounts) => {
+        // Handle callback
+    });
+    
+    // After (v2.x)
+    const { OpenBankingClient } = require('@adcb/openbanking-sdk');
+    const client = new OpenBankingClient(config);
+    const accounts = await client.accounts.list();
+    ```
+  </Tab>
+</Tabs>
+
+## Support and Feedback
+
+<CardGroup cols={2}>
+  <Card title="SDK Documentation" icon="book">
+    Each SDK has comprehensive documentation with examples and API references
+  </Card>
+  <Card title="GitHub Issues" icon="bug">
+    Report bugs and request features on the respective SDK repositories
+  </Card>
+  <Card title="Developer Forum" icon="comments">
+    Get help from the community at [community.adcb.dev](https://community.adcb.dev)
+  </Card>
+  <Card title="SDK Support" icon="headset">
+    Email sdk-support@adcb.com for SDK-specific technical support
+  </Card>
+</CardGroup>
+
+### Contributing to SDKs
+
+We welcome contributions to our SDKs! Each repository has contribution guidelines:
+
+1. **Fork the repository**
+2. **Create a feature branch**
+3. **Write tests for your changes**
+4. **Follow the coding standards**
+5. **Submit a pull request**
+
+## Roadmap
+
+Upcoming SDK features:
+
+- **gRPC Support**: High-performance binary protocol option
+- **GraphQL SDK**: Alternative query-based API access
+- **Mobile SDKs**: Native iOS and Android libraries
+- **CLI Tools**: Enhanced command-line utilities
+- **Streaming APIs**: Real-time data streaming support
+
+---
+
+**Need help with SDKs?**
+- 📧 **SDK Support**: sdk-support@adcb.com
+- 💬 **Community**: [community.adcb.dev/sdks](https://community.adcb.dev/sdks)
+- 📚 **Examples**: [github.com/adcb/sdk-examples](https://github.com/adcb/sdk-examples)
