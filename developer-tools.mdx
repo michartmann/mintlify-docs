@@ -1,0 +1,247 @@
+---
+title: 'Developer Tools'
+description: 'Essential tools and utilities for ADCB API development'
+---
+
+## Developer Tools & Utilities
+
+Accelerate your integration with ADCB APIs using our comprehensive developer toolkit.
+
+<CardGroup cols={2}>
+  <Card
+    title="API Explorer"
+    icon="code"
+    href="https://developers.adcb.com/explorer"
+  >
+    Interactive API testing with live responses and automatic authentication
+  </Card>
+  <Card
+    title="Postman Collection"
+    icon="download"
+    href="/resources/postman"
+  >
+    150+ pre-configured requests with automated authentication and testing
+  </Card>
+  <Card
+    title="SDK Generator"
+    icon="wrench"
+    href="https://developers.adcb.com/sdks"
+  >
+    Generate custom SDKs in your preferred programming language
+  </Card>
+  <Card
+    title="Webhook Debugger"
+    icon="bug"
+    href="https://developers.adcb.com/webhook-debugger"
+  >
+    Debug webhook deliveries with real-time logging and replay capabilities
+  </Card>
+</CardGroup>
+
+## Quick Development Setup
+
+<Steps>
+  <Step title="Get API Credentials">
+    Register at the [Developer Portal](https://developers.adcb.com) and obtain your API keys
+  </Step>
+  <Step title="Configure Authentication">
+    Set up mTLS certificates and OAuth 2.0 for secure API access
+    ```bash
+    # Install certificates
+    curl -o adcb-cert.pem https://developers.adcb.com/certs/sandbox.pem
+    ```
+  </Step>
+  <Step title="Choose Your SDK">
+    Install the official SDK for your preferred language
+    ```bash
+    # Python
+    pip install adcb-openbanking-sdk
+    
+    # Node.js  
+    npm install @adcb/openbanking-sdk
+    ```
+  </Step>
+  <Step title="Make Your First API Call">
+    Test connectivity with a simple account information request
+  </Step>
+</Steps>
+
+## Development Environment Setup
+
+### Sandbox Configuration
+
+```json
+{
+  "base_url": "https://sandbox-api.adcb.com",
+  "auth_url": "https://sandbox-auth.adcb.com/oauth/token",
+  "webhook_url": "https://sandbox-webhook.adcb.com",
+  "certificate_path": "./certs/sandbox-cert.pem",
+  "private_key_path": "./certs/sandbox-key.pem"
+}
+```
+
+### Production Configuration
+
+```json
+{
+  "base_url": "https://api.adcb.com",
+  "auth_url": "https://auth.adcb.com/oauth/token", 
+  "webhook_url": "https://webhook.adcb.com",
+  "certificate_path": "./certs/production-cert.pem",
+  "private_key_path": "./certs/production-key.pem"
+}
+```
+
+## Testing & Debugging Tools
+
+### API Response Validator
+
+Validate API responses against OpenAPI specifications:
+
+```bash
+# Install validator
+npm install -g @adcb/api-validator
+
+# Validate response
+adcb-validator --endpoint "/accounts" --response response.json
+```
+
+### Rate Limit Monitor
+
+Monitor your API usage and rate limits:
+
+```python
+from adcb_sdk import RateLimitMonitor
+
+monitor = RateLimitMonitor(api_key="your-key")
+usage = monitor.get_current_usage()
+print(f"Requests remaining: {usage['remaining']}")
+```
+
+### Circuit Breaker Pattern
+
+Implement resilient API calls:
+
+```javascript
+const CircuitBreaker = require('adcb-circuit-breaker');
+
+const breaker = new CircuitBreaker(adcbApi.getAccounts, {
+  timeout: 3000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000
+});
+
+breaker.fallback(() => 'Service temporarily unavailable');
+```
+
+## Performance Optimization
+
+### Connection Pooling
+
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+session = requests.Session()
+retry = Retry(total=3, backoff_factor=0.3)
+adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=20)
+
+session.mount('https://', adapter)
+```
+
+### Response Caching
+
+```javascript
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 300 }); // 5 minute cache
+
+function getCachedAccounts(customerId) {
+  const cacheKey = `accounts_${customerId}`;
+  let accounts = cache.get(cacheKey);
+  
+  if (!accounts) {
+    accounts = adcbApi.getAccounts(customerId);
+    cache.set(cacheKey, accounts);
+  }
+  
+  return accounts;
+}
+```
+
+## Monitoring & Observability
+
+### Health Check Endpoint
+
+```bash
+# Check API health
+curl -X GET "https://api.adcb.com/health" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+### Metrics Collection
+
+```python
+import time
+from prometheus_client import Counter, Histogram
+
+api_requests_total = Counter('adcb_api_requests_total', 'Total API requests', ['method', 'endpoint'])
+api_request_duration = Histogram('adcb_api_request_duration_seconds', 'API request duration')
+
+def track_api_call(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        try:
+            result = func(*args, **kwargs)
+            api_requests_total.labels(method='GET', endpoint='/accounts').inc()
+            return result
+        finally:
+            api_request_duration.observe(time.time() - start_time)
+    return wrapper
+```
+
+## Community Resources
+
+<CardGroup cols={2}>
+  <Card
+    title="GitHub Repository"
+    icon="github"
+    href="https://github.com/adcb/api-examples"
+  >
+    Code examples and community contributions
+  </Card>
+  <Card
+    title="Stack Overflow"
+    icon="stack-overflow" 
+    href="https://stackoverflow.com/questions/tagged/adcb-api"
+  >
+    Community Q&A and troubleshooting
+  </Card>
+  <Card
+    title="Developer Newsletter"
+    icon="envelope"
+    href="https://developers.adcb.com/newsletter"
+  >
+    Monthly updates and best practices
+  </Card>
+  <Card
+    title="API Workshops"
+    icon="calendar"
+    href="https://developers.adcb.com/events"
+  >
+    Live training sessions and webinars
+  </Card>
+</CardGroup>
+
+## Support Channels
+
+Need help? Our developer support team is here to assist:
+
+- **Technical Support**: api-support@adcb.com
+- **Partnership Inquiries**: partnerships@adcb.com  
+- **Security Issues**: security@adcb.com
+- **Business Development**: bizdev@adcb.com
+
+<Tip>
+For faster support resolution, include your client ID, request ID, and relevant error messages when contacting support.
+</Tip>

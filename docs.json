@@ -28,7 +28,8 @@
               "guides/error-handling",
               "guides/rate-limiting",
               "guides/webhooks",
-              "guides/sandbox-testing"
+              "guides/sandbox-testing",
+              "guides/best-practices"
             ]
           },
           {
@@ -38,6 +39,12 @@
               "resources/postman",
               "resources/changelog",
               "resources/support"
+            ]
+          },
+          {
+            "group": "Developer Tools",
+            "pages": [
+              "developer-tools"
             ]
           }
         ]
@@ -78,7 +85,7 @@
       ]
       },
       {
-        "tab": "Open Finance API Reference (TPP)",
+        "tab": "TPP APIs",
         "groups": [
           {
             "group": "Overview",
@@ -105,7 +112,7 @@
         ]
         },
     {
-      "tab": "Open Finance API Reference (LFI)",
+      "tab": "LFI APIs",
       "groups": [
         {
           "group": "Overview",
@@ -151,6 +158,11 @@
     "global": {
       "anchors": [
         {
+          "anchor": "Quick Start",
+          "href": "/quickstart",
+          "icon": "rocket"
+        },
+        {
           "anchor": "API Status",
           "href": "https://status.adcb.dev",
           "icon": "signal"
@@ -195,6 +207,22 @@
       "x": "https://x.com/adcb",
       "github": "https://github.com/adcb",
       "linkedin": "https://linkedin.com/company/adcb"
+    }
+  },
+  "search": {
+    "prompt": "Search ADCB API docs..."
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "seo": {
+    "indexHiddenPages": false
+  },
+  "analytics": {
+    "gtag": {
+      "measurementId": "G-XXXXXXXXXX"
     }
   }
 }
