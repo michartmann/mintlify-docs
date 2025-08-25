@@ -156,7 +156,7 @@
       "anchors": [
         {
           "anchor": "Quick Start",
-          "href": "/quickstart",
+          "href": "https://adcb.mintlify.app/quickstart",
           "icon": "rocket"
         },
         {
@@ -243,7 +243,9 @@
     }
   },
   "integrations": {
-    "intercom": "adcb_developer_support"
+    "intercom": {
+      "appId": "adcb_developer_support"
+    }
   },
   "topbarLinks": [
     {
