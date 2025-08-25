@@ -60,7 +60,8 @@
           {
             "group": "Developer Tools",
             "pages": [
-              "developer-tools"
+              "developer-tools",
+              "deployment-status"
             ]
           }
         ]
