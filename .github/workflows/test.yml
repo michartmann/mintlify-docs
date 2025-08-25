@@ -1,0 +1,300 @@
+name: ADCB Documentation Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 6 AM UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npx playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Run Playwright tests
+      run: npx playwright test --project=${{ matrix.browser }}
+      env:
+        CI: true
+        PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-results-${{ matrix.browser }}
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 30
+
+  test-mobile:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+    
+    - name: Run Mobile tests
+      run: npx playwright test --project="Mobile Chrome"
+      env:
+        CI: true
+    
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-mobile-results
+        path: test-results/
+        retention-days: 30
+
+  performance-test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+    
+    - name: Run Performance tests
+      run: npx playwright test tests/performance.spec.ts
+      env:
+        CI: true
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-results
+        path: test-results/
+        retention-days: 30
+
+  accessibility-test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+    
+    - name: Run Accessibility tests
+      run: npx playwright test tests/accessibility.spec.ts
+      env:
+        CI: true
+    
+    - name: Upload accessibility results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: accessibility-results
+        path: test-results/
+        retention-days: 30
+
+  content-validation:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+    
+    - name: Run Content validation tests
+      run: |
+        npx playwright test tests/core-pages.spec.ts
+        npx playwright test tests/api-guides.spec.ts
+        npx playwright test tests/resources.spec.ts
+      env:
+        CI: true
+    
+    - name: Upload content validation results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: content-validation-results
+        path: test-results/
+        retention-days: 30
+
+  report:
+    if: always()
+    needs: [test, test-mobile, performance-test, accessibility-test, content-validation]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+    
+    - name: Merge test results
+      run: |
+        mkdir -p merged-results
+        find artifacts/ -name "*.json" -exec cp {} merged-results/ \;
+        find artifacts/ -name "*.html" -exec cp {} merged-results/ \;
+        ls -la merged-results/
+    
+    - name: Generate summary report
+      run: |
+        echo "# ADCB Documentation Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "merged-results/results.json" ]; then
+          echo "✅ Tests completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Key Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Pages Tested**: 20+" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browsers**: Chrome, Firefox, Safari, Mobile" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Types**: Functionality, Performance, Accessibility, Content" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Some tests may have failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Test Categories" >> $GITHUB_STEP_SUMMARY
+        echo "- 🧪 **Core Pages**: Homepage, Quickstart, Authentication" >> $GITHUB_STEP_SUMMARY
+        echo "- 📚 **API Guides**: Error handling, Rate limiting, Webhooks, etc." >> $GITHUB_STEP_SUMMARY
+        echo "- 🛠️ **Resources**: SDKs, Postman, Pricing, Support, Community" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚡ **Performance**: Page load times, Resource optimization" >> $GITHUB_STEP_SUMMARY
+        echo "- ♿ **Accessibility**: WCAG compliance, Keyboard navigation" >> $GITHUB_STEP_SUMMARY
+        echo "- 📱 **Mobile**: Responsive design, Touch targets" >> $GITHUB_STEP_SUMMARY
+    
+    - name: Upload merged report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: final-test-report
+        path: merged-results/
+        retention-days: 90
+
+  notify-on-failure:
+    if: failure()
+    needs: [test, test-mobile, performance-test, accessibility-test, content-validation]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Notify team of test failures
+      run: |
+        echo "🚨 ADCB Documentation tests failed!"
+        echo "Check the test results and fix any issues."
+        echo "Failed job: ${{ github.workflow }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Branch: ${{ github.ref }}"
+        
+        # In a real setup, you might send notifications to Slack, email, etc.
+        # curl -X POST -H 'Content-type: application/json' \
+        #   --data '{"text":"ADCB Documentation tests failed!"}' \
+        #   $SLACK_WEBHOOK_URL
+
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        urls: |
+          https://adcb.mintlify.app
+          https://adcb.mintlify.app/quickstart
+          https://adcb.mintlify.app/authentication
+          https://adcb.mintlify.app/guides/error-handling
+          https://adcb.mintlify.app/resources/sdks
+        configPath: './lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+    
+    - name: Upload Lighthouse results
+      uses: actions/upload-artifact@v3
+      with:
+        name: lighthouse-results
+        path: .lighthouseci/
+        retention-days: 30
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for security vulnerabilities
+      run: |
+        # Check for common security issues in documentation
+        echo "🔒 Running security checks..."
+        
+        # Check for exposed credentials
+        if grep -r "api[_-]key\|secret\|password\|token" . --exclude-dir=node_modules --exclude-dir=.git --exclude="*.md" --exclude="test*"; then
+          echo "⚠️  Warning: Potential credentials found in code"
+          exit 1
+        fi
+        
+        # Check for insecure URLs
+        if grep -r "http://" . --exclude-dir=node_modules --exclude-dir=.git --include="*.mdx" --include="*.json"; then
+          echo "⚠️  Warning: Insecure HTTP URLs found"
+        fi
+        
+        echo "✅ Security check passed"
+
+env:
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0

@@ -1,0 +1,37 @@
+{
+  "name": "adcb-docs-testing",
+  "version": "1.0.0",
+  "description": "Comprehensive testing framework for ADCB API documentation",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project='Mobile Chrome'",
+    "test:parallel": "playwright test --workers=4",
+    "test:guides": "playwright test tests/api-guides.spec.ts",
+    "test:resources": "playwright test tests/resources.spec.ts",
+    "test:core": "playwright test tests/core-pages.spec.ts",
+    "test:performance": "playwright test tests/performance.spec.ts",
+    "test:accessibility": "playwright test tests/accessibility.spec.ts",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://adcb.mintlify.app",
+    "install-browsers": "playwright install",
+    "ci": "playwright test --reporter=html,json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "axe-playwright": "^2.0.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
