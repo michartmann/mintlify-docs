@@ -24,7 +24,7 @@
             ]
           },
           {
-            "group": "API Guides",
+            "group": "Integration Guides",
             "pages": [
               "guides/error-handling",
               "guides/rate-limiting",
@@ -35,51 +35,26 @@
             ]
           },
           {
-            "group": "Resources",
+            "group": "Developer Resources",
             "pages": [
               "resources/sdks",
               "resources/postman",
               "resources/changelog",
               "resources/pricing",
               "resources/support",
-              "resources/community"
-            ]
-          },
-          {
-            "group": "API Versioning",
-            "pages": [
-              "api-reference/versions"
-            ]
-          },
-          {
-            "group": "Learning Paths",
-            "pages": [
-              "tutorials/integration-paths"
-            ]
-          },
-          {
-            "group": "Developer Tools",
-            "pages": [
+              "resources/community",
               "developer-tools",
               "deployment-status"
             ]
+          },
+          {
+            "group": "Advanced Topics",
+            "pages": [
+              "api-reference/versions",
+              "tutorials/integration-paths"
+            ]
           }
         ]
-      },
-    {
-      "tab": "CDP",
-      "groups": [
-        {
-          "group": "Overview",
-          "pages": [
-            "api-reference/cdp-overview"
-          ]
-        },
-        {
-          "group": "CDP APIs",
-          "openapi": "api-reference/cdp/cdp-swagger.json"
-        }
-      ]
       },
       {
         "tab": "TPP APIs",
@@ -91,19 +66,19 @@
             ]
           },
           {
-            "group": "Bank Service Initiation",
+            "group": "Service Initiation",
             "openapi": "api-reference/tpp/uae-bank-initiation-openapi.yaml"
           },
           {
-            "group": "Bank Data",
+            "group": "Account Information",
             "openapi": "api-reference/tpp/uae-account-information-openapi.yaml"
           },
           {
-            "group": "Confirmation of Payee",
+            "group": "Payment Verification",
             "openapi": "api-reference/tpp/uae-confirmation-of-payee-openapi.yaml"
           },
           {
-            "group": "Product Data",
+            "group": "Product Information",
             "openapi": "api-reference/tpp/uae-product-openapi.yaml"
           }
         ]
@@ -118,36 +93,36 @@
           ]
         },
         {
-          "group": "Consent Manager",
-          "openapi": "api-reference/lfi/cbuae-consent-manager-openapi.yaml"
-        },
-        {
-          "group": "Authentication",
+          "group": "Authentication & Consent",
           "openapi": "api-reference/lfi/cbuae-headless-heimdall-openapi.yaml"
         },
         {
-          "group": "Events",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-consent-events-actions-openapi.yaml"
+          "group": "Consent Management",
+          "openapi": "api-reference/lfi/cbuae-consent-manager-openapi.yaml"
         },
         {
-          "group": "Bank Data",
+          "group": "Data Access APIs",
           "openapi": "api-reference/lfi/cbuae-ozone-connect-data-sharing-openapi.yaml"
         },
         {
-          "group": "Health check",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-health-check-openapi.yaml"
-        },
-        {
-          "group": "Insurance Data",
-          "openapi": "api-reference/lfi/cbuae-ozone-connect-insurance-data-sharing-openapi.yaml"
-        },
-        {
-          "group": "Product Data",
+          "group": "Product Information",
           "openapi": "api-reference/lfi/cbuae-ozone-connect-products-data-openapi.yaml"
+        },
+        {
+          "group": "Insurance Services",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-insurance-data-sharing-openapi.yaml"
         },
         {
           "group": "Service Initiation",
           "openapi": "api-reference/lfi/cbuae-ozone-connect-service-initiation-openapi.yaml"
+        },
+        {
+          "group": "Event Monitoring",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-consent-events-actions-openapi.yaml"
+        },
+        {
+          "group": "System Health",
+          "openapi": "api-reference/lfi/cbuae-ozone-connect-health-check-openapi.yaml"
         }
       ]
     }
@@ -160,14 +135,14 @@
           "icon": "rocket"
         },
         {
+          "anchor": "What's New",
+          "href": "https://adcb.mintlify.app/resources/changelog",
+          "icon": "sparkles"
+        },
+        {
           "anchor": "API Status",
           "href": "https://status.adcb.dev",
           "icon": "signal"
-        },
-        {
-          "anchor": "Developer Forum",
-          "href": "https://community.adcb.dev",
-          "icon": "comments"
         },
         {
           "anchor": "Support",
@@ -207,7 +182,7 @@
     }
   },
   "search": {
-    "prompt": "Ask anything about ADCB APIs... Try: 'How do I authenticate?' or 'Show me payment examples'",
+    "prompt": "Search ADCB APIs & guides... Try: 'OAuth authentication', 'webhook setup', 'error codes', 'rate limits'",
     "ai": true
   },
   "feedback": {
@@ -262,6 +237,8 @@
   "versions": ["v2.1.0", "v2.0.0"],
   "metadata": {
     "og:image": "https://adcb.mintlify.app/images/og-image.png",
-    "twitter:site": "@adcb"
+    "twitter:site": "@adcb",
+    "description": "Comprehensive API documentation for ADCB Open Banking APIs including CDP, TPP, and LFI services",
+    "keywords": "ADCB, API, Open Banking, UAE, Financial Services, Developer, Documentation"
   }
 }
